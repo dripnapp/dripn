@@ -14,6 +14,8 @@ interface AppState {
   badges: string[];
   referralCode: string | null;
   referralCount: number;
+  enteredReferralCode: string | null;
+  referralBonusEarned: number;
   setPoints: (points: number) => void;
   addPoints: (amount: number) => void;
   setWallet: (address: string | null) => void;
@@ -22,6 +24,7 @@ interface AppState {
   acceptTerms: () => void;
   addBadge: (badge: string) => void;
   setReferralCode: (code: string) => void;
+  enterReferralCode: (code: string) => boolean;
 }
 
 const generateReferralCode = () => {
@@ -42,6 +45,8 @@ export const useStore = create<AppState>()(
       badges: [],
       referralCode: null,
       referralCount: 0,
+      enteredReferralCode: null,
+      referralBonusEarned: 0,
       setPoints: (points) => set({ points }),
       addPoints: (amount) => set((state) => {
         const today = new Date().toDateString();
@@ -69,6 +74,20 @@ export const useStore = create<AppState>()(
         badges: state.badges.includes(badge) ? state.badges : [...state.badges, badge] 
       })),
       setReferralCode: (code) => set({ referralCode: code }),
+      enterReferralCode: (code) => {
+        const state = get();
+        if (state.enteredReferralCode) {
+          return false;
+        }
+        if (code === state.referralCode) {
+          return false;
+        }
+        if (!code.startsWith('ADFI-') || code.length < 10) {
+          return false;
+        }
+        set({ enteredReferralCode: code });
+        return true;
+      },
     }),
     {
       name: 'crypto-pulse-storage',

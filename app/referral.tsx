@@ -1,19 +1,67 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, TextInput } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useStore } from '../src/store/useStore';
 
 export default function ReferralScreen() {
-  const { referralCode, referralCount } = useStore();
+  const { referralCode, referralCount, enteredReferralCode, referralBonusEarned, enterReferralCode } = useStore();
+  const [inputCode, setInputCode] = useState('');
 
   const copyCode = () => {
     Alert.alert('Copied!', 'Your referral code has been copied to clipboard');
+  };
+
+  const handleEnterCode = () => {
+    if (!inputCode.trim()) {
+      Alert.alert('Error', 'Please enter a referral code');
+      return;
+    }
+    const success = enterReferralCode(inputCode.trim().toUpperCase());
+    if (success) {
+      Alert.alert('Success!', 'Referral code applied! You and your referrer will both earn bonus rewards.');
+      setInputCode('');
+    } else {
+      if (enteredReferralCode) {
+        Alert.alert('Already Applied', 'You have already entered a referral code.');
+      } else {
+        Alert.alert('Invalid Code', 'Please check the code and try again. You cannot use your own code.');
+      }
+    }
   };
 
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.header}>Referral Program</Text>
       <Text style={styles.subheader}>Invite friends and earn together!</Text>
+
+      {!enteredReferralCode && (
+        <View style={styles.enterCodeCard}>
+          <Text style={styles.enterCodeLabel}>Have a referral code?</Text>
+          <View style={styles.inputRow}>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter code (e.g. ADFI-ABC123)"
+              placeholderTextColor="#999"
+              value={inputCode}
+              onChangeText={setInputCode}
+              autoCapitalize="characters"
+            />
+            <TouchableOpacity style={styles.applyButton} onPress={handleEnterCode}>
+              <Text style={styles.applyButtonText}>Apply</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
+
+      {enteredReferralCode && (
+        <View style={styles.appliedCard}>
+          <MaterialCommunityIcons name="check-circle" size={24} color="#40c057" />
+          <View style={styles.appliedContent}>
+            <Text style={styles.appliedLabel}>Referral Applied</Text>
+            <Text style={styles.appliedCode}>{enteredReferralCode}</Text>
+          </View>
+        </View>
+      )}
 
       <View style={styles.codeCard}>
         <Text style={styles.codeLabel}>Your Referral Code</Text>
@@ -33,8 +81,8 @@ export default function ReferralScreen() {
         </View>
         <View style={styles.statDivider} />
         <View style={styles.statItem}>
-          <Text style={styles.statNumber}>0</Text>
-          <Text style={styles.statLabel}>Points Earned</Text>
+          <Text style={styles.statNumber}>{referralBonusEarned}</Text>
+          <Text style={styles.statLabel}>Bonus Points</Text>
         </View>
       </View>
 
@@ -80,6 +128,44 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f8f9fa', padding: 20 },
   header: { fontSize: 24, fontWeight: 'bold', color: '#1a1a1a', marginTop: 10 },
   subheader: { fontSize: 14, color: '#666', marginBottom: 25 },
+  enterCodeCard: {
+    backgroundColor: '#fff',
+    borderRadius: 15,
+    padding: 20,
+    marginBottom: 20,
+    borderWidth: 2,
+    borderColor: '#4dabf7',
+    borderStyle: 'dashed',
+  },
+  enterCodeLabel: { fontSize: 16, fontWeight: '600', color: '#1a1a1a', marginBottom: 12 },
+  inputRow: { flexDirection: 'row', alignItems: 'center' },
+  input: {
+    flex: 1,
+    backgroundColor: '#f8f9fa',
+    borderRadius: 10,
+    padding: 14,
+    fontSize: 16,
+    color: '#1a1a1a',
+    marginRight: 10,
+  },
+  applyButton: {
+    backgroundColor: '#4dabf7',
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    borderRadius: 10,
+  },
+  applyButtonText: { color: '#fff', fontWeight: '600', fontSize: 16 },
+  appliedCard: {
+    backgroundColor: '#d3f9d8',
+    borderRadius: 15,
+    padding: 16,
+    marginBottom: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  appliedContent: { marginLeft: 12 },
+  appliedLabel: { fontSize: 12, color: '#2f9e44', textTransform: 'uppercase', letterSpacing: 1 },
+  appliedCode: { fontSize: 18, fontWeight: 'bold', color: '#1a1a1a', marginTop: 2 },
   codeCard: {
     backgroundColor: '#4dabf7',
     borderRadius: 20,

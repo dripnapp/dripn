@@ -22,7 +22,7 @@ const slides = [
   {
     icon: 'play-circle',
     title: 'Complete Tasks',
-    description: 'Watch rewarded videos to earn points. Each video pays based on current ad rates. You keep 15% of the ad revenue!',
+    description: 'Watch rewarded videos to earn points. Each video pays based on current ad rates.',
   },
   {
     icon: 'cash-check',
