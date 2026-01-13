@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, Platform } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 interface SplashScreenProps {
@@ -7,62 +7,29 @@ interface SplashScreenProps {
 }
 
 export default function SplashScreen({ onFinish }: SplashScreenProps) {
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const scaleAnim = useRef(new Animated.Value(0.5)).current;
-  const pulseAnim = useRef(new Animated.Value(1)).current;
+  const [visible, setVisible] = useState(true);
 
   useEffect(() => {
-    Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 800,
-        useNativeDriver: true,
-      }),
-      Animated.spring(scaleAnim, {
-        toValue: 1,
-        friction: 4,
-        useNativeDriver: true,
-      }),
-    ]).start();
-
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulseAnim, {
-          toValue: 1.1,
-          duration: 800,
-          useNativeDriver: true,
-        }),
-        Animated.timing(pulseAnim, {
-          toValue: 1,
-          duration: 800,
-          useNativeDriver: true,
-        }),
-      ])
-    ).start();
-
     const timer = setTimeout(() => {
-      Animated.timing(fadeAnim, {
-        toValue: 0,
-        duration: 400,
-        useNativeDriver: true,
-      }).start(() => onFinish());
-    }, 2500);
+      setVisible(false);
+      onFinish();
+    }, 2000);
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [onFinish]);
+
+  if (!visible) return null;
 
   return (
     <View style={styles.container}>
-      <Animated.View style={[styles.logoContainer, { opacity: fadeAnim, transform: [{ scale: scaleAnim }] }]}>
-        <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
-          <MaterialCommunityIcons name="currency-usd" size={80} color="#4dabf7" />
-        </Animated.View>
+      <View style={styles.logoContainer}>
+        <MaterialCommunityIcons name="currency-usd" size={80} color="#4dabf7" />
         <Text style={styles.title}>ADFI</Text>
         <Text style={styles.subtitle}>Crypto Pulse Rewards</Text>
-      </Animated.View>
-      <Animated.View style={[styles.loadingContainer, { opacity: fadeAnim }]}>
+      </View>
+      <View style={styles.loadingContainer}>
         <Text style={styles.loadingText}>Loading...</Text>
-      </Animated.View>
+      </View>
     </View>
   );
 }

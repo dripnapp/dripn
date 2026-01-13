@@ -10,19 +10,52 @@ The app is designed to be non-custodial (never holds user funds/keys), with auto
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes (January 2026)
+
+- Changed header from "index" to "ADFI"
+- Added animated splash/loading screen on app launch
+- Implemented one-time acknowledgment popup with checkboxes (18+, volatility, risks, terms)
+- Created step-by-step onboarding tutorial for first-time users
+- Added hamburger menu with navigation to all app sections
+- Created dedicated screens: Learn, Legal, Terms, Referral, Badges
+- Updated reward system to use variable points (15% of ad revenue)
+- Implemented video completion requirement before awarding points
+- Added user levels (Bronze, Silver, Gold) and badge system
+- Added referral program with unique codes
+
 ## System Architecture
 
 ### Frontend Architecture
 - **Framework**: React Native with Expo SDK 54
 - **Routing**: Expo Router with file-based routing (routes defined in `/app` directory)
 - **State Management**: Zustand with persistence middleware for global app state
-- **Storage**: AsyncStorage for persisting wallet connections and user data locally
+- **Storage**: AsyncStorage for persisting wallet connections, onboarding state, and user data
 - **UI Components**: Custom themed components with light/dark mode support
-- **Animations**: React Native Reanimated for smooth UI animations
+
+### App Screens (in `/app` directory)
+- `index.tsx` - Main dashboard with balance, tasks, wallet status
+- `learn.tsx` - Crypto basics and XRP education
+- `legal.tsx` - Legal disclaimers and risk disclosures
+- `terms.tsx` - Terms of Use
+- `referral.tsx` - Referral program with unique codes
+- `badges.tsx` - User badges and level progression
+
+### Components (in `/src/components`)
+- `SplashScreen.tsx` - Animated loading screen
+- `OnboardingScreen.tsx` - Step-by-step tutorial for new users
+- `AcknowledgmentPopup.tsx` - Required checkboxes before using app
+- `VideoPlayer.tsx` - Video ad player with completion tracking
 
 ### Key Application Features
-- **Wallet Connection**: XUMM SDK (Xaman) integration for XRP wallet connectivity via QR codes and deeplinks
+- **Splash Screen**: Animated loading screen on app launch
+- **Onboarding**: 4-step tutorial explaining how the app works
+- **Acknowledgment Popup**: Required checkboxes for volatility, age, risks, and terms
+- **Wallet Connection**: XUMM SDK (Xaman) integration for XRP wallet connectivity
 - **Points System**: USD-pegged points (100 points = $1) with daily earning caps ($5/day)
+- **Variable Rewards**: Users earn 15% of actual ad revenue per task
+- **Video Completion**: Must watch full video to earn points
+- **Levels & Badges**: Bronze (100pts), Silver (500pts), Gold (1000pts)
+- **Referral Program**: 10% of referee earnings for 30 days
 - **Price Fetching**: Real-time XRP prices from CoinGecko API
 - **Cashout Flow**: Minimum $5 threshold, converts points to XRP at current market rate
 
@@ -30,13 +63,19 @@ Preferred communication style: Simple, everyday language.
 The app uses Zustand store (`src/store/useStore.ts`) with the following state:
 - Points balance and daily earnings tracking
 - Wallet connection status and address
-- Automatic daily reset logic for earning caps
+- Onboarding completion status
+- Terms acceptance status
+- User level (Bronze/Silver/Gold)
+- Badges collection
+- Referral code and count
 - Persistence to AsyncStorage for session continuity
 
 ### Security Considerations
 - Non-custodial design - app never holds private keys
-- Daily earning caps to prevent abuse
-- Placeholder for CAPTCHA integration on tasks
+- Daily earning caps ($5/day) to prevent abuse
+- Required acknowledgment checkboxes before accessing tasks
+- Age verification (18+)
+- Clear legal disclaimers throughout app
 - API keys should be moved to backend proxy for production
 
 ## External Dependencies
@@ -54,15 +93,13 @@ The app uses Zustand store (`src/store/useStore.ts`) with the following state:
 
 ### UI & Navigation
 - **expo-router**: File-based routing system
-- **@react-navigation/bottom-tabs**: Tab navigation
-- **react-native-reanimated**: Animation library
-- **react-native-gesture-handler**: Touch gesture handling
 - **@expo/vector-icons**: Icon library (MaterialCommunityIcons)
 
 ### Expo Modules
-- expo-blur, expo-constants, expo-font, expo-haptics, expo-image, expo-linking, expo-splash-screen, expo-status-bar, expo-web-browser
+- expo-constants, expo-font, expo-linking, expo-splash-screen, expo-status-bar, expo-web-browser
 
 ### Development Notes
 - Currently uses XRP Testnet (switchable to Mainnet)
-- XUMM API key is client-side for MVP (should move to backend for production)
+- XUMM integration uses mock for web environment (works fully on native)
 - AdMob integration is placeholder/future implementation
+- Rewards are calculated as 15% of simulated ad revenue
