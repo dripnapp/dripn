@@ -1,0 +1,59 @@
+Build a React Native Expo mobile app called "Crypto Pulse Rewards - ADFI” (a crypto version of Swagbucks) with the following full features and requirements:
+
+Core Concept:
+- Users earn small amounts of points for completing micro-tasks (mainly watching rewarded video ads via AdMob, later add app download/install tasks).
+- Points are tracked in stable USD value (e.g., 100 points = $1).
+- Users can cash out points as XRP (Ripple cryptocurrency) to their connected wallet at current market price (via CoinGecko API).
+- App takes the majority profit (70-90% margins) after covering ad revenue share, XRP fees, and user rewards (users get 10-20% of ad earnings per task).
+- Highly autonomous: automated task verification, payouts, and anti-fraud measures.
+
+Key Features & Requirements:
+1. Wallet Connection:
+   - "Connect XRP Wallet" button using xumm-sdk (Xaman) for Testnet initially (switchable to Mainnet later).
+   - Show QR code and deeplink for signing in Xaman app.
+   - Save connected r-address using AsyncStorage.
+   - Only use Testnet for development/testing.
+
+2. Payout & Volatility Handling:
+   - Minimum cashout threshold: $5 USD equivalent in points (adjustable).
+   - Before any task or cashout: one-time popup with checkboxes users must accept:
+     - "I understand XRP price is volatile and payout value in XRP may change."
+     - "I acknowledge payouts are in XRP at current market rate at time of cashout."
+     - "I'm 18+ and understand risks of crypto."
+   - At cashout, fetch current XRP price from CoinGecko API, show estimated XRP amount, and send equivalent XRP (using xumm-sdk payload for user-signed send tx).
+
+3. UI/UX Design Principles:
+   - Very crisp, clean, minimalist, mobile-first design.
+   - Intuitive and easy enough for kids to navigate (big buttons, clear icons, simple flow).
+   - But deep enough for adults: earnings history, detailed FAQ, tax info links.
+   - Support light/dark mode.
+   - Onboarding tutorial screens on first launch (explain how to earn, connect wallet, cash out).
+   - Sections: Home (dashboard), Tasks, Wallet, Learn (crypto/XRP basics), Legal (disclaimers), Terms of Use.
+
+4. Tasks & Incentives:
+   - Main task: "Watch Video" rewarded ad button (placeholder for AdMob rewarded videos).
+   - Tiered rewards: basic tasks (low points), premium tasks (higher points, e.g., longer videos or app installs).
+   - Daily caps to prevent abuse (e.g., max $5/day earnings).
+   - Referral program: Generate invite code, referrers get 10% of referees' earnings for 30 days (in points), app takes small cut.
+
+5. Gamification & Retention:
+   - Badges and levels (e.g., Bronze at 100 points, unlocks bonuses like extra daily tasks).
+   - Streaks (daily login multipliers).
+   - Progress bar for earnings toward next level/threshold.
+
+6. Security & Safeguards:
+   - Anti-fraud: CAPTCHA on tasks, device fingerprinting if possible, daily earning caps.
+   - Never expose API keys/secrets client-side (prepare for future backend proxy).
+   - Non-custodial: App never holds user funds/keys.
+   - Clear legal disclaimers everywhere.
+
+7. Technical Stack Preferences:
+   - Use Expo + React Native.
+   - State management: Zustand.
+   - Storage: @react-native-async-storage/async-storage.
+   - API calls: axios (for CoinGecko XRP price).
+   - Icons: @expo/vector-icons.
+   - Safe area handling: react-native-safe-area-context.
+
+Make the app functional as an MVP with Testnet only, clean code, and error handling/alerts for everything (e.g., connection fails, low balance, etc.).
+Start with Home screen dashboard showing balance, connected status, and task buttons.
