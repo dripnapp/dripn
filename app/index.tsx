@@ -3,11 +3,6 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, Linking, I
 import { useStore } from '../src/store/useStore';
 import { getXRPPrice } from '../src/services/xrpService';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { XummSdk } from 'xumm-sdk';
-
-// For MVP on Replit/Expo Web, we'll use a public test key or placeholder
-// In a real app, these would be managed securely
-const API_KEY = 'f9fb28fd-38fa-436c-ad91-fe4d2caf181a'; 
 
 export default function Home() {
   const { points, walletAddress, isWalletConnected, setWallet, addPoints, dailyEarnings } = useStore();
