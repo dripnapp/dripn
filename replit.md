@@ -17,11 +17,16 @@ Preferred communication style: Simple, everyday language.
 - Implemented one-time acknowledgment popup with checkboxes (18+, volatility, risks, terms)
 - Created step-by-step onboarding tutorial for first-time users
 - Added hamburger menu with navigation to all app sections
-- Created dedicated screens: Learn, Legal, Terms, Referral, Badges
+- Created dedicated screens: Learn, Legal, Terms, Referral, Badges, Leaderboard
 - Updated reward system to use variable points (15% of ad revenue)
 - Implemented video completion requirement before awarding points
-- Added user levels (Bronze, Silver, Gold) and badge system
-- Added referral program with unique codes
+- Added user levels (Bronze, Silver, Gold) and badge system with rewards
+- Added referral program with unique codes and input for entering codes
+- Added AdMob configuration for Android and iOS (ready for native builds)
+- Added wallet disconnect/logout functionality
+- Added leaderboard with live ranking based on user points
+- Badge rewards: users earn bonus points when claiming unlocked badges
+- Terms link in acknowledgment popup is now clickable
 
 ## System Architecture
 

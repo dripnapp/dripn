@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Modal, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Modal, TouchableOpacity, ScrollView, Linking } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 
 interface AcknowledgmentPopupProps {
   visible: boolean;
@@ -8,6 +9,7 @@ interface AcknowledgmentPopupProps {
 }
 
 export default function AcknowledgmentPopup({ visible, onAccept }: AcknowledgmentPopupProps) {
+  const router = useRouter();
   const [checks, setChecks] = useState({
     volatility: false,
     age: false,
@@ -21,14 +23,20 @@ export default function AcknowledgmentPopup({ visible, onAccept }: Acknowledgmen
     setChecks(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
-  const CheckItem = ({ checked, onPress, label }: { checked: boolean; onPress: () => void; label: string }) => (
+  const handleTermsPress = () => {
+    router.push('/terms');
+  };
+
+  const CheckItem = ({ checked, onPress, children }: { checked: boolean; onPress: () => void; children: React.ReactNode }) => (
     <TouchableOpacity style={styles.checkItem} onPress={onPress}>
       <MaterialCommunityIcons 
         name={checked ? "checkbox-marked" : "checkbox-blank-outline"} 
         size={24} 
         color={checked ? "#4dabf7" : "#868e96"} 
       />
-      <Text style={styles.checkLabel}>{label}</Text>
+      <View style={styles.checkLabelContainer}>
+        {children}
+      </View>
     </TouchableOpacity>
   );
 
@@ -45,23 +53,39 @@ export default function AcknowledgmentPopup({ visible, onAccept }: Acknowledgmen
             <CheckItem 
               checked={checks.volatility} 
               onPress={() => toggleCheck('volatility')}
-              label="I understand XRP price is volatile and payout value may change at any time."
-            />
+            >
+              <Text style={styles.checkLabel}>
+                I understand XRP price is volatile and payout value may change at any time.
+              </Text>
+            </CheckItem>
             <CheckItem 
               checked={checks.age} 
               onPress={() => toggleCheck('age')}
-              label="I confirm I am 18 years of age or older."
-            />
+            >
+              <Text style={styles.checkLabel}>
+                I confirm I am 18 years of age or older.
+              </Text>
+            </CheckItem>
             <CheckItem 
               checked={checks.risks} 
               onPress={() => toggleCheck('risks')}
-              label="I acknowledge payouts are in XRP at current market rate at time of cashout."
-            />
+            >
+              <Text style={styles.checkLabel}>
+                I acknowledge payouts are in XRP at current market rate at time of cashout.
+              </Text>
+            </CheckItem>
             <CheckItem 
               checked={checks.terms} 
               onPress={() => toggleCheck('terms')}
-              label="I have read and agree to the Terms of Use and Privacy Policy."
-            />
+            >
+              <Text style={styles.checkLabel}>
+                I have read and agree to the{' '}
+                <Text style={styles.termsLink} onPress={handleTermsPress}>
+                  Terms of Use and Privacy Policy
+                </Text>
+                .
+              </Text>
+            </CheckItem>
           </ScrollView>
 
           <TouchableOpacity 
@@ -116,12 +140,19 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
   },
-  checkLabel: {
+  checkLabelContainer: {
     flex: 1,
     marginLeft: 12,
+  },
+  checkLabel: {
     fontSize: 14,
     color: '#333',
     lineHeight: 20,
+  },
+  termsLink: {
+    color: '#4dabf7',
+    textDecorationLine: 'underline',
+    fontWeight: '600',
   },
   acceptButton: {
     backgroundColor: '#4dabf7',

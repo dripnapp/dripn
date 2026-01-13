@@ -13,7 +13,8 @@ export default function Home() {
   const router = useRouter();
   const { 
     points, walletAddress, isWalletConnected, setWallet, addPoints, dailyEarnings,
-    hasCompletedOnboarding, hasAcceptedTerms, completeOnboarding, acceptTerms, userLevel
+    hasCompletedOnboarding, hasAcceptedTerms, completeOnboarding, acceptTerms, userLevel,
+    disconnectWallet
   } = useStore();
   
   const [xrpPrice, setXrpPrice] = useState<number | null>(null);
@@ -110,6 +111,20 @@ export default function Home() {
     );
   };
 
+  const handleLogout = () => {
+    Alert.alert(
+      'Disconnect Wallet',
+      'Are you sure you want to disconnect your wallet? You can reconnect anytime.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Disconnect', style: 'destructive', onPress: () => {
+          disconnectWallet();
+          Alert.alert('Disconnected', 'Your wallet has been disconnected.');
+        }}
+      ]
+    );
+  };
+
   const userRewardEstimate = Math.round(AD_REVENUE_CENTS * 0.15);
 
   if (showSplash) {
@@ -144,6 +159,10 @@ export default function Home() {
             <TouchableOpacity style={styles.menuItem} onPress={() => { setMenuOpen(false); router.push('/badges'); }}>
               <MaterialCommunityIcons name="medal" size={22} color="#4dabf7" />
               <Text style={styles.menuText}>Badges & Levels</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.menuItem} onPress={() => { setMenuOpen(false); router.push('/leaderboard'); }}>
+              <MaterialCommunityIcons name="podium" size={22} color="#4dabf7" />
+              <Text style={styles.menuText}>Leaderboard</Text>
             </TouchableOpacity>
             <View style={styles.menuDivider} />
             <TouchableOpacity style={styles.menuItem} onPress={() => { setMenuOpen(false); router.push('/legal'); }}>
@@ -194,7 +213,7 @@ export default function Home() {
             <MaterialCommunityIcons name="play-circle" size={32} color="#fff" />
             <View style={styles.taskInfo}>
               <Text style={styles.taskName}>Watch Rewarded Video</Text>
-              <Text style={styles.taskReward}>+{userRewardEstimate} Points (~${(userRewardEstimate/100).toFixed(2)})</Text>
+              <Text style={styles.taskReward}>+{userRewardEstimate} Points</Text>
             </View>
           </TouchableOpacity>
         </View>
@@ -208,6 +227,10 @@ export default function Home() {
                 <Text style={styles.address}>{walletAddress}</Text>
                 <TouchableOpacity style={styles.cashoutButton} onPress={handleCashout}>
                   <Text style={styles.buttonText}>Cash Out to XRP</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+                  <MaterialCommunityIcons name="logout" size={18} color="#868e96" />
+                  <Text style={styles.logoutText}>Disconnect Wallet</Text>
                 </TouchableOpacity>
               </>
             ) : (
@@ -252,6 +275,8 @@ const styles = StyleSheet.create({
   address: { fontSize: 12, color: '#333', fontWeight: '500', marginBottom: 15 },
   connectButton: { backgroundColor: '#1a1a1a', padding: 15, borderRadius: 12, alignItems: 'center' },
   cashoutButton: { backgroundColor: '#2f9e44', padding: 15, borderRadius: 12, alignItems: 'center' },
+  logoutButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 12, paddingVertical: 10 },
+  logoutText: { color: '#868e96', fontSize: 14, marginLeft: 6 },
   buttonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
   infoCard: { padding: 15, backgroundColor: '#e9ecef', borderRadius: 12, marginTop: 20 },
   infoText: { fontSize: 12, color: '#495057', textAlign: 'center', marginVertical: 2 },
