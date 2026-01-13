@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Xumm } from 'xumm-sdk';
+import { XummSdk } from 'xumm-sdk';
 
 // Note: In a real app, these would be in a backend or securely managed
 // For MVP/Testnet on Replit, we use placeholders or mock logic if SDK needs secret
@@ -15,6 +15,9 @@ export const getXRPPrice = async () => {
     return null;
   }
 };
+
+const API_KEY = 'f9fb28fd-38fa-436c-ad91-fe4d2caf181a';
+const sdk = new XummSdk(API_KEY);
 
 export const XummService = {
   // This is a simplified interface for the MVP
