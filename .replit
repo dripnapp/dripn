@@ -72,13 +72,13 @@ args = "Web Preview"
 name = "Web Preview"
 author = "agent"
 
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npm run web -- --port 5000"
-waitForPort = 5000
-
 [workflows.workflow.metadata]
 outputType = "webview"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npx expo start --tunnel --port 5000"
+waitForPort = 5000
 
 [agent]
 expertMode = true
