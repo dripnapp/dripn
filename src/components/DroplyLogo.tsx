@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Platform } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 interface DroplyLogoProps {
@@ -17,8 +17,8 @@ export default function DroplyLogo({
   iconOnly = false,
   textColor = '#FFFFFF'
 }: DroplyLogoProps) {
-  const iconSize = iconOnly ? Math.min(width, height) : height * 0.8;
-  const fontSize = height * 0.6;
+  const iconSize = iconOnly ? Math.min(width, height) : height * 0.85;
+  const fontSize = height * 0.55;
 
   if (iconOnly) {
     return (
@@ -29,10 +29,10 @@ export default function DroplyLogo({
   }
 
   return (
-    <View style={[styles.container, { width, height }]}>
+    <View style={[styles.container, { height }]}>
       <DropIcon size={iconSize} />
       {showText && (
-        <Text style={[styles.wordmark, { fontSize, color: textColor }]}>droply</Text>
+        <Text style={[styles.wordmark, { fontSize, color: textColor }]}>droply.io</Text>
       )}
     </View>
   );
@@ -43,16 +43,16 @@ export function DropIcon({ size = 32 }: { size?: number }) {
     <View style={[styles.dropContainer, { width: size, height: size }]}>
       <MaterialCommunityIcons 
         name="water" 
-        size={size * 0.9} 
+        size={size} 
         color="#4dabf7" 
       />
-      <View style={[styles.playTriangle, { 
-        left: size * 0.38,
-        top: size * 0.35,
-        borderLeftWidth: size * 0.2,
-        borderTopWidth: size * 0.12,
-        borderBottomWidth: size * 0.12,
-      }]} />
+      <View style={styles.playOverlay}>
+        <MaterialCommunityIcons 
+          name="play" 
+          size={size * 0.4} 
+          color="#FFFFFF" 
+        />
+      </View>
     </View>
   );
 }
@@ -61,28 +61,27 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
   },
   iconContainer: {
     alignItems: 'center',
     justifyContent: 'center',
   },
   dropContainer: {
-    position: 'relative',
     alignItems: 'center',
     justifyContent: 'center',
+    position: 'relative',
   },
-  playTriangle: {
+  playOverlay: {
     position: 'absolute',
-    width: 0,
-    height: 0,
-    borderStyle: 'solid',
-    borderLeftColor: '#fff',
-    borderTopColor: 'transparent',
-    borderBottomColor: 'transparent',
+    alignItems: 'center',
+    justifyContent: 'center',
+    top: '25%',
+    left: '30%',
   },
   wordmark: {
     fontWeight: '500',
-    letterSpacing: -1,
-    marginLeft: 8,
+    letterSpacing: -0.5,
+    marginLeft: 10,
   },
 });

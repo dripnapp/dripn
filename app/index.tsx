@@ -12,6 +12,20 @@ import VideoPlayer from '../src/components/VideoPlayer';
 import UsernameSetup from '../src/components/UsernameSetup';
 import DroplyLogo from '../src/components/DroplyLogo';
 
+const formatCurrency = (value: number, locale?: string): string => {
+  const userLocale = locale || (typeof navigator !== 'undefined' ? navigator.language : 'en-US');
+  try {
+    return new Intl.NumberFormat(userLocale, {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 4,
+      maximumFractionDigits: 4,
+    }).format(value);
+  } catch {
+    return `$${value.toFixed(4)}`;
+  }
+};
+
 export default function Home() {
   const router = useRouter();
   const { 
@@ -229,11 +243,11 @@ export default function Home() {
       <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
         <View style={styles.header}>
           <View style={styles.headerLogoContainer}>
-            <DroplyLogo width={140} height={40} showText={true} />
-            <Text style={styles.subtitle}>every drop counts</Text>
+            <DroplyLogo width={160} height={36} showText={true} textColor="#FFFFFF" />
+            <Text style={styles.subtitle}>"every drop counts"</Text>
           </View>
           <TouchableOpacity style={styles.menuButton} onPress={() => setMenuOpen(true)}>
-            <MaterialCommunityIcons name="menu" size={28} color="#1a1a1a" />
+            <MaterialCommunityIcons name="menu" size={28} color="#FFFFFF" />
           </TouchableOpacity>
         </View>
 
@@ -258,7 +272,7 @@ export default function Home() {
 
         <View style={styles.card}>
           <Text style={styles.label}>Your Balance</Text>
-          <Text style={styles.balance}>{points} Drops</Text>
+          <Text style={styles.balance}>{points} drops</Text>
           <View style={styles.progressBarBg}>
             <View style={[styles.progressBarFill, { width: `${Math.min((points / 500) * 100, 100)}%` }]} />
           </View>
@@ -271,7 +285,7 @@ export default function Home() {
             <MaterialCommunityIcons name="water" size={32} color="#fff" />
             <View style={styles.taskInfo}>
               <Text style={styles.taskName}>Watch Rewarded Video</Text>
-              <Text style={styles.taskReward}>+{userRewardEstimate} Drops</Text>
+              <Text style={styles.taskReward}>+{userRewardEstimate} drops</Text>
             </View>
           </TouchableOpacity>
         </View>
@@ -312,7 +326,7 @@ export default function Home() {
         </View>
 
         <View style={styles.infoCard}>
-          <Text style={styles.infoText}>Current XRP Price: ${xrpPrice?.toFixed(4) || 'Loading...'}</Text>
+          <Text style={styles.infoText}>Current XRP Price: {xrpPrice ? formatCurrency(xrpPrice) : 'Loading...'}</Text>
           <Text style={styles.infoText}>Daily Earnings: {dailyEarnings} / 500 drops</Text>
         </View>
       </ScrollView>
@@ -324,11 +338,24 @@ const styles = StyleSheet.create({
   wrapper: { flex: 1, backgroundColor: '#f8f9fa' },
   container: { flex: 1 },
   contentContainer: { padding: 20, paddingBottom: 40 },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 15, marginTop: 10 },
+  header: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    alignItems: 'center', 
+    marginBottom: 15, 
+    marginTop: -20,
+    marginHorizontal: -20,
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    paddingTop: 20,
+    backgroundColor: '#1a1a2e',
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+  },
   headerLogoContainer: { flex: 1 },
-  subtitle: { fontSize: 12, color: '#666', marginTop: 4 },
+  subtitle: { fontSize: 11, color: '#a0a0a0', marginTop: 2, fontStyle: 'italic' },
   menuButton: { padding: 8 },
-  profileRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
+  profileRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, marginTop: 15 },
   levelBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20 },
   levelText: { marginLeft: 6, fontSize: 12, fontWeight: '600', color: '#495057' },
   profileButton: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#e7f5ff', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20 },

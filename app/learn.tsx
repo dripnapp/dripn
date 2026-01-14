@@ -16,10 +16,10 @@ export default function LearnScreen() {
     },
     {
       icon: 'water',
-      title: 'What is droply?',
-      content: 'droply is a rewards app where you earn "drops" by completing simple tasks like watching short videos. Drops are an in-app reward currency used to track your progress and achievements within the app.',
+      title: 'What is droply.io?',
+      content: 'droply.io is a rewards app where you earn "drops" by completing simple tasks like watching short videos. Drops are an in-app reward currency used to track your progress and achievements within the app.',
       isDroply: true,
-      disclaimer: 'Important: Drops earned on droply have no monetary value, cash value, or real-world currency equivalent. They are virtual rewards for entertainment purposes only and cannot be exchanged for cash or transferred outside the app.',
+      disclaimer: 'Important: Drops earned on droply.io have no monetary value, cash value, or real-world currency equivalent. They are virtual rewards for entertainment purposes only and cannot be exchanged for cash or transferred outside the app.',
     },
     {
       icon: 'wallet-outline',
@@ -29,7 +29,7 @@ export default function LearnScreen() {
     {
       icon: 'shield-check',
       title: 'What is Non-Custodial?',
-      content: 'Non-custodial means you maintain complete control of your private keys and funds. droply never holds your crypto - we only send rewards directly to your connected wallet.',
+      content: 'Non-custodial means you maintain complete control of your private keys and funds. droply.io never holds your crypto - we only send rewards directly to your connected wallet.',
     },
     {
       icon: 'chart-line-variant',
@@ -66,7 +66,7 @@ export default function LearnScreen() {
       <View style={styles.tipBox}>
         <MaterialCommunityIcons name="lightbulb-outline" size={24} color="#f59f00" />
         <Text style={styles.tipText}>
-          Pro Tip: Never share your wallet's secret key with anyone, including droply. We will never ask for it.
+          Pro Tip: Never share your wallet's secret key with anyone, including droply.io. We will never ask for it.
         </Text>
       </View>
     </ScrollView>

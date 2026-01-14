@@ -1,4 +1,4 @@
-# droply - Crypto Rewards App
+# droply.io - Crypto Rewards App
 
 ## Overview
 
@@ -14,13 +14,17 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (January 2026)
 
-- Rebranded app from "ADFI" to "droply"
-- Changed currency from "points" to "drops" throughout app
-- Updated splash screen to use droply branding with tagline "every drop counts"
-- Removed dollar amounts from balance display (now shows drops only)
-- Updated daily earnings to show drops (e.g., "0 / 500 drops")
-- Changed referral code prefix from "ADFI-" to "DROP-"
-- Updated all screens to use "drops" and "drps" terminology
+- Rebranded app from "droply" to "droply.io" throughout to differentiate from other apps in the market
+- Changed referral code prefix from "DROP-" to "DPLY-"
+- Updated splash screen with improved logo centering and quotes around tagline ("every drop counts")
+- Added themed dark header on main screen for better logo/text visibility
+- Changed "Drops" to "drops" (lowercase) in balance display
+- Added locale-aware currency formatting for international users (using Intl.NumberFormat)
+- Fixed DroplyLogo component with better centered play button positioning
+- Updated Learn Crypto screen with droply.io branding and legal disclaimers
+- Created DroplyLogo component using MaterialCommunityIcons for web compatibility
+
+### Previous Changes
 - Implemented one-time acknowledgment popup with checkboxes (18+, volatility, risks, terms)
 - Created step-by-step onboarding tutorial for first-time users
 - Added hamburger menu with navigation to all app sections
@@ -41,6 +45,15 @@ Preferred communication style: Simple, everyday language.
 - XUMM API requires `EXPO_PUBLIC_XUMM_API_KEY` and `EXPO_PUBLIC_XUMM_API_SECRET` environment variables to be set for real wallet connections.
 - Video rewards are calculated as 15% of actual ad revenue. In production, rewards will only be granted when AdMob confirms successful ad completion.
 
+## International Currency Display
+
+The app uses JavaScript's built-in `Intl.NumberFormat` API for locale-aware currency formatting:
+- Automatically detects user's locale via `navigator.language`
+- Formats currency display according to user's region (e.g., "$2.11" for US, "2,11 $" for some European countries)
+- Falls back to standard USD format if locale detection fails
+- **Note:** XRP prices are always fetched in USD from CoinGecko API and displayed with locale formatting
+- App Store handles localization of app listing/pricing separately - this only affects in-app currency display
+
 ## System Architecture
 
 ### Frontend Architecture
@@ -60,14 +73,15 @@ Preferred communication style: Simple, everyday language.
 - `leaderboard.tsx` - Top earners ranking
 
 ### Components (in `/src/components`)
-- `SplashScreen.tsx` - Animated loading screen with droply branding
+- `SplashScreen.tsx` - Animated loading screen with droply.io branding
 - `OnboardingScreen.tsx` - Step-by-step tutorial for new users
 - `AcknowledgmentPopup.tsx` - Required checkboxes before using app
 - `VideoPlayer.tsx` - Video ad player with completion tracking
 - `UsernameSetup.tsx` - Profile username configuration
+- `DroplyLogo.tsx` - Reusable logo component with water drop and play button icon
 
 ### Key Application Features
-- **Splash Screen**: Animated loading screen with droply logo on app launch
+- **Splash Screen**: Animated loading screen with droply.io logo on app launch
 - **Onboarding**: 4-step tutorial explaining how the app works
 - **Acknowledgment Popup**: Required checkboxes for volatility, age, risks, and terms
 - **Wallet Connection**: XUMM SDK (Xaman) integration for XRP wallet connectivity
@@ -75,8 +89,8 @@ Preferred communication style: Simple, everyday language.
 - **Variable Rewards**: Users earn 15% of actual ad revenue per task
 - **Video Completion**: Must watch full video to earn drops
 - **Levels & Badges**: Bronze (100 drops), Silver (500 drops), Gold (1000 drops)
-- **Referral Program**: 10% of referee earnings for 30 days
-- **Price Fetching**: Real-time XRP prices from CoinGecko API
+- **Referral Program**: 10% of referee earnings for 30 days, codes prefixed with "DPLY-"
+- **Price Fetching**: Real-time XRP prices from CoinGecko API with locale-aware formatting
 - **Cashout Flow**: Minimum 500 drops threshold, converts drops to XRP at current market rate
 
 ### State Management Pattern

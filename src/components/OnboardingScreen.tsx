@@ -11,7 +11,7 @@ interface OnboardingScreenProps {
 const slides = [
   {
     icon: 'water',
-    title: 'Welcome to droply',
+    title: 'Welcome to droply.io',
     description: 'Earn cryptocurrency by completing simple tasks like watching videos. Your earnings are tracked in drops.',
   },
   {

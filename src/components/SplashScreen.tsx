@@ -22,14 +22,14 @@ export default function SplashScreen({ onFinish }: SplashScreenProps) {
 
   if (!visible) return null;
 
-  const logoWidth = Math.min(screenWidth * 0.8, 400);
-  const logoHeight = logoWidth * (260 / 900);
+  const logoWidth = Math.min(screenWidth * 0.7, 320);
+  const logoHeight = 60;
 
   return (
     <View style={styles.container}>
       <View style={styles.logoContainer}>
-        <DroplyLogo width={logoWidth} height={logoHeight} showText={true} />
-        <Text style={styles.subtitle}>every drop counts</Text>
+        <DroplyLogo width={logoWidth} height={logoHeight} showText={true} textColor="#FFFFFF" />
+        <Text style={styles.subtitle}>"every drop counts"</Text>
       </View>
       <View style={styles.loadingContainer}>
         <Text style={styles.loadingText}>Loading...</Text>
@@ -47,12 +47,14 @@ const styles = StyleSheet.create({
   },
   logoContainer: {
     alignItems: 'center',
+    justifyContent: 'center',
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 15,
     color: '#868e96',
-    marginTop: 20,
-    letterSpacing: 1,
+    marginTop: 16,
+    letterSpacing: 0.5,
+    fontStyle: 'italic',
   },
   loadingContainer: {
     position: 'absolute',

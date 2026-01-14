@@ -10,7 +10,7 @@ export default function RootLayout() {
         headerTintColor: '#1a1a1a',
         headerTitleStyle: { fontWeight: 'bold' },
       }}>
-        <Stack.Screen name="index" options={{ title: 'droply', headerShown: true }} />
+        <Stack.Screen name="index" options={{ title: 'droply.io', headerShown: true }} />
         <Stack.Screen name="learn" options={{ title: 'Learn Crypto', headerShown: true }} />
         <Stack.Screen name="legal" options={{ title: 'Legal', headerShown: true }} />
         <Stack.Screen name="terms" options={{ title: 'Terms of Use', headerShown: true }} />
