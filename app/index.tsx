@@ -10,6 +10,7 @@ import OnboardingScreen from '../src/components/OnboardingScreen';
 import AcknowledgmentPopup from '../src/components/AcknowledgmentPopup';
 import VideoPlayer from '../src/components/VideoPlayer';
 import UsernameSetup from '../src/components/UsernameSetup';
+import DroplyLogo from '../src/components/DroplyLogo';
 
 export default function Home() {
   const router = useRouter();
@@ -227,8 +228,8 @@ export default function Home() {
 
       <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
         <View style={styles.header}>
-          <View>
-            <Text style={styles.title}>droply</Text>
+          <View style={styles.headerLogoContainer}>
+            <DroplyLogo width={140} height={40} showText={true} />
             <Text style={styles.subtitle}>every drop counts</Text>
           </View>
           <TouchableOpacity style={styles.menuButton} onPress={() => setMenuOpen(true)}>
@@ -324,8 +325,8 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   contentContainer: { padding: 20, paddingBottom: 40 },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 15, marginTop: 10 },
-  title: { fontSize: 32, fontWeight: 'bold', color: '#1a1a1a' },
-  subtitle: { fontSize: 14, color: '#666' },
+  headerLogoContainer: { flex: 1 },
+  subtitle: { fontSize: 12, color: '#666', marginTop: 4 },
   menuButton: { padding: 8 },
   profileRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
   levelBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20 },
