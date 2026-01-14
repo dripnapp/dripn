@@ -33,7 +33,6 @@ export default function SplashScreen({ onFinish }: SplashScreenProps) {
           style={{ width: logoWidth, height: logoHeight }}
           contentFit="contain"
         />
-        <Text style={styles.subtitle}>"every drop counts"</Text>
       </View>
       <View style={styles.loadingContainer}>
         <Text style={styles.loadingText}>Loading...</Text>
@@ -52,13 +51,6 @@ const styles = StyleSheet.create({
   logoContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  subtitle: {
-    fontSize: 15,
-    color: '#868e96',
-    marginTop: 16,
-    letterSpacing: 0.5,
-    fontStyle: 'italic',
   },
   loadingContainer: {
     position: 'absolute',
