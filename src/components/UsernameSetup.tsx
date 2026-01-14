@@ -12,8 +12,8 @@ interface UsernameSetupProps {
 const RESERVED_NAMES = [
   'admin', 'administrator', 'mod', 'moderator', 'support', 'help',
   'cryptoking', 'xrphunter', 'rewardchaser', 'tokenmaster', 'blockexplorer',
-  'coincollector', 'digiearner', 'cashflowpro', 'pointspilot', 'rewardrookie',
-  'adfi', 'system', 'bot', 'official'
+  'coincollector', 'digiearner', 'cashflowpro', 'dropspilot', 'rewardrookie',
+  'droply', 'system', 'bot', 'official'
 ];
 
 export default function UsernameSetup({ visible, currentUsername, onSave, onClose }: UsernameSetupProps) {

@@ -10,9 +10,9 @@ interface OnboardingScreenProps {
 
 const slides = [
   {
-    icon: 'currency-usd',
-    title: 'Welcome to ADFI',
-    description: 'Earn cryptocurrency by completing simple tasks like watching videos. Your earnings are tracked in stable USD value.',
+    icon: 'water',
+    title: 'Welcome to droply',
+    description: 'Earn cryptocurrency by completing simple tasks like watching videos. Your earnings are tracked in drops.',
   },
   {
     icon: 'wallet',
@@ -22,12 +22,12 @@ const slides = [
   {
     icon: 'play-circle',
     title: 'Complete Tasks',
-    description: 'Watch rewarded videos to earn points. Each video pays based on current ad rates.',
+    description: 'Watch rewarded videos to earn drops. Each video pays based on current ad rates.',
   },
   {
     icon: 'cash-check',
     title: 'Cash Out',
-    description: 'Once you reach 500 points ($5), you can cash out to XRP at the current market rate. Fast and secure!',
+    description: 'Once you reach 500 drops, you can cash out to XRP at the current market rate. Fast and secure!',
   },
 ];
 

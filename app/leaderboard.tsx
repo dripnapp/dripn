@@ -12,7 +12,7 @@ const baseLeaderboard = [
   { username: 'CoinCollector', points: 3890, level: 'Gold' },
   { username: 'DigiEarner', points: 2750, level: 'Silver' },
   { username: 'CashFlowPro', points: 1980, level: 'Silver' },
-  { username: 'PointsPilot', points: 1540, level: 'Silver' },
+  { username: 'DropsPilot', points: 1540, level: 'Silver' },
   { username: 'RewardRookie', points: 890, level: 'Bronze' },
 ];
 
@@ -96,7 +96,7 @@ export default function LeaderboardScreen() {
           <Text style={styles.yourRankNumber}>#{userRank}</Text>
         </View>
         <View style={styles.yourRankRight}>
-          <Text style={styles.yourPoints}>{points.toLocaleString()} pts</Text>
+          <Text style={styles.yourPoints}>{points.toLocaleString()} drps</Text>
           <Text style={styles.yourLevel}>{userLevel}</Text>
         </View>
       </View>
@@ -130,7 +130,7 @@ export default function LeaderboardScreen() {
             </View>
             <View style={styles.pointsSection}>
               <Text style={styles.userPoints}>{user.points.toLocaleString()}</Text>
-              <Text style={styles.pointsUnit}>pts</Text>
+              <Text style={styles.pointsUnit}>drps</Text>
             </View>
           </View>
         ))}
@@ -139,7 +139,7 @@ export default function LeaderboardScreen() {
       <View style={styles.infoBox}>
         <MaterialCommunityIcons name="information-outline" size={18} color="#4dabf7" />
         <Text style={styles.infoText}>
-          Leaderboard updates live as you earn points. Keep earning to climb the ranks!
+          Leaderboard updates live as you earn drops. Keep earning to climb the ranks!
         </Text>
       </View>
     </ScrollView>

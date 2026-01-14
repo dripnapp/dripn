@@ -41,7 +41,7 @@ interface AppState {
 }
 
 const generateReferralCode = () => {
-  return 'ADFI-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+  return 'DROP-' + Math.random().toString(36).substring(2, 8).toUpperCase();
 };
 
 const BADGE_REWARDS: Record<string, number> = {
@@ -139,7 +139,7 @@ export const useStore = create<AppState>()(
         if (code === state.referralCode) {
           return false;
         }
-        if (!code.startsWith('ADFI-') || code.length < 10) {
+        if (!code.startsWith('DROP-') || code.length < 10) {
           return false;
         }
         set({ enteredReferralCode: code });
@@ -149,7 +149,7 @@ export const useStore = create<AppState>()(
       setXummPayloadId: (payloadId) => set({ xummPayloadId: payloadId }),
     }),
     {
-      name: 'crypto-pulse-storage',
+      name: 'droply-storage',
       storage: createJSONStorage(() => AsyncStorage),
       onRehydrateStorage: () => (state) => {
         if (state && !state.referralCode) {

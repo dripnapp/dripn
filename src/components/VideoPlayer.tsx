@@ -59,7 +59,7 @@ export default function VideoPlayer({ visible, onComplete, onCancel, adRevenue }
           </View>
 
           <View style={styles.videoArea}>
-            <MaterialCommunityIcons name="play-circle-outline" size={80} color="#4dabf7" />
+            <MaterialCommunityIcons name="water" size={80} color="#4dabf7" />
             <Text style={styles.videoText}>Video Ad Playing...</Text>
             <Text style={styles.timerText}>{videoDuration - progress}s remaining</Text>
           </View>
@@ -69,7 +69,7 @@ export default function VideoPlayer({ visible, onComplete, onCancel, adRevenue }
               <View style={[styles.progressFill, { width: `${(progress / videoDuration) * 100}%` }]} />
             </View>
             <Text style={styles.progressText}>
-              {completed ? 'Video Complete!' : 'Watch the full video to earn points'}
+              {completed ? 'Video Complete!' : 'Watch the full video to earn drops'}
             </Text>
           </View>
 
@@ -77,7 +77,7 @@ export default function VideoPlayer({ visible, onComplete, onCancel, adRevenue }
             <View style={styles.rewardSection}>
               <MaterialCommunityIcons name="check-circle" size={50} color="#2f9e44" />
               <Text style={styles.rewardTitle}>You Earned!</Text>
-              <Text style={styles.rewardAmount}>{userReward} Points</Text>
+              <Text style={styles.rewardAmount}>{userReward} Drops</Text>
               <TouchableOpacity style={styles.claimButton} onPress={handleClose}>
                 <Text style={styles.claimButtonText}>Claim Reward</Text>
               </TouchableOpacity>

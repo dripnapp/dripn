@@ -40,7 +40,7 @@ export default function ReferralScreen() {
           <View style={styles.inputRow}>
             <TextInput
               style={styles.input}
-              placeholder="Enter code (e.g. ADFI-ABC123)"
+              placeholder="Enter code (e.g. DROP-ABC123)"
               placeholderTextColor="#999"
               value={inputCode}
               onChangeText={setInputCode}
@@ -66,7 +66,7 @@ export default function ReferralScreen() {
       <View style={styles.codeCard}>
         <Text style={styles.codeLabel}>Your Referral Code</Text>
         <View style={styles.codeBox}>
-          <Text style={styles.code}>{referralCode || 'ADFI-XXXXXX'}</Text>
+          <Text style={styles.code}>{referralCode || 'DROP-XXXXXX'}</Text>
           <TouchableOpacity style={styles.copyButton} onPress={copyCode}>
             <MaterialCommunityIcons name="content-copy" size={20} color="#fff" />
           </TouchableOpacity>
@@ -82,7 +82,7 @@ export default function ReferralScreen() {
         <View style={styles.statDivider} />
         <View style={styles.statItem}>
           <Text style={styles.statNumber}>{referralBonusEarned}</Text>
-          <Text style={styles.statLabel}>Bonus Points</Text>
+          <Text style={styles.statLabel}>Bonus Drops</Text>
         </View>
       </View>
 
@@ -101,7 +101,7 @@ export default function ReferralScreen() {
           <View style={styles.stepNumber}><Text style={styles.stepNumberText}>2</Text></View>
           <View style={styles.stepContent}>
             <Text style={styles.stepTitle}>They Sign Up</Text>
-            <Text style={styles.stepDesc}>Your friend downloads ADFI and enters your code</Text>
+            <Text style={styles.stepDesc}>Your friend downloads droply and enters your code</Text>
           </View>
         </View>
 
@@ -117,7 +117,7 @@ export default function ReferralScreen() {
       <View style={styles.infoBox}>
         <MaterialCommunityIcons name="information-outline" size={20} color="#4dabf7" />
         <Text style={styles.infoText}>
-          Referral bonuses are paid in points and can be cashed out once you reach the minimum threshold.
+          Referral bonuses are paid in drops and can be cashed out once you reach the minimum threshold.
         </Text>
       </View>
     </ScrollView>

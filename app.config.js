@@ -1,11 +1,11 @@
 export default {
   expo: {
-    name: "expo-on-replit",
-    slug: "expo-on-replit",
+    name: "droply",
+    slug: "droply",
     version: "1.0.0",
     orientation: "portrait",
     icon: "./assets/images/icon.png",
-    scheme: "adfi",
+    scheme: "droply",
     userInterfaceStyle: "automatic",
     newArchEnabled: true,
     ios: {
@@ -14,7 +14,7 @@ export default {
     android: {
       adaptiveIcon: {
         foregroundImage: "./assets/images/adaptive-icon.png",
-        backgroundColor: "#ffffff"
+        backgroundColor: "#0d1117"
       },
       edgeToEdgeEnabled: true
     },
@@ -31,7 +31,7 @@ export default {
           image: "./assets/images/splash-icon.png",
           imageWidth: 200,
           resizeMode: "contain",
-          backgroundColor: "#ffffff"
+          backgroundColor: "#0d1117"
         }
       ]
     ],

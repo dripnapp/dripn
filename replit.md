@@ -1,10 +1,12 @@
-# Crypto Pulse Rewards - ADFI
+# droply - Crypto Rewards App
 
 ## Overview
 
-A React Native Expo mobile application that functions as a crypto rewards platform (similar to Swagbucks). Users earn points by completing micro-tasks (watching rewarded video ads), with points tracked in stable USD value. Points can be cashed out as XRP cryptocurrency to a connected wallet at current market rates via the CoinGecko API.
+A React Native Expo mobile application that functions as a crypto rewards platform. Users earn drops (the in-app currency) by completing micro-tasks (watching rewarded video ads). Drops can be cashed out as XRP cryptocurrency to a connected wallet at current market rates via the CoinGecko API.
 
 The app is designed to be non-custodial (never holds user funds/keys), with automated task verification, payouts, and anti-fraud measures. Currently configured for XRP Testnet development with plans to switch to Mainnet for production.
+
+**Tagline:** "every drop counts"
 
 ## User Preferences
 
@@ -12,27 +14,32 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (January 2026)
 
-- Changed header from "index" to "ADFI"
-- Added animated splash/loading screen on app launch
+- Rebranded app from "ADFI" to "droply"
+- Changed currency from "points" to "drops" throughout app
+- Updated splash screen to use droply branding with tagline "every drop counts"
+- Removed dollar amounts from balance display (now shows drops only)
+- Updated daily earnings to show drops (e.g., "0 / 500 drops")
+- Changed referral code prefix from "ADFI-" to "DROP-"
+- Updated all screens to use "drops" and "drps" terminology
 - Implemented one-time acknowledgment popup with checkboxes (18+, volatility, risks, terms)
 - Created step-by-step onboarding tutorial for first-time users
 - Added hamburger menu with navigation to all app sections
 - Created dedicated screens: Learn, Legal, Terms, Referral, Badges, Leaderboard
-- Updated reward system to use variable points (15% of ad revenue)
-- Implemented video completion requirement before awarding points
+- Updated reward system to use variable drops (15% of ad revenue)
+- Implemented video completion requirement before awarding drops
 - Added user levels (Bronze, Silver, Gold) and badge system with rewards
 - Added referral program with unique codes and input for entering codes
-- Added AdMob configuration for Android and iOS (ready for native builds)
 - Added wallet disconnect/logout functionality
-- Added leaderboard with live ranking based on user points
-- Badge rewards: users earn bonus points when claiming unlocked badges
-- Terms link in acknowledgment popup is now clickable
+- Added leaderboard with live ranking based on user drops
+- Badge rewards: users earn bonus drops when claiming unlocked badges
 - Added unique username system for user profiles (shown on leaderboard)
+- Default username displays truncated wallet address (first 4...last 4 chars)
 - Implemented real XUMM/Xaman wallet connection flow (requires API keys)
 
 ### Production Notes
 - Username uniqueness currently uses client-side reserved names list. Production deployment will require a backend API to check username availability against a central database.
 - XUMM API requires `EXPO_PUBLIC_XUMM_API_KEY` and `EXPO_PUBLIC_XUMM_API_SECRET` environment variables to be set for real wallet connections.
+- Video rewards are calculated as 15% of actual ad revenue. In production, rewards will only be granted when AdMob confirms successful ad completion.
 
 ## System Architecture
 
@@ -50,29 +57,31 @@ Preferred communication style: Simple, everyday language.
 - `terms.tsx` - Terms of Use
 - `referral.tsx` - Referral program with unique codes
 - `badges.tsx` - User badges and level progression
+- `leaderboard.tsx` - Top earners ranking
 
 ### Components (in `/src/components`)
-- `SplashScreen.tsx` - Animated loading screen
+- `SplashScreen.tsx` - Animated loading screen with droply branding
 - `OnboardingScreen.tsx` - Step-by-step tutorial for new users
 - `AcknowledgmentPopup.tsx` - Required checkboxes before using app
 - `VideoPlayer.tsx` - Video ad player with completion tracking
+- `UsernameSetup.tsx` - Profile username configuration
 
 ### Key Application Features
-- **Splash Screen**: Animated loading screen on app launch
+- **Splash Screen**: Animated loading screen with droply logo on app launch
 - **Onboarding**: 4-step tutorial explaining how the app works
 - **Acknowledgment Popup**: Required checkboxes for volatility, age, risks, and terms
 - **Wallet Connection**: XUMM SDK (Xaman) integration for XRP wallet connectivity
-- **Points System**: USD-pegged points (100 points = $1) with daily earning caps ($5/day)
+- **Drops System**: 100 drops = $1 USD value, with daily earning caps (500 drops/day)
 - **Variable Rewards**: Users earn 15% of actual ad revenue per task
-- **Video Completion**: Must watch full video to earn points
-- **Levels & Badges**: Bronze (100pts), Silver (500pts), Gold (1000pts)
+- **Video Completion**: Must watch full video to earn drops
+- **Levels & Badges**: Bronze (100 drops), Silver (500 drops), Gold (1000 drops)
 - **Referral Program**: 10% of referee earnings for 30 days
 - **Price Fetching**: Real-time XRP prices from CoinGecko API
-- **Cashout Flow**: Minimum $5 threshold, converts points to XRP at current market rate
+- **Cashout Flow**: Minimum 500 drops threshold, converts drops to XRP at current market rate
 
 ### State Management Pattern
 The app uses Zustand store (`src/store/useStore.ts`) with the following state:
-- Points balance and daily earnings tracking
+- Drops balance and daily earnings tracking
 - Wallet connection status and address
 - Onboarding completion status
 - Terms acceptance status
@@ -83,7 +92,7 @@ The app uses Zustand store (`src/store/useStore.ts`) with the following state:
 
 ### Security Considerations
 - Non-custodial design - app never holds private keys
-- Daily earning caps ($5/day) to prevent abuse
+- Daily earning caps (500 drops/day) to prevent abuse
 - Required acknowledgment checkboxes before accessing tasks
 - Age verification (18+)
 - Clear legal disclaimers throughout app

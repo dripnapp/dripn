@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Platform } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 interface SplashScreenProps {
@@ -23,9 +23,16 @@ export default function SplashScreen({ onFinish }: SplashScreenProps) {
   return (
     <View style={styles.container}>
       <View style={styles.logoContainer}>
-        <MaterialCommunityIcons name="currency-usd" size={80} color="#4dabf7" />
-        <Text style={styles.title}>ADFI</Text>
-        <Text style={styles.subtitle}>Crypto Pulse Rewards</Text>
+        <View style={styles.logoRow}>
+          <View style={styles.dropIcon}>
+            <MaterialCommunityIcons name="water" size={60} color="#4dabf7" />
+            <View style={styles.playOverlay}>
+              <MaterialCommunityIcons name="play" size={24} color="#fff" />
+            </View>
+          </View>
+          <Text style={styles.title}>droply</Text>
+        </View>
+        <Text style={styles.subtitle}>every drop counts</Text>
       </View>
       <View style={styles.loadingContainer}>
         <Text style={styles.loadingText}>Loading...</Text>
@@ -37,24 +44,39 @@ export default function SplashScreen({ onFinish }: SplashScreenProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#0d1117',
     justifyContent: 'center',
     alignItems: 'center',
   },
   logoContainer: {
     alignItems: 'center',
   },
+  logoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  dropIcon: {
+    position: 'relative',
+    marginRight: 12,
+  },
+  playOverlay: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    marginTop: -12,
+    marginLeft: -10,
+  },
   title: {
     fontSize: 48,
-    fontWeight: 'bold',
+    fontWeight: '300',
     color: '#fff',
-    marginTop: 20,
-    letterSpacing: 4,
+    letterSpacing: 2,
   },
   subtitle: {
     fontSize: 16,
     color: '#868e96',
-    marginTop: 10,
+    marginTop: 15,
+    letterSpacing: 1,
   },
   loadingContainer: {
     position: 'absolute',

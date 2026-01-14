@@ -125,12 +125,12 @@ export default function Home() {
   const handleVideoComplete = (reward: number) => {
     addPoints(reward);
     setShowVideoPlayer(false);
-    Alert.alert('Reward Earned!', `You earned ${reward} points!`);
+    Alert.alert('Reward Earned!', `You earned ${reward} drops!`);
   };
 
   const handleVideoCancel = () => {
     setShowVideoPlayer(false);
-    Alert.alert('Cancelled', 'You must watch the full video to earn points.');
+    Alert.alert('Cancelled', 'You must watch the full video to earn drops.');
   };
 
   const handleCashout = () => {
@@ -139,13 +139,13 @@ export default function Home() {
       return;
     }
     if (points < 500) {
-      Alert.alert('Low Balance', 'Minimum cashout is 500 points ($5)');
+      Alert.alert('Low Balance', 'Minimum cashout is 500 drops');
       return;
     }
 
     Alert.alert(
       'Confirm Cashout',
-      `Cash out 500 points for approx ${(5 / (xrpPrice || 1)).toFixed(2)} XRP?\n\nI understand price volatility and acknowledge payouts are at current market rate.`,
+      `Cash out 500 drops for approx ${(5 / (xrpPrice || 1)).toFixed(2)} XRP?\n\nI understand price volatility and acknowledge payouts are at current market rate.`,
       [
         { text: 'Cancel', style: 'cancel' },
         { text: 'Confirm', onPress: () => Alert.alert('Success', 'Payout request sent! (Testnet)') }
@@ -228,8 +228,8 @@ export default function Home() {
       <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
         <View style={styles.header}>
           <View>
-            <Text style={styles.title}>ADFI</Text>
-            <Text style={styles.subtitle}>Earn XRP for micro-tasks</Text>
+            <Text style={styles.title}>droply</Text>
+            <Text style={styles.subtitle}>every drop counts</Text>
           </View>
           <TouchableOpacity style={styles.menuButton} onPress={() => setMenuOpen(true)}>
             <MaterialCommunityIcons name="menu" size={28} color="#1a1a1a" />
@@ -257,21 +257,20 @@ export default function Home() {
 
         <View style={styles.card}>
           <Text style={styles.label}>Your Balance</Text>
-          <Text style={styles.balance}>${(points / 100).toFixed(2)}</Text>
-          <Text style={styles.points}>{points} Points</Text>
+          <Text style={styles.balance}>{points} Drops</Text>
           <View style={styles.progressBarBg}>
             <View style={[styles.progressBarFill, { width: `${Math.min((points / 500) * 100, 100)}%` }]} />
           </View>
-          <Text style={styles.progressText}>{Math.min(points, 500)} / 500 points to cashout</Text>
+          <Text style={styles.progressText}>{Math.min(points, 500)} / 500 drops to cashout</Text>
         </View>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Quick Tasks</Text>
           <TouchableOpacity style={styles.taskButton} onPress={handleWatchAd} disabled={loading}>
-            <MaterialCommunityIcons name="play-circle" size={32} color="#fff" />
+            <MaterialCommunityIcons name="water" size={32} color="#fff" />
             <View style={styles.taskInfo}>
               <Text style={styles.taskName}>Watch Rewarded Video</Text>
-              <Text style={styles.taskReward}>+{userRewardEstimate} Points</Text>
+              <Text style={styles.taskReward}>+{userRewardEstimate} Drops</Text>
             </View>
           </TouchableOpacity>
         </View>
@@ -313,7 +312,7 @@ export default function Home() {
 
         <View style={styles.infoCard}>
           <Text style={styles.infoText}>Current XRP Price: ${xrpPrice?.toFixed(4) || 'Loading...'}</Text>
-          <Text style={styles.infoText}>Daily Earnings: ${(dailyEarnings / 100).toFixed(2)} / $5.00</Text>
+          <Text style={styles.infoText}>Daily Earnings: {dailyEarnings} / 500 drops</Text>
         </View>
       </ScrollView>
     </View>
@@ -335,8 +334,7 @@ const styles = StyleSheet.create({
   profileButtonText: { marginLeft: 6, fontSize: 12, fontWeight: '600', color: '#4dabf7' },
   card: { backgroundColor: '#fff', padding: 25, borderRadius: 20, elevation: 3, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 8, marginBottom: 20 },
   label: { fontSize: 14, color: '#666', textTransform: 'uppercase', letterSpacing: 1 },
-  balance: { fontSize: 42, fontWeight: 'bold', color: '#1a1a1a', marginVertical: 5 },
-  points: { fontSize: 18, color: '#4dabf7', fontWeight: '600' },
+  balance: { fontSize: 42, fontWeight: 'bold', color: '#4dabf7', marginVertical: 5 },
   section: { marginBottom: 25 },
   sectionTitle: { fontSize: 20, fontWeight: '700', marginBottom: 15, color: '#1a1a1a' },
   taskButton: { backgroundColor: '#4dabf7', padding: 20, borderRadius: 15, flexDirection: 'row', alignItems: 'center' },

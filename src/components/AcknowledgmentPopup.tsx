@@ -46,7 +46,7 @@ export default function AcknowledgmentPopup({ visible, onAccept }: Acknowledgmen
         <View style={styles.popup}>
           <Text style={styles.title}>Important Acknowledgments</Text>
           <Text style={styles.description}>
-            Please read and accept the following before using ADFI:
+            Please read and accept the following before using droply:
           </Text>
           
           <ScrollView style={styles.checkList}>
@@ -93,7 +93,7 @@ export default function AcknowledgmentPopup({ visible, onAccept }: Acknowledgmen
             onPress={onAccept}
             disabled={!allChecked}
           >
-            <Text style={styles.acceptButtonText}>Continue to ADFI</Text>
+            <Text style={styles.acceptButtonText}>Continue to droply</Text>
           </TouchableOpacity>
         </View>
       </View>
