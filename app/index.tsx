@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, ActivityIndicator } from 'react-native';
+import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { useStore } from '../src/store/useStore';
 import { getXRPPrice } from '../src/services/xrpService';
@@ -10,7 +11,6 @@ import OnboardingScreen from '../src/components/OnboardingScreen';
 import AcknowledgmentPopup from '../src/components/AcknowledgmentPopup';
 import VideoPlayer from '../src/components/VideoPlayer';
 import UsernameSetup from '../src/components/UsernameSetup';
-import DroplyLogo from '../src/components/DroplyLogo';
 
 const formatCurrency = (value: number, locale?: string): string => {
   const userLocale = locale || (typeof navigator !== 'undefined' ? navigator.language : 'en-US');
@@ -243,7 +243,11 @@ export default function Home() {
       <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
         <View style={styles.header}>
           <View style={styles.headerLogoContainer}>
-            <DroplyLogo width={160} height={36} showText={true} textColor="#FFFFFF" />
+            <Image 
+              source={require('../assets/images/logo-small.png')}
+              style={styles.headerLogo}
+              contentFit="contain"
+            />
             <Text style={styles.subtitle}>"every drop counts"</Text>
           </View>
           <TouchableOpacity style={styles.menuButton} onPress={() => setMenuOpen(true)}>
@@ -353,6 +357,7 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 20,
   },
   headerLogoContainer: { flex: 1 },
+  headerLogo: { width: 160, height: 40 },
   subtitle: { fontSize: 11, color: '#a0a0a0', marginTop: 2, fontStyle: 'italic' },
   menuButton: { padding: 8 },
   profileRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, marginTop: 15 },

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
-import DroplyLogo from './DroplyLogo';
+import { Image } from 'expo-image';
 
 interface SplashScreenProps {
   onFinish: () => void;
@@ -22,13 +22,17 @@ export default function SplashScreen({ onFinish }: SplashScreenProps) {
 
   if (!visible) return null;
 
-  const logoWidth = Math.min(screenWidth * 0.7, 320);
-  const logoHeight = 60;
+  const logoWidth = Math.min(screenWidth * 0.75, 380);
+  const logoHeight = logoWidth * 0.35;
 
   return (
     <View style={styles.container}>
       <View style={styles.logoContainer}>
-        <DroplyLogo width={logoWidth} height={logoHeight} showText={true} textColor="#FFFFFF" />
+        <Image 
+          source={require('../../assets/images/logo-small.png')}
+          style={{ width: logoWidth, height: logoHeight }}
+          contentFit="contain"
+        />
         <Text style={styles.subtitle}>"every drop counts"</Text>
       </View>
       <View style={styles.loadingContainer}>

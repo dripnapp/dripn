@@ -14,15 +14,21 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (January 2026)
 
+- Added custom droply.io logo image (PNG) to splash screen and main page header
+- Logo images stored in `assets/images/logo-small.png` (optimized 73KB version)
 - Rebranded app from "droply" to "droply.io" throughout to differentiate from other apps in the market
 - Changed referral code prefix from "DROP-" to "DPLY-"
-- Updated splash screen with improved logo centering and quotes around tagline ("every drop counts")
-- Added themed dark header on main screen for better logo/text visibility
+- Updated splash screen with custom logo and quotes around tagline ("every drop counts")
+- Added themed dark header (#1a1a2e) on main screen with custom logo
 - Changed "Drops" to "drops" (lowercase) in balance display
 - Added locale-aware currency formatting for international users (using Intl.NumberFormat)
-- Fixed DroplyLogo component with better centered play button positioning
 - Updated Learn Crypto screen with droply.io branding and legal disclaimers
-- Created DroplyLogo component using MaterialCommunityIcons for web compatibility
+- Using expo-image for optimized image loading across platforms
+
+### Logo Notes
+- Custom logo PNG provided by user (gradient water drop with play button + "droply.io" text)
+- Original logo saved as `assets/images/logo.png` (1MB), optimized version as `logo-small.png` (73KB)
+- Logo may have loading delays on web preview but works properly on native iOS/Android builds
 
 ### Previous Changes
 - Implemented one-time acknowledgment popup with checkboxes (18+, volatility, risks, terms)
