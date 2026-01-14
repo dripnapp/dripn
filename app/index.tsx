@@ -244,7 +244,7 @@ export default function Home() {
         <View style={styles.header}>
           <View style={styles.headerLogoContainer}>
             <Image 
-              source={require('../assets/images/logo-small.png')}
+              source={require('../assets/images/logo-cropped.jpg')}
               style={styles.headerLogo}
               contentFit="contain"
             />

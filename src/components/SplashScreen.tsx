@@ -29,7 +29,7 @@ export default function SplashScreen({ onFinish }: SplashScreenProps) {
     <View style={styles.container}>
       <View style={styles.logoContainer}>
         <Image 
-          source={require('../../assets/images/logo-small.png')}
+          source={require('../../assets/images/logo-cropped.jpg')}
           style={{ width: logoWidth, height: logoHeight }}
           contentFit="contain"
         />
