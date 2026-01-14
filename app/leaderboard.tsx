@@ -20,7 +20,14 @@ export default function LeaderboardScreen() {
   const { points, userLevel, walletAddress, username } = useStore();
   const [refreshing, setRefreshing] = useState(false);
 
-  const displayName = username || (walletAddress ? `${walletAddress.slice(0, 6)}...` : 'You');
+  const getDisplayName = () => {
+    if (username) return username;
+    if (walletAddress) {
+      return `${walletAddress.slice(0, 4)}...${walletAddress.slice(-4)}`;
+    }
+    return 'You';
+  };
+  const displayName = getDisplayName();
 
   const leaderboardData = useMemo(() => {
     const currentUser = {

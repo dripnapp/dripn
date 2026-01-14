@@ -248,7 +248,9 @@ export default function Home() {
           {isWalletConnected && (
             <TouchableOpacity style={styles.profileButton} onPress={() => setShowUsernameSetup(true)}>
               <MaterialCommunityIcons name="account-edit" size={16} color="#4dabf7" />
-              <Text style={styles.profileButtonText}>{username || 'Set Username'}</Text>
+              <Text style={styles.profileButtonText}>
+                {username || (walletAddress ? `${walletAddress.slice(0, 4)}...${walletAddress.slice(-4)}` : 'Set Username')}
+              </Text>
             </TouchableOpacity>
           )}
         </View>
