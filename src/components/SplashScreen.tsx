@@ -22,7 +22,7 @@ export default function SplashScreen({ onFinish }: SplashScreenProps) {
 
   if (!visible) return null;
 
-  const logoWidth = Math.min(screenWidth * 0.75, 380);
+  const logoWidth = Math.min(screenWidth * 0.9, 500);
   const logoHeight = logoWidth * 0.35;
 
   return (

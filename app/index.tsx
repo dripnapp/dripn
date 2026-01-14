@@ -248,7 +248,6 @@ export default function Home() {
               style={styles.headerLogo}
               contentFit="contain"
             />
-            <Text style={styles.subtitle}>"every drop counts"</Text>
           </View>
           <TouchableOpacity style={styles.menuButton} onPress={() => setMenuOpen(true)}>
             <MaterialCommunityIcons name="menu" size={28} color="#FFFFFF" />
@@ -349,16 +348,15 @@ const styles = StyleSheet.create({
     marginBottom: 15, 
     marginTop: -20,
     marginHorizontal: -20,
-    paddingHorizontal: 20,
-    paddingVertical: 15,
-    paddingTop: 20,
-    backgroundColor: '#1a1a2e',
+    paddingHorizontal: 15,
+    paddingVertical: 12,
+    paddingTop: 18,
+    backgroundColor: '#0d1117',
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
   },
-  headerLogoContainer: { flex: 1 },
-  headerLogo: { width: 160, height: 40 },
-  subtitle: { fontSize: 11, color: '#a0a0a0', marginTop: 2, fontStyle: 'italic' },
+  headerLogoContainer: { flex: 1, alignItems: 'center', marginRight: -40 },
+  headerLogo: { width: 220, height: 55 },
   menuButton: { padding: 8 },
   profileRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, marginTop: 15 },
   levelBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20 },
