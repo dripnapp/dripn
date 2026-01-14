@@ -1,14 +1,23 @@
 import { Platform, Linking } from 'react-native';
 import { XummSdk } from 'xumm-sdk';
+import Constants from 'expo-constants';
 
-const XUMM_API_KEY = process.env.EXPO_PUBLIC_XUMM_API_KEY || '';
-const XUMM_API_SECRET = process.env.EXPO_PUBLIC_XUMM_API_SECRET || '';
+const getCredentials = () => {
+  const apiKey = process.env.EXPO_PUBLIC_XUMM_API_KEY || 
+                 Constants.expoConfig?.extra?.xummApiKey || 
+                 '';
+  const apiSecret = process.env.EXPO_PUBLIC_XUMM_API_SECRET || 
+                    Constants.expoConfig?.extra?.xummApiSecret || 
+                    '';
+  return { apiKey, apiSecret };
+};
 
 let xummSdk: XummSdk | null = null;
 
 const getXummSdk = () => {
-  if (!xummSdk && XUMM_API_KEY && XUMM_API_SECRET) {
-    xummSdk = new XummSdk(XUMM_API_KEY, XUMM_API_SECRET);
+  const { apiKey, apiSecret } = getCredentials();
+  if (!xummSdk && apiKey && apiSecret) {
+    xummSdk = new XummSdk(apiKey, apiSecret);
   }
   return xummSdk;
 };
@@ -25,10 +34,11 @@ export const createSignInRequest = async (): Promise<XummSignInResult> => {
     const sdk = getXummSdk();
     
     if (!sdk) {
-      if (!XUMM_API_KEY || !XUMM_API_SECRET) {
+      const { apiKey, apiSecret } = getCredentials();
+      if (!apiKey || !apiSecret) {
         return {
           success: false,
-          error: 'XUMM API credentials not configured. Please add XUMM_API_KEY and XUMM_API_SECRET.'
+          error: 'XUMM API credentials not configured. Please restart the app after adding your API keys.'
         };
       }
       return {

@@ -125,7 +125,7 @@ export default function Home() {
   const handleVideoComplete = (reward: number) => {
     addPoints(reward);
     setShowVideoPlayer(false);
-    Alert.alert('Reward Earned!', `You earned ${reward} points (~$${(reward/100).toFixed(2)})!`);
+    Alert.alert('Reward Earned!', `You earned ${reward} points!`);
   };
 
   const handleVideoCancel = () => {

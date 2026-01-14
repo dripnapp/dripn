@@ -78,7 +78,6 @@ export default function VideoPlayer({ visible, onComplete, onCancel, adRevenue }
               <MaterialCommunityIcons name="check-circle" size={50} color="#2f9e44" />
               <Text style={styles.rewardTitle}>You Earned!</Text>
               <Text style={styles.rewardAmount}>{userReward} Points</Text>
-              <Text style={styles.rewardSubtext}>(~${(userReward / 100).toFixed(2)} USD)</Text>
               <TouchableOpacity style={styles.claimButton} onPress={handleClose}>
                 <Text style={styles.claimButtonText}>Claim Reward</Text>
               </TouchableOpacity>
