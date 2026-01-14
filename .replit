@@ -82,3 +82,7 @@ outputType = "webview"
 
 [agent]
 expertMode = true
+
+[userenv]
+
+[userenv.shared]
