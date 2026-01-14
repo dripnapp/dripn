@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
-import { Image } from 'expo-image';
-import { useAssets } from 'expo-asset';
+import DroplyLogo from './DroplyLogo';
 
 interface SplashScreenProps {
   onFinish: () => void;
@@ -11,7 +10,6 @@ const { width: screenWidth } = Dimensions.get('window');
 
 export default function SplashScreen({ onFinish }: SplashScreenProps) {
   const [visible, setVisible] = useState(true);
-  const [assets] = useAssets([require('../../assets/images/droply-logo.png')]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -24,20 +22,13 @@ export default function SplashScreen({ onFinish }: SplashScreenProps) {
 
   if (!visible) return null;
 
+  const logoWidth = Math.min(screenWidth * 0.8, 400);
+  const logoHeight = logoWidth * (260 / 900);
+
   return (
     <View style={styles.container}>
       <View style={styles.logoContainer}>
-        {assets && assets[0] ? (
-          <Image 
-            source={{ uri: assets[0].uri }} 
-            style={styles.logoImage}
-            contentFit="contain"
-          />
-        ) : (
-          <View style={styles.logoPlaceholder}>
-            <Text style={styles.logoText}>droply</Text>
-          </View>
-        )}
+        <DroplyLogo width={logoWidth} height={logoHeight} showText={true} />
         <Text style={styles.subtitle}>every drop counts</Text>
       </View>
       <View style={styles.loadingContainer}>
@@ -56,21 +47,6 @@ const styles = StyleSheet.create({
   },
   logoContainer: {
     alignItems: 'center',
-    width: '100%',
-  },
-  logoImage: {
-    width: screenWidth * 0.85,
-    height: (screenWidth * 0.85) * (1024 / 1536),
-  },
-  logoPlaceholder: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  logoText: {
-    fontSize: 48,
-    fontWeight: '300',
-    color: '#fff',
-    letterSpacing: 2,
   },
   subtitle: {
     fontSize: 16,

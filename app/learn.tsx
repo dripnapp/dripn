@@ -15,6 +15,13 @@ export default function LearnScreen() {
       content: 'XRP is the native cryptocurrency of the XRP Ledger (XRPL). It was created by Ripple Labs and is designed for fast, low-cost international payments. Transactions typically settle in 3-5 seconds.',
     },
     {
+      icon: 'water',
+      title: 'What is droply?',
+      content: 'droply is a rewards app where you earn "drops" by completing simple tasks like watching short videos. Drops are an in-app reward currency used to track your progress and achievements within the app.',
+      isDroply: true,
+      disclaimer: 'Important: Drops earned on droply have no monetary value, cash value, or real-world currency equivalent. They are virtual rewards for entertainment purposes only and cannot be exchanged for cash or transferred outside the app.',
+    },
+    {
       icon: 'wallet-outline',
       title: 'What is a Crypto Wallet?',
       content: 'A crypto wallet is a tool that allows you to interact with blockchain networks. It stores your private keys (not actual coins) and lets you send, receive, and manage your cryptocurrency.',
@@ -22,7 +29,7 @@ export default function LearnScreen() {
     {
       icon: 'shield-check',
       title: 'What is Non-Custodial?',
-      content: 'Non-custodial means you maintain complete control of your private keys and funds. ADFI never holds your crypto - we only send rewards directly to your connected wallet.',
+      content: 'Non-custodial means you maintain complete control of your private keys and funds. droply never holds your crypto - we only send rewards directly to your connected wallet.',
     },
     {
       icon: 'chart-line-variant',
@@ -37,19 +44,29 @@ export default function LearnScreen() {
       <Text style={styles.subheader}>Learn the fundamentals of cryptocurrency and XRP</Text>
 
       {topics.map((topic, index) => (
-        <View key={index} style={styles.card}>
+        <View key={index} style={[styles.card, topic.isDroply && styles.droplyCard]}>
           <View style={styles.cardHeader}>
-            <MaterialCommunityIcons name={topic.icon as any} size={28} color="#4dabf7" />
+            <MaterialCommunityIcons 
+              name={topic.icon as any} 
+              size={28} 
+              color={topic.isDroply ? '#22E6FF' : '#4dabf7'} 
+            />
             <Text style={styles.cardTitle}>{topic.title}</Text>
           </View>
           <Text style={styles.cardContent}>{topic.content}</Text>
+          {topic.disclaimer && (
+            <View style={styles.disclaimerBox}>
+              <MaterialCommunityIcons name="information-outline" size={16} color="#868e96" />
+              <Text style={styles.disclaimerText}>{topic.disclaimer}</Text>
+            </View>
+          )}
         </View>
       ))}
 
       <View style={styles.tipBox}>
         <MaterialCommunityIcons name="lightbulb-outline" size={24} color="#f59f00" />
         <Text style={styles.tipText}>
-          Pro Tip: Never share your wallet's secret key with anyone, including ADFI. We will never ask for it.
+          Pro Tip: Never share your wallet's secret key with anyone, including droply. We will never ask for it.
         </Text>
       </View>
     </ScrollView>
@@ -71,6 +88,11 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
     elevation: 2,
   },
+  droplyCard: {
+    borderWidth: 1,
+    borderColor: '#4dabf7',
+    backgroundColor: '#f8fcff',
+  },
   cardHeader: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -87,6 +109,22 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#495057',
     lineHeight: 22,
+  },
+  disclaimerBox: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    backgroundColor: '#f1f3f5',
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 12,
+  },
+  disclaimerText: {
+    flex: 1,
+    marginLeft: 8,
+    fontSize: 12,
+    color: '#666',
+    lineHeight: 18,
+    fontStyle: 'italic',
   },
   tipBox: {
     flexDirection: 'row',
