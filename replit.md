@@ -27,6 +27,12 @@ Preferred communication style: Simple, everyday language.
 - Added leaderboard with live ranking based on user points
 - Badge rewards: users earn bonus points when claiming unlocked badges
 - Terms link in acknowledgment popup is now clickable
+- Added unique username system for user profiles (shown on leaderboard)
+- Implemented real XUMM/Xaman wallet connection flow (requires API keys)
+
+### Production Notes
+- Username uniqueness currently uses client-side reserved names list. Production deployment will require a backend API to check username availability against a central database.
+- XUMM API requires `EXPO_PUBLIC_XUMM_API_KEY` and `EXPO_PUBLIC_XUMM_API_SECRET` environment variables to be set for real wallet connections.
 
 ## System Architecture
 

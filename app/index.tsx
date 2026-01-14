@@ -1,20 +1,22 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useStore } from '../src/store/useStore';
 import { getXRPPrice } from '../src/services/xrpService';
+import { createSignInRequest, pollForSignIn } from '../src/services/xummService';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import SplashScreen from '../src/components/SplashScreen';
 import OnboardingScreen from '../src/components/OnboardingScreen';
 import AcknowledgmentPopup from '../src/components/AcknowledgmentPopup';
 import VideoPlayer from '../src/components/VideoPlayer';
+import UsernameSetup from '../src/components/UsernameSetup';
 
 export default function Home() {
   const router = useRouter();
   const { 
     points, walletAddress, isWalletConnected, setWallet, addPoints, dailyEarnings,
     hasCompletedOnboarding, hasAcceptedTerms, completeOnboarding, acceptTerms, userLevel,
-    disconnectWallet
+    disconnectWallet, username, setUsername, xummPayloadId, setXummPayloadId
   } = useStore();
   
   const [xrpPrice, setXrpPrice] = useState<number | null>(null);
@@ -23,6 +25,9 @@ export default function Home() {
   const [showAcknowledgment, setShowAcknowledgment] = useState(false);
   const [showVideoPlayer, setShowVideoPlayer] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [showUsernameSetup, setShowUsernameSetup] = useState(false);
+  const [connectionStatus, setConnectionStatus] = useState('');
+  const pollingRef = useRef(false);
 
   const DAILY_CAP = 500;
   const AD_REVENUE_CENTS = 5;
@@ -59,16 +64,53 @@ export default function Home() {
   };
 
   const handleConnectWallet = async () => {
+    if (pollingRef.current) return;
+    
     setLoading(true);
+    setConnectionStatus('Initializing connection...');
+    
     try {
-      Alert.alert('Connecting', 'Initializing XUMM connection...');
-      const mockAddress = 'rPT1Sjq2YGrBMTttX4GZHjKu9dyfzgpEGP';
-      setWallet(mockAddress);
-      Alert.alert('Success', 'Wallet connected successfully (Testnet)');
-    } catch (error) {
-      Alert.alert('Error', 'Failed to connect wallet');
+      const result = await createSignInRequest();
+      
+      if (!result.success) {
+        Alert.alert('Connection Error', result.error || 'Failed to create sign-in request');
+        setLoading(false);
+        setConnectionStatus('');
+        return;
+      }
+      
+      if (result.payloadId) {
+        setXummPayloadId(result.payloadId);
+        setConnectionStatus('Open Xaman app and approve the sign-in request...');
+        
+        pollingRef.current = true;
+        
+        const pollResult = await pollForSignIn(
+          result.payloadId,
+          (status) => setConnectionStatus(status),
+          60
+        );
+        
+        pollingRef.current = false;
+        
+        if (pollResult.success && pollResult.address) {
+          setWallet(pollResult.address);
+          Alert.alert('Success', 'Wallet connected successfully!');
+          
+          if (!username) {
+            setTimeout(() => setShowUsernameSetup(true), 500);
+          }
+        } else {
+          Alert.alert('Connection Failed', pollResult.error || 'Could not connect wallet');
+        }
+      }
+    } catch (error: any) {
+      console.error('Wallet connection error:', error);
+      Alert.alert('Error', error.message || 'Failed to connect wallet');
     } finally {
       setLoading(false);
+      setConnectionStatus('');
+      pollingRef.current = false;
     }
   };
 
@@ -144,6 +186,12 @@ export default function Home() {
         onCancel={handleVideoCancel}
         adRevenue={AD_REVENUE_CENTS / 100}
       />
+      <UsernameSetup
+        visible={showUsernameSetup}
+        currentUsername={username}
+        onSave={setUsername}
+        onClose={() => setShowUsernameSetup(false)}
+      />
 
       {menuOpen && (
         <TouchableOpacity style={styles.menuOverlay} onPress={() => setMenuOpen(false)} activeOpacity={1}>
@@ -188,13 +236,21 @@ export default function Home() {
           </TouchableOpacity>
         </View>
 
-        <View style={styles.levelBadge}>
-          <MaterialCommunityIcons 
-            name={userLevel === 'Gold' ? 'trophy' : userLevel === 'Silver' ? 'medal-outline' : 'medal'} 
-            size={16} 
-            color={userLevel === 'Gold' ? '#f59f00' : userLevel === 'Silver' ? '#868e96' : '#cd7f32'} 
-          />
-          <Text style={styles.levelText}>{userLevel} Member</Text>
+        <View style={styles.profileRow}>
+          <View style={styles.levelBadge}>
+            <MaterialCommunityIcons 
+              name={userLevel === 'Gold' ? 'trophy' : userLevel === 'Silver' ? 'medal-outline' : 'medal'} 
+              size={16} 
+              color={userLevel === 'Gold' ? '#f59f00' : userLevel === 'Silver' ? '#868e96' : '#cd7f32'} 
+            />
+            <Text style={styles.levelText}>{userLevel} Member</Text>
+          </View>
+          {isWalletConnected && (
+            <TouchableOpacity style={styles.profileButton} onPress={() => setShowUsernameSetup(true)}>
+              <MaterialCommunityIcons name="account-edit" size={16} color="#4dabf7" />
+              <Text style={styles.profileButtonText}>{username || 'Set Username'}</Text>
+            </TouchableOpacity>
+          )}
         </View>
 
         <View style={styles.card}>
@@ -234,9 +290,21 @@ export default function Home() {
                 </TouchableOpacity>
               </>
             ) : (
-              <TouchableOpacity style={styles.connectButton} onPress={handleConnectWallet} disabled={loading}>
-                <Text style={styles.buttonText}>Connect XRP Wallet (XUMM)</Text>
-              </TouchableOpacity>
+              <View>
+                <TouchableOpacity style={styles.connectButton} onPress={handleConnectWallet} disabled={loading}>
+                  {loading ? (
+                    <View style={styles.loadingRow}>
+                      <ActivityIndicator color="#fff" size="small" />
+                      <Text style={[styles.buttonText, { marginLeft: 10 }]}>Connecting...</Text>
+                    </View>
+                  ) : (
+                    <Text style={styles.buttonText}>Connect with Xaman</Text>
+                  )}
+                </TouchableOpacity>
+                {connectionStatus ? (
+                  <Text style={styles.connectionStatus}>{connectionStatus}</Text>
+                ) : null}
+              </View>
             )}
           </View>
         </View>
@@ -258,8 +326,11 @@ const styles = StyleSheet.create({
   title: { fontSize: 32, fontWeight: 'bold', color: '#1a1a1a' },
   subtitle: { fontSize: 14, color: '#666' },
   menuButton: { padding: 8 },
-  levelBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', alignSelf: 'flex-start', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, marginBottom: 20 },
+  profileRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
+  levelBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20 },
   levelText: { marginLeft: 6, fontSize: 12, fontWeight: '600', color: '#495057' },
+  profileButton: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#e7f5ff', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20 },
+  profileButtonText: { marginLeft: 6, fontSize: 12, fontWeight: '600', color: '#4dabf7' },
   card: { backgroundColor: '#fff', padding: 25, borderRadius: 20, elevation: 3, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 8, marginBottom: 20 },
   label: { fontSize: 14, color: '#666', textTransform: 'uppercase', letterSpacing: 1 },
   balance: { fontSize: 42, fontWeight: 'bold', color: '#1a1a1a', marginVertical: 5 },
@@ -278,6 +349,8 @@ const styles = StyleSheet.create({
   logoutButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 12, paddingVertical: 10 },
   logoutText: { color: '#868e96', fontSize: 14, marginLeft: 6 },
   buttonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  loadingRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
+  connectionStatus: { fontSize: 12, color: '#4dabf7', textAlign: 'center', marginTop: 10 },
   infoCard: { padding: 15, backgroundColor: '#e9ecef', borderRadius: 12, marginTop: 20 },
   infoText: { fontSize: 12, color: '#495057', textAlign: 'center', marginVertical: 2 },
   progressBarBg: { height: 8, backgroundColor: '#e9ecef', borderRadius: 4, marginTop: 15, marginBottom: 5 },

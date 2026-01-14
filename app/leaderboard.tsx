@@ -17,12 +17,14 @@ const baseLeaderboard = [
 ];
 
 export default function LeaderboardScreen() {
-  const { points, userLevel, walletAddress } = useStore();
+  const { points, userLevel, walletAddress, username } = useStore();
   const [refreshing, setRefreshing] = useState(false);
+
+  const displayName = username || (walletAddress ? `${walletAddress.slice(0, 6)}...` : 'You');
 
   const leaderboardData = useMemo(() => {
     const currentUser = {
-      username: walletAddress ? `You (${walletAddress.slice(0, 6)}...)` : 'You',
+      username: displayName,
       points: points,
       level: userLevel,
       isCurrentUser: true,
@@ -40,17 +42,17 @@ export default function LeaderboardScreen() {
     }));
 
     return ranked.slice(0, 10);
-  }, [points, userLevel, walletAddress]);
+  }, [points, userLevel, displayName]);
 
   const userRank = useMemo(() => {
     const allUsers = [
       ...baseLeaderboard.map(u => ({ ...u, isCurrentUser: false })),
-      { username: 'You', points, level: userLevel, isCurrentUser: true },
+      { username: displayName, points, level: userLevel, isCurrentUser: true },
     ];
     const sorted = allUsers.sort((a, b) => b.points - a.points);
     const userIndex = sorted.findIndex(u => u.isCurrentUser);
     return userIndex + 1;
-  }, [points, userLevel]);
+  }, [points, userLevel, displayName]);
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -115,8 +117,7 @@ export default function LeaderboardScreen() {
             </View>
             <View style={styles.userInfo}>
               <Text style={[styles.username, user.isCurrentUser && styles.usernameCurrentUser]}>
-                {user.username}
-                {user.isCurrentUser && ' (You)'}
+                {user.username}{user.isCurrentUser ? ' (You)' : ''}
               </Text>
               <Text style={styles.userLevel}>{user.level}</Text>
             </View>

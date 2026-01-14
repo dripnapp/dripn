@@ -23,6 +23,8 @@ interface AppState {
   referralCount: number;
   enteredReferralCode: string | null;
   referralBonusEarned: number;
+  username: string | null;
+  xummPayloadId: string | null;
   setPoints: (points: number) => void;
   addPoints: (amount: number) => void;
   setWallet: (address: string | null) => void;
@@ -34,6 +36,8 @@ interface AppState {
   claimBadgeReward: (badgeId: string) => number;
   setReferralCode: (code: string) => void;
   enterReferralCode: (code: string) => boolean;
+  setUsername: (username: string) => void;
+  setXummPayloadId: (payloadId: string | null) => void;
 }
 
 const generateReferralCode = () => {
@@ -68,6 +72,8 @@ export const useStore = create<AppState>()(
       referralCount: 0,
       enteredReferralCode: null,
       referralBonusEarned: 0,
+      username: null,
+      xummPayloadId: null,
       setPoints: (points) => set({ points }),
       addPoints: (amount) => set((state) => {
         const today = new Date().toDateString();
@@ -139,6 +145,8 @@ export const useStore = create<AppState>()(
         set({ enteredReferralCode: code });
         return true;
       },
+      setUsername: (username) => set({ username }),
+      setXummPayloadId: (payloadId) => set({ xummPayloadId: payloadId }),
     }),
     {
       name: 'crypto-pulse-storage',

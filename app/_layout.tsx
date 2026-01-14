@@ -16,6 +16,7 @@ export default function RootLayout() {
         <Stack.Screen name="terms" options={{ title: 'Terms of Use', headerShown: true }} />
         <Stack.Screen name="referral" options={{ title: 'Referral Program', headerShown: true }} />
         <Stack.Screen name="badges" options={{ title: 'Your Badges', headerShown: true }} />
+        <Stack.Screen name="leaderboard" options={{ title: 'Leaderboard', headerShown: true }} />
       </Stack>
     </>
   );
