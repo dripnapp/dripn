@@ -1,19 +1,23 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import { Image } from 'expo-image';
+import { useAssets } from 'expo-asset';
 
 interface SplashScreenProps {
   onFinish: () => void;
 }
 
+const { width: screenWidth } = Dimensions.get('window');
+
 export default function SplashScreen({ onFinish }: SplashScreenProps) {
   const [visible, setVisible] = useState(true);
+  const [assets] = useAssets([require('../../assets/images/droply-logo.png')]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setVisible(false);
       onFinish();
-    }, 2000);
+    }, 2500);
 
     return () => clearTimeout(timer);
   }, [onFinish]);
@@ -23,15 +27,17 @@ export default function SplashScreen({ onFinish }: SplashScreenProps) {
   return (
     <View style={styles.container}>
       <View style={styles.logoContainer}>
-        <View style={styles.logoRow}>
-          <View style={styles.dropIcon}>
-            <MaterialCommunityIcons name="water" size={60} color="#4dabf7" />
-            <View style={styles.playOverlay}>
-              <MaterialCommunityIcons name="play" size={24} color="#fff" />
-            </View>
+        {assets && assets[0] ? (
+          <Image 
+            source={{ uri: assets[0].uri }} 
+            style={styles.logoImage}
+            contentFit="contain"
+          />
+        ) : (
+          <View style={styles.logoPlaceholder}>
+            <Text style={styles.logoText}>droply</Text>
           </View>
-          <Text style={styles.title}>droply</Text>
-        </View>
+        )}
         <Text style={styles.subtitle}>every drop counts</Text>
       </View>
       <View style={styles.loadingContainer}>
@@ -50,23 +56,17 @@ const styles = StyleSheet.create({
   },
   logoContainer: {
     alignItems: 'center',
+    width: '100%',
   },
-  logoRow: {
-    flexDirection: 'row',
+  logoImage: {
+    width: screenWidth * 0.85,
+    height: (screenWidth * 0.85) * (1024 / 1536),
+  },
+  logoPlaceholder: {
+    justifyContent: 'center',
     alignItems: 'center',
   },
-  dropIcon: {
-    position: 'relative',
-    marginRight: 12,
-  },
-  playOverlay: {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    marginTop: -12,
-    marginLeft: -10,
-  },
-  title: {
+  logoText: {
     fontSize: 48,
     fontWeight: '300',
     color: '#fff',
@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 16,
     color: '#868e96',
-    marginTop: 15,
+    marginTop: 20,
     letterSpacing: 1,
   },
   loadingContainer: {
