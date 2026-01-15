@@ -8,6 +8,8 @@ interface BadgeReward {
   claimed: boolean;
 }
 
+type ThemeMode = 'classic' | 'dark';
+
 interface AppState {
   points: number;
   walletAddress: string | null;
@@ -25,6 +27,7 @@ interface AppState {
   referralBonusEarned: number;
   username: string | null;
   xummPayloadId: string | null;
+  theme: ThemeMode;
   setPoints: (points: number) => void;
   addPoints: (amount: number) => void;
   setWallet: (address: string | null) => void;
@@ -38,6 +41,7 @@ interface AppState {
   enterReferralCode: (code: string) => boolean;
   setUsername: (username: string) => void;
   setXummPayloadId: (payloadId: string | null) => void;
+  setTheme: (theme: ThemeMode) => void;
 }
 
 const generateReferralCode = () => {
@@ -74,6 +78,7 @@ export const useStore = create<AppState>()(
       referralBonusEarned: 0,
       username: null,
       xummPayloadId: null,
+      theme: 'classic',
       setPoints: (points) => set({ points }),
       addPoints: (amount) => set((state) => {
         const today = new Date().toDateString();
@@ -147,6 +152,7 @@ export const useStore = create<AppState>()(
       },
       setUsername: (username) => set({ username }),
       setXummPayloadId: (payloadId) => set({ xummPayloadId: payloadId }),
+      setTheme: (theme) => set({ theme }),
     }),
     {
       name: 'droply-io-storage',

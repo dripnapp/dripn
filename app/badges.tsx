@@ -15,7 +15,8 @@ const allBadges = [
 ];
 
 export default function BadgesScreen() {
-  const { badges, badgeRewards, points, userLevel, claimBadgeReward, addBadge } = useStore();
+  const { badges, badgeRewards, points, userLevel, claimBadgeReward, addBadge, theme } = useStore();
+  const isDark = theme === 'dark';
   const [showUnlockModal, setShowUnlockModal] = useState(false);
   const [unlockedBadge, setUnlockedBadge] = useState<typeof allBadges[0] | null>(null);
   const [previousPoints, setPreviousPoints] = useState(points);
@@ -95,7 +96,7 @@ export default function BadgesScreen() {
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={[styles.container, isDark && styles.containerDark]}>
       <Modal visible={showUnlockModal} transparent animationType="fade">
         <View style={styles.modalOverlay}>
           <View style={styles.unlockModal}>
@@ -119,26 +120,26 @@ export default function BadgesScreen() {
         </View>
       </Modal>
 
-      <Text style={styles.header}>Your Badges</Text>
+      <Text style={[styles.header, isDark && styles.textDark]}>Your Badges</Text>
       
-      <View style={styles.levelCard}>
+      <View style={[styles.levelCard, isDark && styles.cardDark]}>
         <MaterialCommunityIcons 
           name={userLevel === 'Gold' ? 'trophy' : userLevel === 'Silver' ? 'medal-outline' : 'medal'} 
           size={50} 
           color={userLevel === 'Gold' ? '#f59f00' : userLevel === 'Silver' ? '#868e96' : '#cd7f32'} 
         />
         <View style={styles.levelInfo}>
-          <Text style={styles.levelLabel}>Current Level</Text>
-          <Text style={styles.levelName}>{userLevel}</Text>
+          <Text style={[styles.levelLabel, isDark && styles.textMuted]}>Current Level</Text>
+          <Text style={[styles.levelName, isDark && styles.textDark]}>{userLevel}</Text>
         </View>
-        <View style={styles.pointsBox}>
+        <View style={[styles.pointsBox, isDark && styles.pointsBoxDark]}>
           <Text style={styles.pointsNumber}>{points}</Text>
           <Text style={styles.pointsLabel}>Drops</Text>
         </View>
       </View>
 
-      <Text style={styles.sectionTitle}>All Badges</Text>
-      <Text style={styles.sectionSubtitle}>Tap unlocked badges to claim rewards</Text>
+      <Text style={[styles.sectionTitle, isDark && styles.textDark]}>All Badges</Text>
+      <Text style={[styles.sectionSubtitle, isDark && styles.textMuted]}>Tap unlocked badges to claim rewards</Text>
       
       <View style={styles.badgesGrid}>
         {allBadges.map((badge) => {
@@ -151,7 +152,8 @@ export default function BadgesScreen() {
               style={[
                 styles.badgeCard, 
                 !unlocked && styles.badgeCardLocked,
-                claimable && styles.badgeCardClaimable
+                claimable && styles.badgeCardClaimable,
+                isDark && styles.cardDark
               ]}
               onPress={() => handleBadgePress(badge)}
             >
@@ -167,8 +169,8 @@ export default function BadgesScreen() {
                   color={unlocked ? '#4dabf7' : '#ced4da'} 
                 />
               </View>
-              <Text style={[styles.badgeName, !unlocked && styles.badgeNameLocked]}>{badge.name}</Text>
-              <Text style={styles.badgeDesc}>{badge.description}</Text>
+              <Text style={[styles.badgeName, !unlocked && styles.badgeNameLocked, isDark && unlocked && styles.textDark]}>{badge.name}</Text>
+              <Text style={[styles.badgeDesc, isDark && styles.textMuted]}>{badge.description}</Text>
               <View style={styles.rewardRow}>
                 <MaterialCommunityIcons name="gift" size={14} color={reward?.claimed ? '#40c057' : '#f59f00'} />
                 <Text style={[styles.rewardAmount, reward?.claimed && styles.rewardClaimed]}>
@@ -188,7 +190,12 @@ export default function BadgesScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f8f9fa', padding: 20 },
+  containerDark: { backgroundColor: '#1a1a2e' },
   header: { fontSize: 24, fontWeight: 'bold', color: '#1a1a1a', marginTop: 10, marginBottom: 5 },
+  textDark: { color: '#fff' },
+  textMuted: { color: '#a0a0a0' },
+  cardDark: { backgroundColor: '#252542' },
+  pointsBoxDark: { backgroundColor: '#1a1a2e' },
   levelCard: {
     backgroundColor: '#fff',
     borderRadius: 20,

@@ -31,8 +31,10 @@ export default function Home() {
   const { 
     points, walletAddress, isWalletConnected, setWallet, addPoints, dailyEarnings,
     hasCompletedOnboarding, hasAcceptedTerms, completeOnboarding, acceptTerms, userLevel,
-    disconnectWallet, username, setUsername, xummPayloadId, setXummPayloadId
+    disconnectWallet, username, setUsername, xummPayloadId, setXummPayloadId, theme
   } = useStore();
+  
+  const isDark = theme === 'dark';
   
   const [xrpPrice, setXrpPrice] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
@@ -193,7 +195,7 @@ export default function Home() {
   }
 
   return (
-    <View style={styles.wrapper}>
+    <View style={[styles.wrapper, isDark && styles.wrapperDark]}>
       <AcknowledgmentPopup visible={showAcknowledgment} onAccept={handleAcceptTerms} />
       <VideoPlayer 
         visible={showVideoPlayer} 
@@ -236,6 +238,11 @@ export default function Home() {
               <MaterialCommunityIcons name="file-document" size={22} color="#868e96" />
               <Text style={styles.menuText}>Terms of Use</Text>
             </TouchableOpacity>
+            <View style={styles.menuDivider} />
+            <TouchableOpacity style={styles.menuItem} onPress={() => { setMenuOpen(false); router.push('/settings'); }}>
+              <MaterialCommunityIcons name="cog" size={22} color="#4dabf7" />
+              <Text style={styles.menuText}>Settings</Text>
+            </TouchableOpacity>
           </View>
         </TouchableOpacity>
       )}
@@ -255,16 +262,16 @@ export default function Home() {
         </View>
 
         <View style={styles.profileRow}>
-          <View style={styles.levelBadge}>
+          <View style={[styles.levelBadge, isDark && styles.levelBadgeDark]}>
             <MaterialCommunityIcons 
               name={userLevel === 'Gold' ? 'trophy' : userLevel === 'Silver' ? 'medal-outline' : 'medal'} 
               size={16} 
               color={userLevel === 'Gold' ? '#f59f00' : userLevel === 'Silver' ? '#868e96' : '#cd7f32'} 
             />
-            <Text style={styles.levelText}>{userLevel} Member</Text>
+            <Text style={[styles.levelText, isDark && styles.textDark]}>{userLevel} Member</Text>
           </View>
           {isWalletConnected && (
-            <TouchableOpacity style={styles.profileButton} onPress={() => setShowUsernameSetup(true)}>
+            <TouchableOpacity style={[styles.profileButton, isDark && styles.profileButtonDark]} onPress={() => setShowUsernameSetup(true)}>
               <MaterialCommunityIcons name="account-edit" size={16} color="#4dabf7" />
               <Text style={styles.profileButtonText}>
                 {username || (walletAddress ? `${walletAddress.slice(0, 4)}...${walletAddress.slice(-4)}` : 'Set Username')}
@@ -273,8 +280,8 @@ export default function Home() {
           )}
         </View>
 
-        <View style={styles.card}>
-          <Text style={styles.label}>Your Balance</Text>
+        <View style={[styles.card, isDark && styles.cardDark]}>
+          <Text style={[styles.label, isDark && styles.labelDark]}>Your Balance</Text>
           <Text style={styles.balance}>{points} drops</Text>
           <View style={styles.progressBarBg}>
             <View style={[styles.progressBarFill, { width: `${Math.min((points / 500) * 100, 100)}%` }]} />
@@ -283,7 +290,7 @@ export default function Home() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Quick Tasks</Text>
+          <Text style={[styles.sectionTitle, isDark && styles.textDark]}>Quick Tasks</Text>
           <TouchableOpacity style={styles.taskButton} onPress={handleWatchAd} disabled={loading}>
             <MaterialCommunityIcons name="water" size={32} color="#fff" />
             <View style={styles.taskInfo}>
@@ -294,12 +301,12 @@ export default function Home() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Wallet Status</Text>
-          <View style={styles.walletCard}>
+          <Text style={[styles.sectionTitle, isDark && styles.textDark]}>Wallet Status</Text>
+          <View style={[styles.walletCard, isDark && styles.walletCardDark]}>
             {isWalletConnected ? (
               <>
-                <Text style={styles.addressLabel}>Connected Address (Testnet):</Text>
-                <Text style={styles.address}>{walletAddress}</Text>
+                <Text style={[styles.addressLabel, isDark && styles.labelDark]}>Connected Address (Testnet):</Text>
+                <Text style={[styles.address, isDark && styles.textDark]}>{walletAddress}</Text>
                 <TouchableOpacity style={styles.cashoutButton} onPress={handleCashout}>
                   <Text style={styles.buttonText}>Cash Out to XRP</Text>
                 </TouchableOpacity>
@@ -328,9 +335,9 @@ export default function Home() {
           </View>
         </View>
 
-        <View style={styles.infoCard}>
-          <Text style={styles.infoText}>Current XRP Price: {xrpPrice ? formatCurrency(xrpPrice) : 'Loading...'}</Text>
-          <Text style={styles.infoText}>Daily Earnings: {dailyEarnings} / 500 drops</Text>
+        <View style={[styles.infoCard, isDark && styles.infoCardDark]}>
+          <Text style={[styles.infoText, isDark && styles.infoTextDark]}>Current XRP Price: {xrpPrice ? formatCurrency(xrpPrice) : 'Loading...'}</Text>
+          <Text style={[styles.infoText, isDark && styles.infoTextDark]}>Daily Earnings: {dailyEarnings} / 500 drops</Text>
         </View>
       </ScrollView>
     </View>
@@ -339,6 +346,7 @@ export default function Home() {
 
 const styles = StyleSheet.create({
   wrapper: { flex: 1, backgroundColor: '#f8f9fa' },
+  wrapperDark: { backgroundColor: '#1a1a2e' },
   container: { flex: 1 },
   contentContainer: { padding: 20, paddingBottom: 40 },
   header: { 
@@ -360,10 +368,15 @@ const styles = StyleSheet.create({
   menuButton: { padding: 8 },
   profileRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, marginTop: 15 },
   levelBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20 },
+  levelBadgeDark: { backgroundColor: '#252542' },
   levelText: { marginLeft: 6, fontSize: 12, fontWeight: '600', color: '#495057' },
+  textDark: { color: '#fff' },
   profileButton: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#e7f5ff', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20 },
+  profileButtonDark: { backgroundColor: '#252542' },
   profileButtonText: { marginLeft: 6, fontSize: 12, fontWeight: '600', color: '#4dabf7' },
   card: { backgroundColor: '#fff', padding: 25, borderRadius: 20, elevation: 3, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 8, marginBottom: 20 },
+  cardDark: { backgroundColor: '#252542' },
+  labelDark: { color: '#a0a0a0' },
   label: { fontSize: 14, color: '#666', textTransform: 'uppercase', letterSpacing: 1 },
   balance: { fontSize: 42, fontWeight: 'bold', color: '#4dabf7', marginVertical: 5 },
   section: { marginBottom: 25 },
@@ -373,6 +386,7 @@ const styles = StyleSheet.create({
   taskName: { color: '#fff', fontSize: 18, fontWeight: '600' },
   taskReward: { color: '#e7f5ff', fontSize: 14 },
   walletCard: { backgroundColor: '#fff', padding: 20, borderRadius: 15, borderWidth: 1, borderColor: '#eee' },
+  walletCardDark: { backgroundColor: '#252542', borderColor: '#3a3a5a' },
   addressLabel: { fontSize: 12, color: '#666', marginBottom: 5 },
   address: { fontSize: 12, color: '#333', fontWeight: '500', marginBottom: 15 },
   connectButton: { backgroundColor: '#1a1a1a', padding: 15, borderRadius: 12, alignItems: 'center' },
@@ -383,7 +397,9 @@ const styles = StyleSheet.create({
   loadingRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
   connectionStatus: { fontSize: 12, color: '#4dabf7', textAlign: 'center', marginTop: 10 },
   infoCard: { padding: 15, backgroundColor: '#e9ecef', borderRadius: 12, marginTop: 20 },
+  infoCardDark: { backgroundColor: '#252542' },
   infoText: { fontSize: 12, color: '#495057', textAlign: 'center', marginVertical: 2 },
+  infoTextDark: { color: '#a0a0a0' },
   progressBarBg: { height: 8, backgroundColor: '#e9ecef', borderRadius: 4, marginTop: 15, marginBottom: 5 },
   progressBarFill: { height: '100%', backgroundColor: '#4dabf7', borderRadius: 4 },
   progressText: { fontSize: 12, color: '#868e96', textAlign: 'right' },

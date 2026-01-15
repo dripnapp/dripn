@@ -14,12 +14,14 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (January 2026)
 
+- Added Settings page with username editing and theme switching
+- Implemented Classic and Dark theme modes with visual theme picker
+- Theme applied consistently across all screens (home, learn, badges, leaderboard, referral, settings)
+- Header bar remains consistent with dark (#0d1117) background in both themes
+- User-cropped logo image used for splash screen and header (assets/images/logo-cropped.jpg)
 - Added custom droply.io logo image (PNG) to splash screen and main page header
-- Logo images stored in `assets/images/logo-small.png` (optimized 73KB version)
 - Rebranded app from "droply" to "droply.io" throughout to differentiate from other apps in the market
 - Changed referral code prefix from "DROP-" to "DPLY-"
-- Updated splash screen with custom logo and quotes around tagline ("every drop counts")
-- Added themed dark header (#1a1a2e) on main screen with custom logo
 - Changed "Drops" to "drops" (lowercase) in balance display
 - Added locale-aware currency formatting for international users (using Intl.NumberFormat)
 - Updated Learn Crypto screen with droply.io branding and legal disclaimers
@@ -71,6 +73,7 @@ The app uses JavaScript's built-in `Intl.NumberFormat` API for locale-aware curr
 
 ### App Screens (in `/app` directory)
 - `index.tsx` - Main dashboard with balance, tasks, wallet status
+- `settings.tsx` - User settings (username, theme selection)
 - `learn.tsx` - Crypto basics and XRP education
 - `legal.tsx` - Legal disclaimers and risk disclosures
 - `terms.tsx` - Terms of Use

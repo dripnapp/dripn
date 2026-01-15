@@ -4,7 +4,8 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useStore } from '../src/store/useStore';
 
 export default function ReferralScreen() {
-  const { referralCode, referralCount, enteredReferralCode, referralBonusEarned, enterReferralCode } = useStore();
+  const { referralCode, referralCount, enteredReferralCode, referralBonusEarned, enterReferralCode, theme } = useStore();
+  const isDark = theme === 'dark';
   const [inputCode, setInputCode] = useState('');
 
   const copyCode = () => {
@@ -30,13 +31,13 @@ export default function ReferralScreen() {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.header}>Referral Program</Text>
-      <Text style={styles.subheader}>Invite friends and earn together!</Text>
+    <ScrollView style={[styles.container, isDark && styles.containerDark]}>
+      <Text style={[styles.header, isDark && styles.textDark]}>Referral Program</Text>
+      <Text style={[styles.subheader, isDark && styles.textMuted]}>Invite friends and earn together!</Text>
 
       {!enteredReferralCode && (
-        <View style={styles.enterCodeCard}>
-          <Text style={styles.enterCodeLabel}>Have a referral code?</Text>
+        <View style={[styles.enterCodeCard, isDark && styles.cardDark]}>
+          <Text style={[styles.enterCodeLabel, isDark && styles.textDark]}>Have a referral code?</Text>
           <View style={styles.inputRow}>
             <TextInput
               style={styles.input}
@@ -63,8 +64,8 @@ export default function ReferralScreen() {
         </View>
       )}
 
-      <View style={styles.codeCard}>
-        <Text style={styles.codeLabel}>Your Referral Code</Text>
+      <View style={[styles.codeCard, isDark && styles.cardDark]}>
+        <Text style={[styles.codeLabel, isDark && styles.textMuted]}>Your Referral Code</Text>
         <View style={styles.codeBox}>
           <Text style={styles.code}>{referralCode || 'DPLY-XXXXXX'}</Text>
           <TouchableOpacity style={styles.copyButton} onPress={copyCode}>
@@ -74,49 +75,49 @@ export default function ReferralScreen() {
         <Text style={styles.codeHint}>Share this code with friends</Text>
       </View>
 
-      <View style={styles.statsCard}>
+      <View style={[styles.statsCard, isDark && styles.cardDark]}>
         <View style={styles.statItem}>
           <Text style={styles.statNumber}>{referralCount}</Text>
-          <Text style={styles.statLabel}>Friends Referred</Text>
+          <Text style={[styles.statLabel, isDark && styles.textMuted]}>Friends Referred</Text>
         </View>
         <View style={styles.statDivider} />
         <View style={styles.statItem}>
           <Text style={styles.statNumber}>{referralBonusEarned}</Text>
-          <Text style={styles.statLabel}>Bonus drops</Text>
+          <Text style={[styles.statLabel, isDark && styles.textMuted]}>Bonus drops</Text>
         </View>
       </View>
 
-      <View style={styles.howItWorks}>
-        <Text style={styles.sectionTitle}>How It Works</Text>
+      <View style={[styles.howItWorks, isDark && styles.cardDark]}>
+        <Text style={[styles.sectionTitle, isDark && styles.textDark]}>How It Works</Text>
         
         <View style={styles.step}>
           <View style={styles.stepNumber}><Text style={styles.stepNumberText}>1</Text></View>
           <View style={styles.stepContent}>
-            <Text style={styles.stepTitle}>Share Your Code</Text>
-            <Text style={styles.stepDesc}>Send your unique referral code to friends and family</Text>
+            <Text style={[styles.stepTitle, isDark && styles.textDark]}>Share Your Code</Text>
+            <Text style={[styles.stepDesc, isDark && styles.textMuted]}>Send your unique referral code to friends and family</Text>
           </View>
         </View>
 
         <View style={styles.step}>
           <View style={styles.stepNumber}><Text style={styles.stepNumberText}>2</Text></View>
           <View style={styles.stepContent}>
-            <Text style={styles.stepTitle}>They Sign Up</Text>
-            <Text style={styles.stepDesc}>Your friend downloads droply.io and enters your code</Text>
+            <Text style={[styles.stepTitle, isDark && styles.textDark]}>They Sign Up</Text>
+            <Text style={[styles.stepDesc, isDark && styles.textMuted]}>Your friend downloads droply.io and enters your code</Text>
           </View>
         </View>
 
         <View style={styles.step}>
           <View style={styles.stepNumber}><Text style={styles.stepNumberText}>3</Text></View>
           <View style={styles.stepContent}>
-            <Text style={styles.stepTitle}>You Both Earn</Text>
-            <Text style={styles.stepDesc}>Get 10% of their earnings for 30 days</Text>
+            <Text style={[styles.stepTitle, isDark && styles.textDark]}>You Both Earn</Text>
+            <Text style={[styles.stepDesc, isDark && styles.textMuted]}>Get 10% of their earnings for 30 days</Text>
           </View>
         </View>
       </View>
 
-      <View style={styles.infoBox}>
+      <View style={[styles.infoBox, isDark && styles.infoBoxDark]}>
         <MaterialCommunityIcons name="information-outline" size={20} color="#4dabf7" />
-        <Text style={styles.infoText}>
+        <Text style={[styles.infoText, isDark && styles.infoTextDark]}>
           Referral bonuses are paid in drops and can be cashed out once you reach the minimum threshold.
         </Text>
       </View>
@@ -126,7 +127,13 @@ export default function ReferralScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f8f9fa', padding: 20 },
+  containerDark: { backgroundColor: '#1a1a2e' },
   header: { fontSize: 24, fontWeight: 'bold', color: '#1a1a1a', marginTop: 10 },
+  textDark: { color: '#fff' },
+  textMuted: { color: '#a0a0a0' },
+  cardDark: { backgroundColor: '#252542' },
+  infoBoxDark: { backgroundColor: '#252542' },
+  infoTextDark: { color: '#a0a0a0' },
   subheader: { fontSize: 14, color: '#666', marginBottom: 25 },
   enterCodeCard: {
     backgroundColor: '#fff',

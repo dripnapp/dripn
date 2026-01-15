@@ -17,7 +17,8 @@ const baseLeaderboard = [
 ];
 
 export default function LeaderboardScreen() {
-  const { points, userLevel, walletAddress, username } = useStore();
+  const { points, userLevel, walletAddress, username, theme } = useStore();
+  const isDark = theme === 'dark';
   const [refreshing, setRefreshing] = useState(false);
 
   const getDisplayName = () => {
@@ -84,11 +85,11 @@ export default function LeaderboardScreen() {
 
   return (
     <ScrollView 
-      style={styles.container}
+      style={[styles.container, isDark && styles.containerDark]}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
-      <Text style={styles.header}>Leaderboard</Text>
-      <Text style={styles.subheader}>Top 10 earners this month</Text>
+      <Text style={[styles.header, isDark && styles.textDark]}>Leaderboard</Text>
+      <Text style={[styles.subheader, isDark && styles.textMuted]}>Top 10 earners this month</Text>
 
       <View style={styles.yourRankCard}>
         <View style={styles.yourRankLeft}>
@@ -101,7 +102,7 @@ export default function LeaderboardScreen() {
         </View>
       </View>
 
-      <View style={styles.leaderboardCard}>
+      <View style={[styles.leaderboardCard, isDark && styles.cardDark]}>
         {leaderboardData.map((user, index) => (
           <View 
             key={index} 
@@ -123,22 +124,22 @@ export default function LeaderboardScreen() {
               )}
             </View>
             <View style={styles.userInfo}>
-              <Text style={[styles.username, user.isCurrentUser && styles.usernameCurrentUser]}>
+              <Text style={[styles.username, user.isCurrentUser && styles.usernameCurrentUser, isDark && !user.isCurrentUser && styles.textDark]}>
                 {user.username}{user.isCurrentUser ? ' (You)' : ''}
               </Text>
-              <Text style={styles.userLevel}>{user.level}</Text>
+              <Text style={[styles.userLevel, isDark && styles.textMuted]}>{user.level}</Text>
             </View>
             <View style={styles.pointsSection}>
-              <Text style={styles.userPoints}>{user.points.toLocaleString()}</Text>
+              <Text style={[styles.userPoints, isDark && styles.textDark]}>{user.points.toLocaleString()}</Text>
               <Text style={styles.pointsUnit}>drps</Text>
             </View>
           </View>
         ))}
       </View>
 
-      <View style={styles.infoBox}>
+      <View style={[styles.infoBox, isDark && styles.infoBoxDark]}>
         <MaterialCommunityIcons name="information-outline" size={18} color="#4dabf7" />
-        <Text style={styles.infoText}>
+        <Text style={[styles.infoText, isDark && styles.infoTextDark]}>
           Leaderboard updates live as you earn drops. Keep earning to climb the ranks!
         </Text>
       </View>
@@ -148,7 +149,13 @@ export default function LeaderboardScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f8f9fa', padding: 20 },
+  containerDark: { backgroundColor: '#1a1a2e' },
   header: { fontSize: 24, fontWeight: 'bold', color: '#1a1a1a', marginTop: 10 },
+  textDark: { color: '#fff' },
+  textMuted: { color: '#a0a0a0' },
+  cardDark: { backgroundColor: '#252542' },
+  infoBoxDark: { backgroundColor: '#252542' },
+  infoTextDark: { color: '#a0a0a0' },
   subheader: { fontSize: 14, color: '#666', marginBottom: 20 },
   yourRankCard: {
     backgroundColor: '#4dabf7',
