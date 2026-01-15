@@ -54,12 +54,12 @@ export const createSignInRequest = async (): Promise<XummSignInResult> => {
       options: {
         submit: false,
         return_url: {
-          app: 'adfi://xumm-callback',
+          app: 'droply://xumm-callback',
           web: Platform.OS === 'web' ? window.location.href : undefined
         }
       },
       custom_meta: {
-        instruction: 'Sign in to ADFI Crypto Rewards'
+        instruction: 'Sign in to droply.io'
       }
     });
 

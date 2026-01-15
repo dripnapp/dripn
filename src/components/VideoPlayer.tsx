@@ -9,24 +9,40 @@ interface VideoPlayerProps {
   adRevenue: number;
 }
 
+const getValueTier = (): { tier: 'standard' | 'premium'; duration: number; estimatedCents: number; reward: number } => {
+  const random = Math.random();
+  if (random < 0.6) {
+    const estimatedCents = 4 + Math.random() * 4;
+    const maxRewardFromRevenue = Math.floor(estimatedCents * 0.25);
+    const reward = Math.max(1, Math.min(2, maxRewardFromRevenue));
+    return { tier: 'standard', duration: 10 + Math.floor(Math.random() * 6), estimatedCents, reward };
+  } else {
+    const estimatedCents = 9 + Math.random() * 7;
+    const maxRewardFromRevenue = Math.floor(estimatedCents * 0.25);
+    const reward = Math.max(3, Math.min(4, maxRewardFromRevenue));
+    return { tier: 'premium', duration: 20 + Math.floor(Math.random() * 11), estimatedCents, reward };
+  }
+};
+
 export default function VideoPlayer({ visible, onComplete, onCancel, adRevenue }: VideoPlayerProps) {
   const [progress, setProgress] = useState(0);
   const [completed, setCompleted] = useState(false);
-  const videoDuration = 15;
+  const [currentAd, setCurrentAd] = useState(() => getValueTier());
 
   useEffect(() => {
     if (!visible) {
       setProgress(0);
       setCompleted(false);
+      setCurrentAd(getValueTier());
       return;
     }
 
     const interval = setInterval(() => {
       setProgress(prev => {
-        if (prev >= videoDuration) {
+        if (prev >= currentAd.duration) {
           clearInterval(interval);
           setCompleted(true);
-          return videoDuration;
+          return currentAd.duration;
         }
         return prev + 1;
       });
@@ -35,7 +51,7 @@ export default function VideoPlayer({ visible, onComplete, onCancel, adRevenue }
     return () => clearInterval(interval);
   }, [visible]);
 
-  const userReward = Math.round(adRevenue * 0.15 * 100);
+  const userReward = currentAd.reward;
 
   const handleClose = () => {
     if (completed) {
@@ -61,12 +77,13 @@ export default function VideoPlayer({ visible, onComplete, onCancel, adRevenue }
           <View style={styles.videoArea}>
             <MaterialCommunityIcons name="water" size={80} color="#4dabf7" />
             <Text style={styles.videoText}>Video Ad Playing...</Text>
-            <Text style={styles.timerText}>{videoDuration - progress}s remaining</Text>
+            <Text style={styles.timerText}>{currentAd.duration - progress}s remaining</Text>
+            <Text style={styles.tierText}>{currentAd.tier === 'premium' ? 'Premium Ad' : 'Standard Ad'}</Text>
           </View>
 
           <View style={styles.progressContainer}>
             <View style={styles.progressBar}>
-              <View style={[styles.progressFill, { width: `${(progress / videoDuration) * 100}%` }]} />
+              <View style={[styles.progressFill, { width: `${(progress / currentAd.duration) * 100}%` }]} />
             </View>
             <Text style={styles.progressText}>
               {completed ? 'Video Complete!' : 'Watch the full video to earn drops'}
@@ -135,6 +152,12 @@ const styles = StyleSheet.create({
     color: '#868e96',
     fontSize: 14,
     marginTop: 5,
+  },
+  tierText: {
+    color: '#4dabf7',
+    fontSize: 12,
+    marginTop: 8,
+    fontWeight: '600',
   },
   progressContainer: {
     padding: 15,

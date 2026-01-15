@@ -14,18 +14,19 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (January 2026)
 
+- Added Share Task with anti-abuse measures (3x daily limit, 1-minute cooldown between shares)
+- Share rewards: 1 drop (first), 1 drop (second), 3 drops (third) = 5 drops max per day
+- Share options: X (Twitter), Facebook, or Text/SMS
+- Added Contact page with email support (droply.io@proton.me)
+- Updated video reward system with value tiers proportional to ad revenue
+- Standard ads (60% chance): 10-15s duration, 1-2 drops reward
+- Premium ads (40% chance): 20-30s duration, 3-4 drops reward
+- Rewards capped at 25% of lowest expected ad revenue (~$0.005-0.01 per view)
+- Added AdMob iOS configuration (app ID and ad unit ID stored in src/config/admob.ts)
+- Changed all "ADFI" references to "droply.io" in Legal and Terms pages
 - Added Settings page with username editing and theme switching
-- Implemented Classic and Dark theme modes with visual theme picker
-- Theme applied consistently across all screens (home, learn, badges, leaderboard, referral, settings)
+- Theme applied consistently across all screens (including legal, terms, contact)
 - Header bar remains consistent with dark (#0d1117) background in both themes
-- User-cropped logo image used for splash screen and header (assets/images/logo-cropped.jpg)
-- Added custom droply.io logo image (PNG) to splash screen and main page header
-- Rebranded app from "droply" to "droply.io" throughout to differentiate from other apps in the market
-- Changed referral code prefix from "DROP-" to "DPLY-"
-- Changed "Drops" to "drops" (lowercase) in balance display
-- Added locale-aware currency formatting for international users (using Intl.NumberFormat)
-- Updated Learn Crypto screen with droply.io branding and legal disclaimers
-- Using expo-image for optimized image loading across platforms
 
 ### Logo Notes
 - Custom logo PNG provided by user (gradient water drop with play button + "droply.io" text)
@@ -51,7 +52,10 @@ Preferred communication style: Simple, everyday language.
 ### Production Notes
 - Username uniqueness currently uses client-side reserved names list. Production deployment will require a backend API to check username availability against a central database.
 - XUMM API requires `EXPO_PUBLIC_XUMM_API_KEY` and `EXPO_PUBLIC_XUMM_API_SECRET` environment variables to be set for real wallet connections.
-- Video rewards are calculated as 15% of actual ad revenue. In production, rewards will only be granted when AdMob confirms successful ad completion.
+- Video rewards use value tiers to approximate ad revenue proportionality (1-4 drops based on estimated ad value)
+- Share rewards are limited to 3x daily with anti-abuse measures (1-minute cooldown, device tracking)
+- AdMob iOS configuration: App ID `ca-app-pub-4501953262639636~3485723863`, Ad Unit ID `ca-app-pub-4501953262639636/8435825886`
+- Contact email: droply.io@proton.me
 
 ## International Currency Display
 
@@ -72,8 +76,9 @@ The app uses JavaScript's built-in `Intl.NumberFormat` API for locale-aware curr
 - **UI Components**: Custom themed components with light/dark mode support
 
 ### App Screens (in `/app` directory)
-- `index.tsx` - Main dashboard with balance, tasks, wallet status
+- `index.tsx` - Main dashboard with balance, tasks (video + share), wallet status
 - `settings.tsx` - User settings (username, theme selection)
+- `contact.tsx` - Contact/support page with email link
 - `learn.tsx` - Crypto basics and XRP education
 - `legal.tsx` - Legal disclaimers and risk disclosures
 - `terms.tsx` - Terms of Use

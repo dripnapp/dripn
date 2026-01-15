@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, ActivityIndicator, Share, Linking } from 'react-native';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { useStore } from '../src/store/useStore';
@@ -31,7 +31,8 @@ export default function Home() {
   const { 
     points, walletAddress, isWalletConnected, setWallet, addPoints, dailyEarnings,
     hasCompletedOnboarding, hasAcceptedTerms, completeOnboarding, acceptTerms, userLevel,
-    disconnectWallet, username, setUsername, xummPayloadId, setXummPayloadId, theme
+    disconnectWallet, username, setUsername, xummPayloadId, setXummPayloadId, theme,
+    recordShare, getDailyShareCount
   } = useStore();
   
   const isDark = theme === 'dark';
@@ -186,6 +187,61 @@ export default function Home() {
 
   const userRewardEstimate = Math.round(AD_REVENUE_CENTS * 0.15);
 
+  const handleShare = async (platform: 'twitter' | 'facebook' | 'text') => {
+    const shareCount = getDailyShareCount();
+    if (shareCount >= 3) {
+      Alert.alert('Limit Reached', 'You have reached the maximum 3 shares for today.');
+      return;
+    }
+
+    const shareMessage = 'Check out droply.io - earn crypto rewards by watching videos! every drop counts. Download now!';
+    const shareUrl = 'https://droply.io';
+    
+    try {
+      let shared = false;
+      
+      if (platform === 'twitter') {
+        const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareMessage)}&url=${encodeURIComponent(shareUrl)}`;
+        const canOpen = await Linking.canOpenURL(twitterUrl);
+        if (canOpen) {
+          await Linking.openURL(twitterUrl);
+          shared = true;
+        }
+      } else if (platform === 'facebook') {
+        const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(shareMessage)}`;
+        const canOpen = await Linking.canOpenURL(facebookUrl);
+        if (canOpen) {
+          await Linking.openURL(facebookUrl);
+          shared = true;
+        }
+      } else if (platform === 'text') {
+        const result = await Share.share({ message: `${shareMessage} ${shareUrl}` });
+        if (result.action === Share.sharedAction) {
+          shared = true;
+        }
+      }
+
+      if (shared) {
+        const shareResult = recordShare(platform);
+        if (shareResult.success) {
+          Alert.alert('Reward Earned!', shareResult.message);
+        } else {
+          Alert.alert('Notice', shareResult.message);
+        }
+      }
+    } catch (error) {
+      console.error('Share error:', error);
+    }
+  };
+
+  const getNextShareReward = () => {
+    const count = getDailyShareCount();
+    if (count >= 3) return 0;
+    if (count === 0) return 1;
+    if (count === 1) return 1;
+    return 3;
+  };
+
   if (showSplash) {
     return <SplashScreen onFinish={handleSplashFinish} />;
   }
@@ -243,6 +299,10 @@ export default function Home() {
               <MaterialCommunityIcons name="cog" size={22} color="#4dabf7" />
               <Text style={styles.menuText}>Settings</Text>
             </TouchableOpacity>
+            <TouchableOpacity style={styles.menuItem} onPress={() => { setMenuOpen(false); router.push('/contact'); }}>
+              <MaterialCommunityIcons name="email-outline" size={22} color="#4dabf7" />
+              <Text style={styles.menuText}>Contact Us</Text>
+            </TouchableOpacity>
           </View>
         </TouchableOpacity>
       )}
@@ -295,9 +355,47 @@ export default function Home() {
             <MaterialCommunityIcons name="water" size={32} color="#fff" />
             <View style={styles.taskInfo}>
               <Text style={styles.taskName}>Watch Rewarded Video</Text>
-              <Text style={styles.taskReward}>+{userRewardEstimate} drops</Text>
+              <Text style={styles.taskReward}>+1-4 drops (varies by ad)</Text>
             </View>
           </TouchableOpacity>
+          
+          <View style={[styles.shareTaskCard, isDark && styles.cardDark]}>
+            <View style={styles.shareHeader}>
+              <MaterialCommunityIcons name="share-variant" size={24} color="#4dabf7" />
+              <View style={styles.shareHeaderText}>
+                <Text style={[styles.shareTitle, isDark && styles.textDark]}>Share droply.io</Text>
+                <Text style={[styles.shareSubtitle, isDark && styles.labelDark]}>
+                  {getDailyShareCount()}/3 shares today • +{getNextShareReward()} drops next
+                </Text>
+              </View>
+            </View>
+            <View style={styles.shareButtons}>
+              <TouchableOpacity 
+                style={[styles.shareButton, styles.twitterButton]} 
+                onPress={() => handleShare('twitter')}
+                disabled={getDailyShareCount() >= 3}
+              >
+                <MaterialCommunityIcons name="twitter" size={20} color="#fff" />
+                <Text style={styles.shareButtonText}>X</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.shareButton, styles.facebookButton]} 
+                onPress={() => handleShare('facebook')}
+                disabled={getDailyShareCount() >= 3}
+              >
+                <MaterialCommunityIcons name="facebook" size={20} color="#fff" />
+                <Text style={styles.shareButtonText}>Facebook</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.shareButton, styles.textButton]} 
+                onPress={() => handleShare('text')}
+                disabled={getDailyShareCount() >= 3}
+              >
+                <MaterialCommunityIcons name="message-text" size={20} color="#fff" />
+                <Text style={styles.shareButtonText}>Text</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
         </View>
 
         <View style={styles.section}>
@@ -385,6 +483,17 @@ const styles = StyleSheet.create({
   taskInfo: { marginLeft: 15 },
   taskName: { color: '#fff', fontSize: 18, fontWeight: '600' },
   taskReward: { color: '#e7f5ff', fontSize: 14 },
+  shareTaskCard: { backgroundColor: '#fff', borderRadius: 15, padding: 20, marginTop: 15, borderWidth: 1, borderColor: '#e9ecef' },
+  shareHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 15 },
+  shareHeaderText: { marginLeft: 12, flex: 1 },
+  shareTitle: { fontSize: 16, fontWeight: '600', color: '#1a1a1a' },
+  shareSubtitle: { fontSize: 12, color: '#666', marginTop: 2 },
+  shareButtons: { flexDirection: 'row', justifyContent: 'space-between' },
+  shareButton: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 12, borderRadius: 10, marginHorizontal: 4 },
+  shareButtonText: { color: '#fff', fontWeight: '600', fontSize: 13, marginLeft: 6 },
+  twitterButton: { backgroundColor: '#1DA1F2' },
+  facebookButton: { backgroundColor: '#4267B2' },
+  textButton: { backgroundColor: '#2f9e44' },
   walletCard: { backgroundColor: '#fff', padding: 20, borderRadius: 15, borderWidth: 1, borderColor: '#eee' },
   walletCardDark: { backgroundColor: '#252542', borderColor: '#3a3a5a' },
   addressLabel: { fontSize: 12, color: '#666', marginBottom: 5 },

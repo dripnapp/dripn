@@ -10,6 +10,12 @@ interface BadgeReward {
 
 type ThemeMode = 'classic' | 'dark';
 
+interface ShareRecord {
+  date: string;
+  platform: string;
+  timestamp: number;
+}
+
 interface AppState {
   points: number;
   walletAddress: string | null;
@@ -28,6 +34,7 @@ interface AppState {
   username: string | null;
   xummPayloadId: string | null;
   theme: ThemeMode;
+  dailyShares: ShareRecord[];
   setPoints: (points: number) => void;
   addPoints: (amount: number) => void;
   setWallet: (address: string | null) => void;
@@ -42,6 +49,8 @@ interface AppState {
   setUsername: (username: string) => void;
   setXummPayloadId: (payloadId: string | null) => void;
   setTheme: (theme: ThemeMode) => void;
+  recordShare: (platform: string) => { success: boolean; reward: number; message: string };
+  getDailyShareCount: () => number;
 }
 
 const generateReferralCode = () => {
@@ -79,6 +88,7 @@ export const useStore = create<AppState>()(
       username: null,
       xummPayloadId: null,
       theme: 'classic',
+      dailyShares: [],
       setPoints: (points) => set({ points }),
       addPoints: (amount) => set((state) => {
         const today = new Date().toDateString();
@@ -153,6 +163,48 @@ export const useStore = create<AppState>()(
       setUsername: (username) => set({ username }),
       setXummPayloadId: (payloadId) => set({ xummPayloadId: payloadId }),
       setTheme: (theme) => set({ theme }),
+      getDailyShareCount: () => {
+        const state = get();
+        const today = new Date().toDateString();
+        return state.dailyShares.filter(s => s.date === today).length;
+      },
+      recordShare: (platform: string) => {
+        const state = get();
+        const today = new Date().toDateString();
+        const todayShares = state.dailyShares.filter(s => s.date === today);
+        
+        if (todayShares.length >= 3) {
+          return { success: false, reward: 0, message: 'You have reached the maximum 3 shares for today.' };
+        }
+        
+        const lastShare = todayShares[todayShares.length - 1];
+        if (lastShare && Date.now() - lastShare.timestamp < 60000) {
+          return { success: false, reward: 0, message: 'Please wait at least 1 minute between shares.' };
+        }
+        
+        const shareNumber = todayShares.length + 1;
+        let reward = 0;
+        if (shareNumber === 1) reward = 1;
+        else if (shareNumber === 2) reward = 1;
+        else if (shareNumber === 3) reward = 3;
+        
+        const newShare: ShareRecord = { date: today, platform, timestamp: Date.now() };
+        const newPoints = state.points + reward;
+        let userLevel = state.userLevel;
+        if (newPoints >= 1000) userLevel = 'Gold';
+        else if (newPoints >= 500) userLevel = 'Silver';
+        else if (newPoints >= 100) userLevel = 'Bronze';
+        
+        const filteredShares = state.dailyShares.filter(s => s.date === today);
+        
+        set({ 
+          dailyShares: [...filteredShares, newShare],
+          points: newPoints,
+          userLevel
+        });
+        
+        return { success: true, reward, message: `Share successful! You earned ${reward} drops.` };
+      },
     }),
     {
       name: 'droply-io-storage',

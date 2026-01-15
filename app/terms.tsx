@@ -1,84 +1,88 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { useStore } from '../src/store/useStore';
 
 export default function TermsScreen() {
+  const { theme } = useStore();
+  const isDark = theme === 'dark';
+  
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.header}>Terms of Use</Text>
-      <Text style={styles.effectiveDate}>Effective Date: January 2026</Text>
+    <ScrollView style={[styles.container, isDark && styles.containerDark]}>
+      <Text style={[styles.header, isDark && styles.textDark]}>Terms of Use</Text>
+      <Text style={[styles.effectiveDate, isDark && styles.textMuted]}>Effective Date: January 2026</Text>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>1. Acceptance of Terms</Text>
-        <Text style={styles.sectionContent}>
-          By accessing or using ADFI ("the App"), you agree to be bound by these Terms of Use. If you do not agree to these terms, please do not use the App.
+      <View style={[styles.section, isDark && styles.sectionDark]}>
+        <Text style={[styles.sectionTitle, isDark && styles.textDark]}>1. Acceptance of Terms</Text>
+        <Text style={[styles.sectionContent, isDark && styles.textMuted]}>
+          By accessing or using droply.io ("the App"), you agree to be bound by these Terms of Use. If you do not agree to these terms, please do not use the App.
         </Text>
       </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>2. Eligibility</Text>
-        <Text style={styles.sectionContent}>
-          You must be at least 18 years old to use ADFI. By using the App, you represent and warrant that you meet this age requirement and have the legal capacity to enter into these Terms.
+      <View style={[styles.section, isDark && styles.sectionDark]}>
+        <Text style={[styles.sectionTitle, isDark && styles.textDark]}>2. Eligibility</Text>
+        <Text style={[styles.sectionContent, isDark && styles.textMuted]}>
+          You must be at least 18 years old to use droply.io. By using the App, you represent and warrant that you meet this age requirement and have the legal capacity to enter into these Terms.
         </Text>
       </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>3. Account Responsibilities</Text>
-        <Text style={styles.sectionContent}>
+      <View style={[styles.section, isDark && styles.sectionDark]}>
+        <Text style={[styles.sectionTitle, isDark && styles.textDark]}>3. Account Responsibilities</Text>
+        <Text style={[styles.sectionContent, isDark && styles.textMuted]}>
           You are responsible for maintaining the confidentiality of your wallet and account information. You agree to accept responsibility for all activities that occur under your account.
         </Text>
       </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>4. Earning Points</Text>
-        <Text style={styles.sectionContent}>
+      <View style={[styles.section, isDark && styles.sectionDark]}>
+        <Text style={[styles.sectionTitle, isDark && styles.textDark]}>4. Earning Points</Text>
+        <Text style={[styles.sectionContent, isDark && styles.textMuted]}>
           Points are earned by completing designated tasks such as watching rewarded videos. Point values are determined by actual ad revenue, with users receiving 15% of the revenue generated. Daily earning caps may apply to prevent abuse.
         </Text>
       </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>5. Cashouts and Payouts</Text>
-        <Text style={styles.sectionContent}>
+      <View style={[styles.section, isDark && styles.sectionDark]}>
+        <Text style={[styles.sectionTitle, isDark && styles.textDark]}>5. Cashouts and Payouts</Text>
+        <Text style={[styles.sectionContent, isDark && styles.textMuted]}>
           Points may be cashed out for XRP cryptocurrency once the minimum threshold is reached. Payouts are processed at the current XRP market rate. We reserve the right to delay or deny payouts in cases of suspected fraud.
         </Text>
       </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>6. Prohibited Activities</Text>
-        <Text style={styles.sectionContent}>
+      <View style={[styles.section, isDark && styles.sectionDark]}>
+        <Text style={[styles.sectionTitle, isDark && styles.textDark]}>6. Prohibited Activities</Text>
+        <Text style={[styles.sectionContent, isDark && styles.textMuted]}>
           You agree not to: use bots or automated systems, create multiple accounts, exploit bugs or glitches, engage in fraudulent activity, or violate any applicable laws while using the App.
         </Text>
       </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>7. Referral Program</Text>
-        <Text style={styles.sectionContent}>
+      <View style={[styles.section, isDark && styles.sectionDark]}>
+        <Text style={[styles.sectionTitle, isDark && styles.textDark]}>7. Referral Program</Text>
+        <Text style={[styles.sectionContent, isDark && styles.textMuted]}>
           Referrers earn 10% of their referees' earnings for 30 days after signup. Abuse of the referral program, including self-referrals, will result in account termination.
         </Text>
       </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>8. Modifications</Text>
-        <Text style={styles.sectionContent}>
+      <View style={[styles.section, isDark && styles.sectionDark]}>
+        <Text style={[styles.sectionTitle, isDark && styles.textDark]}>8. Modifications</Text>
+        <Text style={[styles.sectionContent, isDark && styles.textMuted]}>
           We reserve the right to modify these Terms at any time. Continued use of the App after changes constitutes acceptance of the modified Terms.
         </Text>
       </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>9. Limitation of Liability</Text>
-        <Text style={styles.sectionContent}>
-          ADFI is provided "as is" without warranties of any kind. We are not liable for any losses arising from cryptocurrency price fluctuations, network issues, or third-party services.
+      <View style={[styles.section, isDark && styles.sectionDark]}>
+        <Text style={[styles.sectionTitle, isDark && styles.textDark]}>9. Limitation of Liability</Text>
+        <Text style={[styles.sectionContent, isDark && styles.textMuted]}>
+          droply.io is provided "as is" without warranties of any kind. We are not liable for any losses arising from cryptocurrency price fluctuations, network issues, or third-party services.
         </Text>
       </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>10. Contact</Text>
-        <Text style={styles.sectionContent}>
-          For questions about these Terms, please contact us through the App's support channel.
+      <View style={[styles.section, isDark && styles.sectionDark]}>
+        <Text style={[styles.sectionTitle, isDark && styles.textDark]}>10. Contact</Text>
+        <Text style={[styles.sectionContent, isDark && styles.textMuted]}>
+          For questions about these Terms, please contact us at droply.io@proton.me or through the Contact Us page in the app.
         </Text>
       </View>
 
       <Text style={styles.footer}>
-        By using ADFI, you acknowledge that you have read, understood, and agree to be bound by these Terms of Use.
+        By using droply.io, you acknowledge that you have read, understood, and agree to be bound by these Terms of Use.
       </Text>
     </ScrollView>
   );
@@ -86,7 +90,11 @@ export default function TermsScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f8f9fa', padding: 20 },
+  containerDark: { backgroundColor: '#1a1a2e' },
   header: { fontSize: 24, fontWeight: 'bold', color: '#1a1a1a', marginTop: 10 },
+  textDark: { color: '#fff' },
+  textMuted: { color: '#a0a0a0' },
+  sectionDark: { backgroundColor: '#252542' },
   effectiveDate: { fontSize: 14, color: '#666', marginBottom: 25 },
   section: {
     backgroundColor: '#fff',
