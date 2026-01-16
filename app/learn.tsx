@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useStore } from '../src/store/useStore';
+import AppHeader from '../src/components/AppHeader';
 
 export default function LearnScreen() {
   const { theme } = useStore();
@@ -42,44 +43,48 @@ export default function LearnScreen() {
   ];
 
   return (
-    <ScrollView style={[styles.container, isDark && styles.containerDark]}>
-      <Text style={[styles.header, isDark && styles.textDark]}>Crypto Basics</Text>
-      <Text style={[styles.subheader, isDark && styles.textMuted]}>Learn the fundamentals of cryptocurrency and XRP</Text>
+    <View style={[styles.container, isDark && styles.containerDark]}>
+      <AppHeader title="Learn Crypto" showBack />
 
-      {topics.map((topic, index) => (
-        <View key={index} style={[styles.card, topic.isDripn && styles.dripnCard, isDark && styles.cardDark]}>
-          <View style={styles.cardHeader}>
-            <MaterialCommunityIcons 
-              name={topic.icon as any} 
-              size={28} 
-              color={topic.isDripn ? '#22E6FF' : '#4dabf7'} 
-            />
-            <Text style={[styles.cardTitle, isDark && styles.textDark]}>{topic.title}</Text>
-          </View>
-          <Text style={[styles.cardContent, isDark && styles.textMuted]}>{topic.content}</Text>
-          {topic.disclaimer && (
-            <View style={styles.disclaimerBox}>
-              <MaterialCommunityIcons name="information-outline" size={16} color="#868e96" />
-              <Text style={styles.disclaimerText}>{topic.disclaimer}</Text>
+      <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
+        <Text style={[styles.subheader, isDark && styles.textMuted]}>Learn the fundamentals of cryptocurrency and XRP</Text>
+
+        {topics.map((topic, index) => (
+          <View key={index} style={[styles.card, topic.isDripn && styles.dripnCard, isDark && styles.cardDark]}>
+            <View style={styles.cardHeader}>
+              <MaterialCommunityIcons 
+                name={topic.icon as any} 
+                size={28} 
+                color={topic.isDripn ? '#22E6FF' : '#4dabf7'} 
+              />
+              <Text style={[styles.cardTitle, isDark && styles.textDark]}>{topic.title}</Text>
             </View>
-          )}
-        </View>
-      ))}
+            <Text style={[styles.cardContent, isDark && styles.textMuted]}>{topic.content}</Text>
+            {topic.disclaimer && (
+              <View style={styles.disclaimerBox}>
+                <MaterialCommunityIcons name="information-outline" size={16} color="#868e96" />
+                <Text style={styles.disclaimerText}>{topic.disclaimer}</Text>
+              </View>
+            )}
+          </View>
+        ))}
 
-      <View style={[styles.tipBox, isDark && styles.tipBoxDark]}>
-        <MaterialCommunityIcons name="lightbulb-outline" size={24} color="#f59f00" />
-        <Text style={[styles.tipText, isDark && styles.textMuted]}>
-          Pro Tip: Never share your wallet's secret key with anyone, including Drip'n. We will never ask for it.
-        </Text>
-      </View>
-    </ScrollView>
+        <View style={[styles.tipBox, isDark && styles.tipBoxDark]}>
+          <MaterialCommunityIcons name="lightbulb-outline" size={24} color="#f59f00" />
+          <Text style={[styles.tipText, isDark && styles.textMuted]}>
+            Pro Tip: Never share your wallet's secret key with anyone, including Drip'n. We will never ask for it.
+          </Text>
+        </View>
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f8f9fa', padding: 20 },
+  container: { flex: 1, backgroundColor: '#f8f9fa' },
   containerDark: { backgroundColor: '#1a1a2e' },
-  header: { fontSize: 24, fontWeight: 'bold', color: '#1a1a1a', marginTop: 10 },
+  content: { flex: 1 },
+  contentContainer: { padding: 20 },
   textDark: { color: '#fff' },
   textMuted: { color: '#a0a0a0' },
   subheader: { fontSize: 14, color: '#666', marginBottom: 25 },

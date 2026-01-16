@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Modal } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useStore, BADGE_REWARDS } from '../src/store/useStore';
+import AppHeader from '../src/components/AppHeader';
 
 const allBadges = [
   { id: 'first_video', name: 'First Steps', description: 'Watch your first video', icon: 'play', unlockPoints: 0 },
@@ -96,7 +97,9 @@ export default function BadgesScreen() {
   };
 
   return (
-    <ScrollView style={[styles.container, isDark && styles.containerDark]}>
+    <View style={[styles.container, isDark && styles.containerDark]}>
+      <AppHeader title="Badges & Levels" showBack />
+
       <Modal visible={showUnlockModal} transparent animationType="fade">
         <View style={styles.modalOverlay}>
           <View style={styles.unlockModal}>
@@ -120,78 +123,79 @@ export default function BadgesScreen() {
         </View>
       </Modal>
 
-      <Text style={[styles.header, isDark && styles.textDark]}>Your Badges</Text>
-      
-      <View style={[styles.levelCard, isDark && styles.cardDark]}>
-        <MaterialCommunityIcons 
-          name={userLevel === 'Gold' ? 'trophy' : userLevel === 'Silver' ? 'medal-outline' : 'medal'} 
-          size={50} 
-          color={userLevel === 'Gold' ? '#f59f00' : userLevel === 'Silver' ? '#868e96' : '#cd7f32'} 
-        />
-        <View style={styles.levelInfo}>
-          <Text style={[styles.levelLabel, isDark && styles.textMuted]}>Current Level</Text>
-          <Text style={[styles.levelName, isDark && styles.textDark]}>{userLevel}</Text>
+      <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
+        <View style={[styles.levelCard, isDark && styles.cardDark]}>
+          <MaterialCommunityIcons 
+            name={userLevel === 'Gold' ? 'trophy' : userLevel === 'Silver' ? 'medal-outline' : 'medal'} 
+            size={50} 
+            color={userLevel === 'Gold' ? '#f59f00' : userLevel === 'Silver' ? '#868e96' : '#cd7f32'} 
+          />
+          <View style={styles.levelInfo}>
+            <Text style={[styles.levelLabel, isDark && styles.textMuted]}>Current Level</Text>
+            <Text style={[styles.levelName, isDark && styles.textDark]}>{userLevel}</Text>
+          </View>
+          <View style={[styles.pointsBox, isDark && styles.pointsBoxDark]}>
+            <Text style={styles.pointsNumber}>{points}</Text>
+            <Text style={styles.pointsLabel}>Drips</Text>
+          </View>
         </View>
-        <View style={[styles.pointsBox, isDark && styles.pointsBoxDark]}>
-          <Text style={styles.pointsNumber}>{points}</Text>
-          <Text style={styles.pointsLabel}>Drips</Text>
-        </View>
-      </View>
 
-      <Text style={[styles.sectionTitle, isDark && styles.textDark]}>All Badges</Text>
-      <Text style={[styles.sectionSubtitle, isDark && styles.textMuted]}>Tap unlocked badges to claim rewards</Text>
-      
-      <View style={styles.badgesGrid}>
-        {allBadges.map((badge) => {
-          const unlocked = isUnlocked(badge);
-          const claimable = canClaim(badge.id);
-          const reward = getBadgeReward(badge.id);
-          return (
-            <TouchableOpacity 
-              key={badge.id} 
-              style={[
-                styles.badgeCard, 
-                !unlocked && styles.badgeCardLocked,
-                claimable && styles.badgeCardClaimable,
-                isDark && styles.cardDark
-              ]}
-              onPress={() => handleBadgePress(badge)}
-            >
-              {claimable && (
-                <View style={styles.claimBadge}>
-                  <Text style={styles.claimBadgeText}>CLAIM</Text>
+        <Text style={[styles.sectionTitle, isDark && styles.textDark]}>All Badges</Text>
+        <Text style={[styles.sectionSubtitle, isDark && styles.textMuted]}>Tap unlocked badges to claim rewards</Text>
+        
+        <View style={styles.badgesGrid}>
+          {allBadges.map((badge) => {
+            const unlocked = isUnlocked(badge);
+            const claimable = canClaim(badge.id);
+            const reward = getBadgeReward(badge.id);
+            return (
+              <TouchableOpacity 
+                key={badge.id} 
+                style={[
+                  styles.badgeCard, 
+                  !unlocked && styles.badgeCardLocked,
+                  claimable && styles.badgeCardClaimable,
+                  isDark && styles.cardDark
+                ]}
+                onPress={() => handleBadgePress(badge)}
+              >
+                {claimable && (
+                  <View style={styles.claimBadge}>
+                    <Text style={styles.claimBadgeText}>CLAIM</Text>
+                  </View>
+                )}
+                <View style={[styles.badgeIcon, !unlocked && styles.badgeIconLocked]}>
+                  <MaterialCommunityIcons 
+                    name={badge.icon as any} 
+                    size={32} 
+                    color={unlocked ? '#4dabf7' : '#ced4da'} 
+                  />
                 </View>
-              )}
-              <View style={[styles.badgeIcon, !unlocked && styles.badgeIconLocked]}>
-                <MaterialCommunityIcons 
-                  name={badge.icon as any} 
-                  size={32} 
-                  color={unlocked ? '#4dabf7' : '#ced4da'} 
-                />
-              </View>
-              <Text style={[styles.badgeName, !unlocked && styles.badgeNameLocked, isDark && unlocked && styles.textDark]}>{badge.name}</Text>
-              <Text style={[styles.badgeDesc, isDark && styles.textMuted]}>{badge.description}</Text>
-              <View style={styles.rewardRow}>
-                <MaterialCommunityIcons name="gift" size={14} color={reward?.claimed ? '#40c057' : '#f59f00'} />
-                <Text style={[styles.rewardAmount, reward?.claimed && styles.rewardClaimed]}>
-                  {reward?.claimed ? 'Claimed' : `+${BADGE_REWARDS[badge.id]} drps`}
-                </Text>
-              </View>
-              {!unlocked && badge.unlockPoints > 0 && (
-                <Text style={styles.unlockText}>{badge.unlockPoints} drps to unlock</Text>
-              )}
-            </TouchableOpacity>
-          );
-        })}
-      </View>
-    </ScrollView>
+                <Text style={[styles.badgeName, !unlocked && styles.badgeNameLocked, isDark && unlocked && styles.textDark]}>{badge.name}</Text>
+                <Text style={[styles.badgeDesc, isDark && styles.textMuted]}>{badge.description}</Text>
+                <View style={styles.rewardRow}>
+                  <MaterialCommunityIcons name="gift" size={14} color={reward?.claimed ? '#40c057' : '#f59f00'} />
+                  <Text style={[styles.rewardAmount, reward?.claimed && styles.rewardClaimed]}>
+                    {reward?.claimed ? 'Claimed' : `+${BADGE_REWARDS[badge.id]} drps`}
+                  </Text>
+                </View>
+                {!unlocked && badge.unlockPoints > 0 && (
+                  <Text style={styles.unlockText}>{badge.unlockPoints} drps to unlock</Text>
+                )}
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f8f9fa', padding: 20 },
+  container: { flex: 1, backgroundColor: '#f8f9fa' },
   containerDark: { backgroundColor: '#1a1a2e' },
-  header: { fontSize: 24, fontWeight: 'bold', color: '#1a1a1a', marginTop: 10, marginBottom: 5 },
+  content: { flex: 1 },
+  contentContainer: { padding: 20 },
   textDark: { color: '#fff' },
   textMuted: { color: '#a0a0a0' },
   cardDark: { backgroundColor: '#252542' },
@@ -203,7 +207,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 25,
-    marginTop: 15,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,

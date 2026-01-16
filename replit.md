@@ -24,6 +24,8 @@ Preferred communication style: Simple, everyday language.
 - Added totalEarned tracking for leaderboard (separate from spendable balance)
 - Updated contact email to dripnapp@proton.me
 - Updated referral code prefix from "DPLY-" to "DRPN-"
+- **NAVIGATION UPDATE**: Created shared AppHeader component with hamburger menu visible on ALL pages
+- Lowered header position (50px top padding) for better mobile accessibility
 
 ### Share Task Features
 - Anti-abuse measures: 3x daily limit, 1-minute cooldown between shares
@@ -102,6 +104,7 @@ The app uses JavaScript's built-in `Intl.NumberFormat` API for locale-aware curr
 - `leaderboard.tsx` - Top earners ranking (uses totalEarned)
 
 ### Components (in `/src/components`)
+- `AppHeader.tsx` - Shared header with hamburger menu navigation (used on all pages)
 - `SplashScreen.tsx` - Animated loading screen with Drip'n branding
 - `OnboardingScreen.tsx` - Step-by-step tutorial for new users
 - `AcknowledgmentPopup.tsx` - Required checkboxes before using app

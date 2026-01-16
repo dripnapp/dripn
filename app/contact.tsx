@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Linking } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useStore } from '../src/store/useStore';
+import AppHeader from '../src/components/AppHeader';
 
 export default function ContactScreen() {
   const { theme } = useStore();
@@ -12,67 +13,68 @@ export default function ContactScreen() {
   };
 
   return (
-    <ScrollView style={[styles.container, isDark && styles.containerDark]}>
-      <Text style={[styles.header, isDark && styles.textDark]}>Contact Us</Text>
-      <Text style={[styles.subheader, isDark && styles.textMuted]}>We're here to help!</Text>
+    <View style={[styles.container, isDark && styles.containerDark]}>
+      <AppHeader title="Contact Us" showBack />
 
-      <View style={[styles.card, isDark && styles.cardDark]}>
-        <View style={styles.iconContainer}>
-          <MaterialCommunityIcons name="email-outline" size={48} color="#4dabf7" />
+      <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
+        <View style={[styles.card, isDark && styles.cardDark]}>
+          <View style={styles.iconContainer}>
+            <MaterialCommunityIcons name="email-outline" size={48} color="#4dabf7" />
+          </View>
+          <Text style={[styles.cardTitle, isDark && styles.textDark]}>Email Support</Text>
+          <Text style={[styles.cardDesc, isDark && styles.textMuted]}>
+            For questions, issues, or feedback, reach out to our support team via email.
+          </Text>
+          <TouchableOpacity style={styles.emailButton} onPress={handleEmailPress}>
+            <MaterialCommunityIcons name="email-fast" size={20} color="#fff" />
+            <Text style={styles.emailButtonText}>dripnapp@proton.me</Text>
+          </TouchableOpacity>
         </View>
-        <Text style={[styles.cardTitle, isDark && styles.textDark]}>Email Support</Text>
-        <Text style={[styles.cardDesc, isDark && styles.textMuted]}>
-          For questions, issues, or feedback, reach out to our support team via email.
-        </Text>
-        <TouchableOpacity style={styles.emailButton} onPress={handleEmailPress}>
-          <MaterialCommunityIcons name="email-fast" size={20} color="#fff" />
-          <Text style={styles.emailButtonText}>dripnapp@proton.me</Text>
-        </TouchableOpacity>
-      </View>
 
-      <View style={[styles.infoCard, isDark && styles.cardDark]}>
-        <Text style={[styles.infoTitle, isDark && styles.textDark]}>What to Include</Text>
-        <View style={styles.infoItem}>
-          <MaterialCommunityIcons name="check-circle" size={18} color="#40c057" />
-          <Text style={[styles.infoText, isDark && styles.textMuted]}>Your username or wallet address (first 4...last 4 characters)</Text>
+        <View style={[styles.infoCard, isDark && styles.cardDark]}>
+          <Text style={[styles.infoTitle, isDark && styles.textDark]}>What to Include</Text>
+          <View style={styles.infoItem}>
+            <MaterialCommunityIcons name="check-circle" size={18} color="#40c057" />
+            <Text style={[styles.infoText, isDark && styles.textMuted]}>Your username or wallet address (first 4...last 4 characters)</Text>
+          </View>
+          <View style={styles.infoItem}>
+            <MaterialCommunityIcons name="check-circle" size={18} color="#40c057" />
+            <Text style={[styles.infoText, isDark && styles.textMuted]}>A clear description of your issue or question</Text>
+          </View>
+          <View style={styles.infoItem}>
+            <MaterialCommunityIcons name="check-circle" size={18} color="#40c057" />
+            <Text style={[styles.infoText, isDark && styles.textMuted]}>Screenshots if applicable (optional)</Text>
+          </View>
         </View>
-        <View style={styles.infoItem}>
-          <MaterialCommunityIcons name="check-circle" size={18} color="#40c057" />
-          <Text style={[styles.infoText, isDark && styles.textMuted]}>A clear description of your issue or question</Text>
-        </View>
-        <View style={styles.infoItem}>
-          <MaterialCommunityIcons name="check-circle" size={18} color="#40c057" />
-          <Text style={[styles.infoText, isDark && styles.textMuted]}>Screenshots if applicable (optional)</Text>
-        </View>
-      </View>
 
-      <View style={[styles.responseCard, isDark && styles.cardDark]}>
-        <MaterialCommunityIcons name="clock-outline" size={24} color="#f59f00" />
-        <View style={styles.responseContent}>
-          <Text style={[styles.responseTitle, isDark && styles.textDark]}>Response Time</Text>
-          <Text style={[styles.responseText, isDark && styles.textMuted]}>
-            We typically respond within 24-48 hours during business days.
+        <View style={[styles.responseCard, isDark && styles.cardDark]}>
+          <MaterialCommunityIcons name="clock-outline" size={24} color="#f59f00" />
+          <View style={styles.responseContent}>
+            <Text style={[styles.responseTitle, isDark && styles.textDark]}>Response Time</Text>
+            <Text style={[styles.responseText, isDark && styles.textMuted]}>
+              We typically respond within 24-48 hours during business days.
+            </Text>
+          </View>
+        </View>
+
+        <View style={[styles.tipBox, isDark && styles.cardDark]}>
+          <MaterialCommunityIcons name="lightbulb-outline" size={20} color="#4dabf7" />
+          <Text style={[styles.tipText, isDark && styles.textMuted]}>
+            Before contacting support, check our Learn section and Terms of Use for common questions.
           </Text>
         </View>
-      </View>
-
-      <View style={[styles.tipBox, isDark && styles.cardDark]}>
-        <MaterialCommunityIcons name="lightbulb-outline" size={20} color="#4dabf7" />
-        <Text style={[styles.tipText, isDark && styles.textMuted]}>
-          Before contacting support, check our Learn section and Terms of Use for common questions.
-        </Text>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f8f9fa', padding: 20 },
+  container: { flex: 1, backgroundColor: '#f8f9fa' },
   containerDark: { backgroundColor: '#1a1a2e' },
-  header: { fontSize: 24, fontWeight: 'bold', color: '#1a1a1a', marginTop: 10 },
+  content: { flex: 1 },
+  contentContainer: { padding: 20 },
   textDark: { color: '#fff' },
   textMuted: { color: '#a0a0a0' },
-  subheader: { fontSize: 14, color: '#666', marginBottom: 25 },
   card: {
     backgroundColor: '#fff',
     borderRadius: 20,

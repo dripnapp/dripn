@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, TextInput } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useStore } from '../src/store/useStore';
+import AppHeader from '../src/components/AppHeader';
 
 export default function ReferralScreen() {
   const { referralCode, referralCount, enteredReferralCode, referralBonusEarned, enterReferralCode, theme } = useStore();
@@ -31,104 +32,108 @@ export default function ReferralScreen() {
   };
 
   return (
-    <ScrollView style={[styles.container, isDark && styles.containerDark]}>
-      <Text style={[styles.header, isDark && styles.textDark]}>Referral Program</Text>
-      <Text style={[styles.subheader, isDark && styles.textMuted]}>Invite friends and earn together!</Text>
+    <View style={[styles.container, isDark && styles.containerDark]}>
+      <AppHeader title="Referral Program" showBack />
 
-      {!enteredReferralCode && (
-        <View style={[styles.enterCodeCard, isDark && styles.cardDark]}>
-          <Text style={[styles.enterCodeLabel, isDark && styles.textDark]}>Have a referral code?</Text>
-          <View style={styles.inputRow}>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter code (e.g. DRPN-ABC123)"
-              placeholderTextColor="#999"
-              value={inputCode}
-              onChangeText={setInputCode}
-              autoCapitalize="characters"
-            />
-            <TouchableOpacity style={styles.applyButton} onPress={handleEnterCode}>
-              <Text style={styles.applyButtonText}>Apply</Text>
+      <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
+        <Text style={[styles.subheader, isDark && styles.textMuted]}>Invite friends and earn together!</Text>
+
+        {!enteredReferralCode && (
+          <View style={[styles.enterCodeCard, isDark && styles.cardDark]}>
+            <Text style={[styles.enterCodeLabel, isDark && styles.textDark]}>Have a referral code?</Text>
+            <View style={styles.inputRow}>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter code (e.g. DRPN-ABC123)"
+                placeholderTextColor="#999"
+                value={inputCode}
+                onChangeText={setInputCode}
+                autoCapitalize="characters"
+              />
+              <TouchableOpacity style={styles.applyButton} onPress={handleEnterCode}>
+                <Text style={styles.applyButtonText}>Apply</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+
+        {enteredReferralCode && (
+          <View style={styles.appliedCard}>
+            <MaterialCommunityIcons name="check-circle" size={24} color="#40c057" />
+            <View style={styles.appliedContent}>
+              <Text style={styles.appliedLabel}>Referral Applied</Text>
+              <Text style={styles.appliedCode}>{enteredReferralCode}</Text>
+            </View>
+          </View>
+        )}
+
+        <View style={[styles.codeCard, isDark && styles.cardDark]}>
+          <Text style={[styles.codeLabel, isDark && styles.textMuted]}>Your Referral Code</Text>
+          <View style={styles.codeBox}>
+            <Text style={styles.code}>{referralCode || 'DRPN-XXXXXX'}</Text>
+            <TouchableOpacity style={styles.copyButton} onPress={copyCode}>
+              <MaterialCommunityIcons name="content-copy" size={20} color="#fff" />
             </TouchableOpacity>
           </View>
+          <Text style={styles.codeHint}>Share this code with friends</Text>
         </View>
-      )}
 
-      {enteredReferralCode && (
-        <View style={styles.appliedCard}>
-          <MaterialCommunityIcons name="check-circle" size={24} color="#40c057" />
-          <View style={styles.appliedContent}>
-            <Text style={styles.appliedLabel}>Referral Applied</Text>
-            <Text style={styles.appliedCode}>{enteredReferralCode}</Text>
+        <View style={[styles.statsCard, isDark && styles.cardDark]}>
+          <View style={styles.statItem}>
+            <Text style={styles.statNumber}>{referralCount}</Text>
+            <Text style={[styles.statLabel, isDark && styles.textMuted]}>Friends Referred</Text>
           </View>
-        </View>
-      )}
-
-      <View style={[styles.codeCard, isDark && styles.cardDark]}>
-        <Text style={[styles.codeLabel, isDark && styles.textMuted]}>Your Referral Code</Text>
-        <View style={styles.codeBox}>
-          <Text style={styles.code}>{referralCode || 'DRPN-XXXXXX'}</Text>
-          <TouchableOpacity style={styles.copyButton} onPress={copyCode}>
-            <MaterialCommunityIcons name="content-copy" size={20} color="#fff" />
-          </TouchableOpacity>
-        </View>
-        <Text style={styles.codeHint}>Share this code with friends</Text>
-      </View>
-
-      <View style={[styles.statsCard, isDark && styles.cardDark]}>
-        <View style={styles.statItem}>
-          <Text style={styles.statNumber}>{referralCount}</Text>
-          <Text style={[styles.statLabel, isDark && styles.textMuted]}>Friends Referred</Text>
-        </View>
-        <View style={styles.statDivider} />
-        <View style={styles.statItem}>
-          <Text style={styles.statNumber}>{referralBonusEarned}</Text>
-          <Text style={[styles.statLabel, isDark && styles.textMuted]}>Bonus drips</Text>
-        </View>
-      </View>
-
-      <View style={[styles.howItWorks, isDark && styles.cardDark]}>
-        <Text style={[styles.sectionTitle, isDark && styles.textDark]}>How It Works</Text>
-        
-        <View style={styles.step}>
-          <View style={styles.stepNumber}><Text style={styles.stepNumberText}>1</Text></View>
-          <View style={styles.stepContent}>
-            <Text style={[styles.stepTitle, isDark && styles.textDark]}>Share Your Code</Text>
-            <Text style={[styles.stepDesc, isDark && styles.textMuted]}>Send your unique referral code to friends and family</Text>
+          <View style={styles.statDivider} />
+          <View style={styles.statItem}>
+            <Text style={styles.statNumber}>{referralBonusEarned}</Text>
+            <Text style={[styles.statLabel, isDark && styles.textMuted]}>Bonus drips</Text>
           </View>
         </View>
 
-        <View style={styles.step}>
-          <View style={styles.stepNumber}><Text style={styles.stepNumberText}>2</Text></View>
-          <View style={styles.stepContent}>
-            <Text style={[styles.stepTitle, isDark && styles.textDark]}>They Sign Up</Text>
-            <Text style={[styles.stepDesc, isDark && styles.textMuted]}>Your friend downloads Drip'n and enters your code</Text>
+        <View style={[styles.howItWorks, isDark && styles.cardDark]}>
+          <Text style={[styles.sectionTitle, isDark && styles.textDark]}>How It Works</Text>
+          
+          <View style={styles.step}>
+            <View style={styles.stepNumber}><Text style={styles.stepNumberText}>1</Text></View>
+            <View style={styles.stepContent}>
+              <Text style={[styles.stepTitle, isDark && styles.textDark]}>Share Your Code</Text>
+              <Text style={[styles.stepDesc, isDark && styles.textMuted]}>Send your unique referral code to friends and family</Text>
+            </View>
+          </View>
+
+          <View style={styles.step}>
+            <View style={styles.stepNumber}><Text style={styles.stepNumberText}>2</Text></View>
+            <View style={styles.stepContent}>
+              <Text style={[styles.stepTitle, isDark && styles.textDark]}>They Sign Up</Text>
+              <Text style={[styles.stepDesc, isDark && styles.textMuted]}>Your friend downloads Drip'n and enters your code</Text>
+            </View>
+          </View>
+
+          <View style={styles.step}>
+            <View style={styles.stepNumber}><Text style={styles.stepNumberText}>3</Text></View>
+            <View style={styles.stepContent}>
+              <Text style={[styles.stepTitle, isDark && styles.textDark]}>You Both Earn</Text>
+              <Text style={[styles.stepDesc, isDark && styles.textMuted]}>Get 10% of their earnings for 30 days</Text>
+            </View>
           </View>
         </View>
 
-        <View style={styles.step}>
-          <View style={styles.stepNumber}><Text style={styles.stepNumberText}>3</Text></View>
-          <View style={styles.stepContent}>
-            <Text style={[styles.stepTitle, isDark && styles.textDark]}>You Both Earn</Text>
-            <Text style={[styles.stepDesc, isDark && styles.textMuted]}>Get 10% of their earnings for 30 days</Text>
-          </View>
+        <View style={[styles.infoBox, isDark && styles.infoBoxDark]}>
+          <MaterialCommunityIcons name="information-outline" size={20} color="#4dabf7" />
+          <Text style={[styles.infoText, isDark && styles.infoTextDark]}>
+            Referral bonuses are paid in drips and can be cashed out once you reach the minimum threshold.
+          </Text>
         </View>
-      </View>
-
-      <View style={[styles.infoBox, isDark && styles.infoBoxDark]}>
-        <MaterialCommunityIcons name="information-outline" size={20} color="#4dabf7" />
-        <Text style={[styles.infoText, isDark && styles.infoTextDark]}>
-          Referral bonuses are paid in drips and can be cashed out once you reach the minimum threshold.
-        </Text>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f8f9fa', padding: 20 },
+  container: { flex: 1, backgroundColor: '#f8f9fa' },
   containerDark: { backgroundColor: '#1a1a2e' },
-  header: { fontSize: 24, fontWeight: 'bold', color: '#1a1a1a', marginTop: 10 },
+  content: { flex: 1 },
+  contentContainer: { padding: 20 },
   textDark: { color: '#fff' },
   textMuted: { color: '#a0a0a0' },
   cardDark: { backgroundColor: '#252542' },

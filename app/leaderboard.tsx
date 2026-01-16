@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, RefreshControl } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useStore } from '../src/store/useStore';
+import AppHeader from '../src/components/AppHeader';
 
 const baseLeaderboard = [
   { username: 'CryptoKing', points: 12450, level: 'Gold' },
@@ -84,73 +85,78 @@ export default function LeaderboardScreen() {
   };
 
   return (
-    <ScrollView 
-      style={[styles.container, isDark && styles.containerDark]}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-    >
-      <Text style={[styles.header, isDark && styles.textDark]}>Leaderboard</Text>
-      <Text style={[styles.subheader, isDark && styles.textMuted]}>Top 10 earners this month</Text>
+    <View style={[styles.container, isDark && styles.containerDark]}>
+      <AppHeader title="Leaderboard" showBack />
 
-      <View style={styles.yourRankCard}>
-        <View style={styles.yourRankLeft}>
-          <Text style={styles.yourRankLabel}>Your Rank</Text>
-          <Text style={styles.yourRankNumber}>#{userRank}</Text>
-        </View>
-        <View style={styles.yourRankRight}>
-          <Text style={styles.yourPoints}>{(totalEarned || points).toLocaleString()} drps</Text>
-          <Text style={styles.yourLevel}>{userLevel}</Text>
-        </View>
-      </View>
+      <ScrollView 
+        style={styles.content}
+        contentContainerStyle={styles.contentContainer}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      >
+        <Text style={[styles.subheader, isDark && styles.textMuted]}>Top 10 earners this month</Text>
 
-      <View style={[styles.leaderboardCard, isDark && styles.cardDark]}>
-        {leaderboardData.map((user, index) => (
-          <View 
-            key={index} 
-            style={[
-              styles.leaderRow, 
-              index === 0 && styles.leaderRowFirst,
-              user.isCurrentUser && styles.leaderRowCurrentUser
-            ]}
-          >
-            <View style={[styles.rankBadge, { backgroundColor: getRankColor(user.rank) + '20' }]}>
-              {user.rank <= 3 ? (
-                <MaterialCommunityIcons 
-                  name={getRankIcon(user.rank) as any} 
-                  size={20} 
-                  color={getRankColor(user.rank)} 
-                />
-              ) : (
-                <Text style={[styles.rankNumber, { color: getRankColor(user.rank) }]}>{user.rank}</Text>
-              )}
-            </View>
-            <View style={styles.userInfo}>
-              <Text style={[styles.username, user.isCurrentUser && styles.usernameCurrentUser, isDark && !user.isCurrentUser && styles.textDark]}>
-                {user.username}{user.isCurrentUser ? ' (You)' : ''}
-              </Text>
-              <Text style={[styles.userLevel, isDark && styles.textMuted]}>{user.level}</Text>
-            </View>
-            <View style={styles.pointsSection}>
-              <Text style={[styles.userPoints, isDark && styles.textDark]}>{user.points.toLocaleString()}</Text>
-              <Text style={styles.pointsUnit}>drps</Text>
-            </View>
+        <View style={styles.yourRankCard}>
+          <View style={styles.yourRankLeft}>
+            <Text style={styles.yourRankLabel}>Your Rank</Text>
+            <Text style={styles.yourRankNumber}>#{userRank}</Text>
           </View>
-        ))}
-      </View>
+          <View style={styles.yourRankRight}>
+            <Text style={styles.yourPoints}>{(totalEarned || points).toLocaleString()} drps</Text>
+            <Text style={styles.yourLevel}>{userLevel}</Text>
+          </View>
+        </View>
 
-      <View style={[styles.infoBox, isDark && styles.infoBoxDark]}>
-        <MaterialCommunityIcons name="information-outline" size={18} color="#4dabf7" />
-        <Text style={[styles.infoText, isDark && styles.infoTextDark]}>
-          Leaderboard uses total earned drips. Keep earning to climb the ranks!
-        </Text>
-      </View>
-    </ScrollView>
+        <View style={[styles.leaderboardCard, isDark && styles.cardDark]}>
+          {leaderboardData.map((user, index) => (
+            <View 
+              key={index} 
+              style={[
+                styles.leaderRow, 
+                index === 0 && styles.leaderRowFirst,
+                user.isCurrentUser && styles.leaderRowCurrentUser
+              ]}
+            >
+              <View style={[styles.rankBadge, { backgroundColor: getRankColor(user.rank) + '20' }]}>
+                {user.rank <= 3 ? (
+                  <MaterialCommunityIcons 
+                    name={getRankIcon(user.rank) as any} 
+                    size={20} 
+                    color={getRankColor(user.rank)} 
+                  />
+                ) : (
+                  <Text style={[styles.rankNumber, { color: getRankColor(user.rank) }]}>{user.rank}</Text>
+                )}
+              </View>
+              <View style={styles.userInfo}>
+                <Text style={[styles.username, user.isCurrentUser && styles.usernameCurrentUser, isDark && !user.isCurrentUser && styles.textDark]}>
+                  {user.username}{user.isCurrentUser ? ' (You)' : ''}
+                </Text>
+                <Text style={[styles.userLevel, isDark && styles.textMuted]}>{user.level}</Text>
+              </View>
+              <View style={styles.pointsSection}>
+                <Text style={[styles.userPoints, isDark && styles.textDark]}>{user.points.toLocaleString()}</Text>
+                <Text style={styles.pointsUnit}>drps</Text>
+              </View>
+            </View>
+          ))}
+        </View>
+
+        <View style={[styles.infoBox, isDark && styles.infoBoxDark]}>
+          <MaterialCommunityIcons name="information-outline" size={18} color="#4dabf7" />
+          <Text style={[styles.infoText, isDark && styles.infoTextDark]}>
+            Leaderboard uses total earned drips. Keep earning to climb the ranks!
+          </Text>
+        </View>
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f8f9fa', padding: 20 },
+  container: { flex: 1, backgroundColor: '#f8f9fa' },
   containerDark: { backgroundColor: '#1a1a2e' },
-  header: { fontSize: 24, fontWeight: 'bold', color: '#1a1a1a', marginTop: 10 },
+  content: { flex: 1 },
+  contentContainer: { padding: 20 },
   textDark: { color: '#fff' },
   textMuted: { color: '#a0a0a0' },
   cardDark: { backgroundColor: '#252542' },

@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, Alert } from 'react-native';
-import { useRouter } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useStore } from '../src/store/useStore';
+import AppHeader from '../src/components/AppHeader';
 
 const RESERVED_USERNAMES = ['admin', 'dripn', 'system', 'support', 'moderator'];
 
 export default function Settings() {
-  const router = useRouter();
   const { username, setUsername, walletAddress, theme, setTheme } = useStore();
   const [newUsername, setNewUsername] = useState(username || '');
   const [isEditingUsername, setIsEditingUsername] = useState(false);
@@ -41,13 +40,7 @@ export default function Settings() {
 
   return (
     <View style={[styles.container, isDark && styles.containerDark]}>
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-          <MaterialCommunityIcons name="arrow-left" size={24} color="#FFFFFF" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Settings</Text>
-        <View style={{ width: 40 }} />
-      </View>
+      <AppHeader title="Settings" showBack />
 
       <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
         <View style={[styles.section, isDark && styles.sectionDark]}>
@@ -152,117 +145,98 @@ export default function Settings() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f8f9fa' },
   containerDark: { backgroundColor: '#1a1a2e' },
-  header: { 
-    flexDirection: 'row', 
-    alignItems: 'center', 
-    justifyContent: 'space-between',
-    paddingHorizontal: 15,
-    paddingVertical: 15,
-    paddingTop: 20,
-    backgroundColor: '#12122a',
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
-  },
-  backButton: { padding: 8 },
-  headerTitle: { fontSize: 20, fontWeight: '700', color: '#FFFFFF' },
   content: { flex: 1 },
   contentContainer: { padding: 20 },
-  section: { 
-    backgroundColor: '#fff', 
-    borderRadius: 16, 
-    padding: 20, 
+  textDark: { color: '#fff' },
+  textMutedDark: { color: '#a0a0a0' },
+  section: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 20,
     marginBottom: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
-    shadowRadius: 8,
+    shadowRadius: 5,
     elevation: 2,
   },
   sectionDark: { backgroundColor: '#252542' },
-  sectionTitle: { fontSize: 18, fontWeight: '700', color: '#1a1a1a', marginBottom: 5 },
-  sectionSubtitle: { fontSize: 13, color: '#868e96', marginBottom: 20 },
-  textDark: { color: '#fff' },
-  textMutedDark: { color: '#a0a0a0' },
-  settingRow: { 
-    flexDirection: 'row', 
-    alignItems: 'center', 
+  sectionTitle: { fontSize: 18, fontWeight: '600', color: '#1a1a1a', marginBottom: 15 },
+  sectionSubtitle: { fontSize: 13, color: '#868e96', marginBottom: 15, marginTop: -10 },
+  settingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    paddingVertical: 10,
   },
   settingRowDark: { borderBottomColor: '#3a3a5a' },
   settingInfo: { flexDirection: 'row', alignItems: 'center', flex: 1 },
-  settingText: { marginLeft: 15, flex: 1 },
-  settingLabel: { fontSize: 14, fontWeight: '600', color: '#1a1a1a' },
+  settingText: { marginLeft: 12, flex: 1 },
+  settingLabel: { fontSize: 15, fontWeight: '500', color: '#1a1a1a' },
   settingValue: { fontSize: 13, color: '#868e96', marginTop: 2 },
   editButton: { padding: 8 },
-  editButtons: { flexDirection: 'row', gap: 8 },
-  saveButton: { backgroundColor: '#4dabf7', padding: 8, borderRadius: 8 },
-  cancelButton: { padding: 8 },
-  usernameInput: { 
-    fontSize: 14, 
-    color: '#1a1a1a', 
-    borderWidth: 1, 
-    borderColor: '#4dabf7', 
-    borderRadius: 8, 
-    paddingHorizontal: 10, 
-    paddingVertical: 6,
+  editButtons: { flexDirection: 'row', alignItems: 'center' },
+  saveButton: {
+    backgroundColor: '#40c057',
+    padding: 8,
+    borderRadius: 8,
+    marginRight: 8,
+  },
+  cancelButton: {
+    backgroundColor: '#f1f3f5',
+    padding: 8,
+    borderRadius: 8,
+  },
+  usernameInput: {
+    borderWidth: 1,
+    borderColor: '#e9ecef',
+    borderRadius: 8,
+    padding: 8,
+    fontSize: 14,
+    color: '#1a1a1a',
+    backgroundColor: '#f8f9fa',
     marginTop: 4,
   },
-  usernameInputDark: { color: '#fff', borderColor: '#4dabf7', backgroundColor: '#1a1a2e' },
-  themeGrid: { flexDirection: 'row', gap: 15 },
-  themeCard: { 
-    flex: 1, 
-    borderRadius: 12, 
-    borderWidth: 2, 
+  usernameInputDark: {
+    borderColor: '#3a3a5a',
+    backgroundColor: '#1a1a2e',
+    color: '#fff',
+  },
+  themeGrid: { flexDirection: 'row', justifyContent: 'space-between' },
+  themeCard: {
+    width: '48%',
+    borderRadius: 12,
+    borderWidth: 2,
     borderColor: '#e9ecef',
     overflow: 'hidden',
   },
   themeCardSelected: { borderColor: '#4dabf7' },
-  themePreviewClassic: { 
-    height: 100, 
-    backgroundColor: '#f8f9fa',
-  },
-  themePreviewDark: { 
-    height: 100, 
-    backgroundColor: '#1a1a2e',
-  },
-  previewHeader: { 
-    height: 20, 
-    backgroundColor: '#12122a', 
-    justifyContent: 'center', 
-    alignItems: 'center',
-  },
-  previewHeaderBar: { width: 40, height: 6, backgroundColor: '#4dabf7', borderRadius: 3 },
-  previewContentClassic: { flex: 1, padding: 8, justifyContent: 'space-between' },
-  previewContentDark: { flex: 1, padding: 8, justifyContent: 'space-between' },
+  themePreviewClassic: { height: 100, backgroundColor: '#f8f9fa' },
+  themePreviewDark: { height: 100, backgroundColor: '#1a1a2e' },
+  previewHeader: { height: 20, backgroundColor: '#12122a', justifyContent: 'center', alignItems: 'center' },
+  previewHeaderBar: { width: 40, height: 6, backgroundColor: 'rgba(255,255,255,0.3)', borderRadius: 3 },
+  previewContentClassic: { flex: 1, padding: 10, justifyContent: 'space-between' },
+  previewContentDark: { flex: 1, padding: 10, justifyContent: 'space-between' },
   previewCardClassic: { height: 30, backgroundColor: '#fff', borderRadius: 6 },
   previewCardDark: { height: 30, backgroundColor: '#252542', borderRadius: 6 },
-  previewButtonClassic: { height: 20, backgroundColor: '#4dabf7', borderRadius: 4, width: '60%' },
-  previewButtonDark: { height: 20, backgroundColor: '#4dabf7', borderRadius: 4, width: '60%' },
-  themeInfo: { 
-    flexDirection: 'row', 
-    alignItems: 'center', 
-    padding: 12,
-    backgroundColor: '#fff',
-  },
-  themeRadio: { 
-    width: 20, 
-    height: 20, 
-    borderRadius: 10, 
-    borderWidth: 2, 
+  previewButtonClassic: { height: 20, width: '60%', backgroundColor: '#4dabf7', borderRadius: 4 },
+  previewButtonDark: { height: 20, width: '60%', backgroundColor: '#4dabf7', borderRadius: 4 },
+  themeInfo: { flexDirection: 'row', alignItems: 'center', padding: 12, backgroundColor: '#fff' },
+  themeRadio: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
     borderColor: '#4dabf7',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 10,
   },
-  themeRadioInner: { 
-    width: 10, 
-    height: 10, 
-    borderRadius: 5, 
+  themeRadioInner: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
     backgroundColor: '#4dabf7',
   },
-  themeName: { fontSize: 14, fontWeight: '600', color: '#495057' },
+  themeName: { marginLeft: 10, fontSize: 14, fontWeight: '500', color: '#1a1a1a' },
   themeNameSelected: { color: '#4dabf7' },
 });

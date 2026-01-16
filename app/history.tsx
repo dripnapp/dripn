@@ -1,11 +1,10 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { useRouter } from 'expo-router';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useStore } from '../src/store/useStore';
+import AppHeader from '../src/components/AppHeader';
 
 export default function HistoryScreen() {
-  const router = useRouter();
   const { history, points, totalEarned, theme } = useStore();
   const isDark = theme === 'dark';
 
@@ -28,13 +27,7 @@ export default function HistoryScreen() {
 
   return (
     <View style={[styles.container, isDark && styles.containerDark]}>
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-          <MaterialCommunityIcons name="arrow-left" size={24} color="#FFFFFF" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>History</Text>
-        <View style={{ width: 40 }} />
-      </View>
+      <AppHeader title="History" showBack />
 
       <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
         <View style={styles.statsRow}>
@@ -115,19 +108,6 @@ export default function HistoryScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f8f9fa' },
   containerDark: { backgroundColor: '#1a1a2e' },
-  header: { 
-    flexDirection: 'row', 
-    alignItems: 'center', 
-    justifyContent: 'space-between',
-    paddingHorizontal: 15,
-    paddingVertical: 15,
-    paddingTop: 20,
-    backgroundColor: '#12122a',
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
-  },
-  backButton: { padding: 8 },
-  headerTitle: { fontSize: 20, fontWeight: '700', color: '#FFFFFF' },
   content: { flex: 1 },
   contentContainer: { padding: 20 },
   statsRow: { flexDirection: 'row', gap: 15, marginBottom: 15 },

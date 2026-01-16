@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, ActivityIndicator, Share, Linking } from 'react-native';
-import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { useStore } from '../src/store/useStore';
 import { getXRPPrice } from '../src/services/xrpService';
@@ -11,6 +10,7 @@ import OnboardingScreen from '../src/components/OnboardingScreen';
 import AcknowledgmentPopup from '../src/components/AcknowledgmentPopup';
 import VideoPlayer from '../src/components/VideoPlayer';
 import UsernameSetup from '../src/components/UsernameSetup';
+import AppHeader from '../src/components/AppHeader';
 
 const formatCurrency = (value: number, locale?: string): string => {
   const userLocale = locale || (typeof navigator !== 'undefined' ? navigator.language : 'en-US');
@@ -42,7 +42,6 @@ export default function Home() {
   const [showSplash, setShowSplash] = useState(true);
   const [showAcknowledgment, setShowAcknowledgment] = useState(false);
   const [showVideoPlayer, setShowVideoPlayer] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
   const [showUsernameSetup, setShowUsernameSetup] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState('');
   const pollingRef = useRef(false);
@@ -276,65 +275,9 @@ export default function Home() {
         onClose={() => setShowUsernameSetup(false)}
       />
 
-      {menuOpen && (
-        <TouchableOpacity style={styles.menuOverlay} onPress={() => setMenuOpen(false)} activeOpacity={1}>
-          <View style={styles.menu}>
-            <TouchableOpacity style={styles.menuItem} onPress={() => { setMenuOpen(false); router.push('/history'); }}>
-              <MaterialCommunityIcons name="history" size={22} color="#4dabf7" />
-              <Text style={styles.menuText}>History</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.menuItem} onPress={() => { setMenuOpen(false); router.push('/learn'); }}>
-              <MaterialCommunityIcons name="school" size={22} color="#4dabf7" />
-              <Text style={styles.menuText}>Learn Crypto</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.menuItem} onPress={() => { setMenuOpen(false); router.push('/referral'); }}>
-              <MaterialCommunityIcons name="account-group" size={22} color="#4dabf7" />
-              <Text style={styles.menuText}>Referral Program</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.menuItem} onPress={() => { setMenuOpen(false); router.push('/badges'); }}>
-              <MaterialCommunityIcons name="medal" size={22} color="#4dabf7" />
-              <Text style={styles.menuText}>Badges & Levels</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.menuItem} onPress={() => { setMenuOpen(false); router.push('/leaderboard'); }}>
-              <MaterialCommunityIcons name="podium" size={22} color="#4dabf7" />
-              <Text style={styles.menuText}>Leaderboard</Text>
-            </TouchableOpacity>
-            <View style={styles.menuDivider} />
-            <TouchableOpacity style={styles.menuItem} onPress={() => { setMenuOpen(false); router.push('/legal'); }}>
-              <MaterialCommunityIcons name="shield-check" size={22} color="#868e96" />
-              <Text style={styles.menuText}>Legal Disclaimers</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.menuItem} onPress={() => { setMenuOpen(false); router.push('/terms'); }}>
-              <MaterialCommunityIcons name="file-document" size={22} color="#868e96" />
-              <Text style={styles.menuText}>Terms of Use</Text>
-            </TouchableOpacity>
-            <View style={styles.menuDivider} />
-            <TouchableOpacity style={styles.menuItem} onPress={() => { setMenuOpen(false); router.push('/settings'); }}>
-              <MaterialCommunityIcons name="cog" size={22} color="#4dabf7" />
-              <Text style={styles.menuText}>Settings</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.menuItem} onPress={() => { setMenuOpen(false); router.push('/contact'); }}>
-              <MaterialCommunityIcons name="email-outline" size={22} color="#4dabf7" />
-              <Text style={styles.menuText}>Contact Us</Text>
-            </TouchableOpacity>
-          </View>
-        </TouchableOpacity>
-      )}
+      <AppHeader showLogo />
 
       <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-        <View style={styles.header}>
-          <View style={styles.headerLogoContainer}>
-            <Image 
-              source={require('../assets/images/dripn-logo.jpg')}
-              style={styles.headerLogo}
-              contentFit="contain"
-            />
-          </View>
-          <TouchableOpacity style={styles.menuButton} onPress={() => setMenuOpen(true)}>
-            <MaterialCommunityIcons name="menu" size={28} color="#FFFFFF" />
-          </TouchableOpacity>
-        </View>
-
         <View style={styles.profileRow}>
           <View style={[styles.levelBadge, isDark && styles.levelBadgeDark]}>
             <MaterialCommunityIcons 
@@ -465,23 +408,6 @@ const styles = StyleSheet.create({
   wrapperDark: { backgroundColor: '#1a1a2e' },
   container: { flex: 1 },
   contentContainer: { padding: 20, paddingBottom: 40 },
-  header: { 
-    flexDirection: 'row', 
-    justifyContent: 'space-between', 
-    alignItems: 'center', 
-    marginBottom: 15, 
-    marginTop: -20,
-    marginHorizontal: -20,
-    paddingHorizontal: 15,
-    paddingVertical: 15,
-    paddingTop: 20,
-    backgroundColor: '#12122a',
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
-  },
-  headerLogoContainer: { flex: 1, alignItems: 'center', marginRight: -40, overflow: 'hidden' },
-  headerLogo: { width: 280, height: 45 },
-  menuButton: { padding: 8 },
   profileRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, marginTop: 15 },
   levelBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20 },
   levelBadgeDark: { backgroundColor: '#252542' },
@@ -532,9 +458,4 @@ const styles = StyleSheet.create({
   progressBarBg: { height: 8, backgroundColor: '#e9ecef', borderRadius: 4, marginTop: 15, marginBottom: 5 },
   progressBarFill: { height: '100%', backgroundColor: '#4dabf7', borderRadius: 4 },
   progressText: { fontSize: 12, color: '#868e96', textAlign: 'right' },
-  menuOverlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 100, justifyContent: 'flex-start', alignItems: 'flex-end', paddingTop: 60, paddingRight: 20 },
-  menu: { backgroundColor: '#fff', borderRadius: 15, padding: 10, width: 220, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.15, shadowRadius: 10, elevation: 5 },
-  menuItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, paddingHorizontal: 15 },
-  menuText: { marginLeft: 12, fontSize: 15, color: '#1a1a1a' },
-  menuDivider: { height: 1, backgroundColor: '#eee', marginVertical: 5 },
 });
