@@ -16,8 +16,18 @@ interface ShareRecord {
   timestamp: number;
 }
 
+interface HistoryRecord {
+  id: string;
+  type: 'reward' | 'cashout';
+  amount: number;
+  source: string;
+  timestamp: number;
+  date: string;
+}
+
 interface AppState {
   points: number;
+  totalEarned: number;
   walletAddress: string | null;
   isWalletConnected: boolean;
   dailyEarnings: number;
@@ -35,8 +45,9 @@ interface AppState {
   xummPayloadId: string | null;
   theme: ThemeMode;
   dailyShares: ShareRecord[];
+  history: HistoryRecord[];
   setPoints: (points: number) => void;
-  addPoints: (amount: number) => void;
+  addPoints: (amount: number, source?: string) => void;
   setWallet: (address: string | null) => void;
   disconnectWallet: () => void;
   resetDaily: () => void;
@@ -51,10 +62,11 @@ interface AppState {
   setTheme: (theme: ThemeMode) => void;
   recordShare: (platform: string) => { success: boolean; reward: number; message: string };
   getDailyShareCount: () => number;
+  recordCashout: (amount: number) => void;
 }
 
 const generateReferralCode = () => {
-  return 'DPLY-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+  return 'DRPN-' + Math.random().toString(36).substring(2, 8).toUpperCase();
 };
 
 const BADGE_REWARDS: Record<string, number> = {
@@ -72,6 +84,7 @@ export const useStore = create<AppState>()(
   persist(
     (set, get) => ({
       points: 0,
+      totalEarned: 0,
       walletAddress: null,
       isWalletConnected: false,
       dailyEarnings: 0,
@@ -89,20 +102,34 @@ export const useStore = create<AppState>()(
       xummPayloadId: null,
       theme: 'classic',
       dailyShares: [],
+      history: [],
       setPoints: (points) => set({ points }),
-      addPoints: (amount) => set((state) => {
+      addPoints: (amount, source = 'Task') => set((state) => {
         const today = new Date().toDateString();
         const dailyEarnings = state.lastEarningsDate === today ? state.dailyEarnings + amount : amount;
         const newPoints = state.points + amount;
+        const newTotalEarned = (state.totalEarned || 0) + amount;
         let userLevel = state.userLevel;
-        if (newPoints >= 1000) userLevel = 'Gold';
-        else if (newPoints >= 500) userLevel = 'Silver';
-        else if (newPoints >= 100) userLevel = 'Bronze';
+        if (newTotalEarned >= 1000) userLevel = 'Gold';
+        else if (newTotalEarned >= 500) userLevel = 'Silver';
+        else if (newTotalEarned >= 100) userLevel = 'Bronze';
+        
+        const historyRecord: HistoryRecord = {
+          id: Date.now().toString(),
+          type: 'reward',
+          amount,
+          source,
+          timestamp: Date.now(),
+          date: new Date().toLocaleDateString(),
+        };
+        
         return { 
           points: newPoints,
+          totalEarned: newTotalEarned,
           dailyEarnings,
           lastEarningsDate: today,
-          userLevel
+          userLevel,
+          history: [historyRecord, ...state.history].slice(0, 100),
         };
       }),
       setWallet: (address) => set({ 
@@ -131,17 +158,29 @@ export const useStore = create<AppState>()(
         if (!badgeReward) return 0;
         
         const newPoints = state.points + badgeReward.reward;
+        const newTotalEarned = (state.totalEarned || 0) + badgeReward.reward;
         let userLevel = state.userLevel;
-        if (newPoints >= 1000) userLevel = 'Gold';
-        else if (newPoints >= 500) userLevel = 'Silver';
-        else if (newPoints >= 100) userLevel = 'Bronze';
+        if (newTotalEarned >= 1000) userLevel = 'Gold';
+        else if (newTotalEarned >= 500) userLevel = 'Silver';
+        else if (newTotalEarned >= 100) userLevel = 'Bronze';
+        
+        const historyRecord: HistoryRecord = {
+          id: Date.now().toString(),
+          type: 'reward',
+          amount: badgeReward.reward,
+          source: `Badge: ${badgeId}`,
+          timestamp: Date.now(),
+          date: new Date().toLocaleDateString(),
+        };
         
         set({
           points: newPoints,
+          totalEarned: newTotalEarned,
           userLevel,
           badgeRewards: state.badgeRewards.map(br => 
             br.id === badgeId ? { ...br, claimed: true } : br
-          )
+          ),
+          history: [historyRecord, ...state.history].slice(0, 100),
         });
         return badgeReward.reward;
       },
@@ -154,7 +193,7 @@ export const useStore = create<AppState>()(
         if (code === state.referralCode) {
           return false;
         }
-        if (!code.startsWith('DPLY-') || code.length < 10) {
+        if (!code.startsWith('DRPN-') || code.length < 10) {
           return false;
         }
         set({ enteredReferralCode: code });
@@ -190,24 +229,50 @@ export const useStore = create<AppState>()(
         
         const newShare: ShareRecord = { date: today, platform, timestamp: Date.now() };
         const newPoints = state.points + reward;
+        const newTotalEarned = (state.totalEarned || 0) + reward;
         let userLevel = state.userLevel;
-        if (newPoints >= 1000) userLevel = 'Gold';
-        else if (newPoints >= 500) userLevel = 'Silver';
-        else if (newPoints >= 100) userLevel = 'Bronze';
+        if (newTotalEarned >= 1000) userLevel = 'Gold';
+        else if (newTotalEarned >= 500) userLevel = 'Silver';
+        else if (newTotalEarned >= 100) userLevel = 'Bronze';
+        
+        const historyRecord: HistoryRecord = {
+          id: Date.now().toString(),
+          type: 'reward',
+          amount: reward,
+          source: `Share: ${platform}`,
+          timestamp: Date.now(),
+          date: new Date().toLocaleDateString(),
+        };
         
         const filteredShares = state.dailyShares.filter(s => s.date === today);
         
         set({ 
           dailyShares: [...filteredShares, newShare],
           points: newPoints,
-          userLevel
+          totalEarned: newTotalEarned,
+          userLevel,
+          history: [historyRecord, ...state.history].slice(0, 100),
         });
         
-        return { success: true, reward, message: `Share successful! You earned ${reward} drops.` };
+        return { success: true, reward, message: `Share successful! You earned ${reward} drips.` };
       },
+      recordCashout: (amount: number) => set((state) => {
+        const historyRecord: HistoryRecord = {
+          id: Date.now().toString(),
+          type: 'cashout',
+          amount,
+          source: 'XRP Cashout',
+          timestamp: Date.now(),
+          date: new Date().toLocaleDateString(),
+        };
+        return {
+          points: state.points - amount,
+          history: [historyRecord, ...state.history].slice(0, 100),
+        };
+      }),
     }),
     {
-      name: 'droply-io-storage',
+      name: 'dripn-storage',
       storage: createJSONStorage(() => AsyncStorage),
       onRehydrateStorage: () => (state) => {
         if (state && !state.referralCode) {

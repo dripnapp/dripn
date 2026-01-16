@@ -13,7 +13,7 @@ export default function LegalScreen() {
 
       <View style={styles.warningBox}>
         <MaterialCommunityIcons name="alert-circle" size={24} color="#e03131" />
-        <Text style={styles.warningText}>Important: Please read all disclaimers carefully before using droply.io.</Text>
+        <Text style={styles.warningText}>Important: Please read all disclaimers carefully before using Drip'n.</Text>
       </View>
 
       <View style={[styles.section, isDark && styles.sectionDark]}>
@@ -26,28 +26,28 @@ export default function LegalScreen() {
       <View style={[styles.section, isDark && styles.sectionDark]}>
         <Text style={[styles.sectionTitle, isDark && styles.textDark]}>No Financial Advice</Text>
         <Text style={[styles.sectionContent, isDark && styles.textMuted]}>
-          droply.io does not provide financial, investment, tax, or legal advice. The information provided in this app is for general informational purposes only. You should consult with a qualified professional before making any financial decisions.
+          Drip'n does not provide financial, investment, tax, or legal advice. The information provided in this app is for general informational purposes only. You should consult with a qualified professional before making any financial decisions.
         </Text>
       </View>
 
       <View style={[styles.section, isDark && styles.sectionDark]}>
         <Text style={[styles.sectionTitle, isDark && styles.textDark]}>Non-Custodial Service</Text>
         <Text style={[styles.sectionContent, isDark && styles.textMuted]}>
-          droply.io operates as a non-custodial service. We do not hold, store, or have access to your private keys or funds. You are solely responsible for the security of your wallet and private keys.
+          Drip'n operates as a non-custodial service. We do not hold, store, or have access to your private keys or funds. You are solely responsible for the security of your wallet and private keys.
         </Text>
       </View>
 
       <View style={[styles.section, isDark && styles.sectionDark]}>
         <Text style={[styles.sectionTitle, isDark && styles.textDark]}>Payout Disclaimer</Text>
         <Text style={[styles.sectionContent, isDark && styles.textMuted]}>
-          All payouts are made in XRP at the current market rate at the time of the transaction. Due to price volatility, the USD equivalent value of your payout may differ from your point balance. Network fees may apply.
+          All payouts are made in XRP at the current market rate at the time of the transaction. Due to price volatility, the USD equivalent value of your payout may differ from your drip balance. Network fees may apply.
         </Text>
       </View>
 
       <View style={[styles.section, isDark && styles.sectionDark]}>
         <Text style={[styles.sectionTitle, isDark && styles.textDark]}>Age Requirement</Text>
         <Text style={[styles.sectionContent, isDark && styles.textMuted]}>
-          You must be at least 18 years of age to use droply.io. By using this app, you confirm that you meet this age requirement and are legally permitted to engage in cryptocurrency transactions in your jurisdiction.
+          You must be at least 18 years of age to use Drip'n. By using this app, you confirm that you meet this age requirement and are legally permitted to engage in cryptocurrency transactions in your jurisdiction.
         </Text>
       </View>
 

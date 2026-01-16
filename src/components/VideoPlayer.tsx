@@ -86,7 +86,7 @@ export default function VideoPlayer({ visible, onComplete, onCancel, adRevenue }
               <View style={[styles.progressFill, { width: `${(progress / currentAd.duration) * 100}%` }]} />
             </View>
             <Text style={styles.progressText}>
-              {completed ? 'Video Complete!' : 'Watch the full video to earn drops'}
+              {completed ? 'Video Complete!' : 'Watch the full video to earn drips'}
             </Text>
           </View>
 
@@ -94,7 +94,7 @@ export default function VideoPlayer({ visible, onComplete, onCancel, adRevenue }
             <View style={styles.rewardSection}>
               <MaterialCommunityIcons name="check-circle" size={50} color="#2f9e44" />
               <Text style={styles.rewardTitle}>You Earned!</Text>
-              <Text style={styles.rewardAmount}>{userReward} Drops</Text>
+              <Text style={styles.rewardAmount}>{userReward} Drips</Text>
               <TouchableOpacity style={styles.claimButton} onPress={handleClose}>
                 <Text style={styles.claimButtonText}>Claim Reward</Text>
               </TouchableOpacity>

@@ -143,12 +143,12 @@ export default function Home() {
   const handleVideoComplete = (reward: number) => {
     addPoints(reward);
     setShowVideoPlayer(false);
-    Alert.alert('Reward Earned!', `You earned ${reward} drops!`);
+    Alert.alert('Reward Earned!', `You earned ${reward} drips!`);
   };
 
   const handleVideoCancel = () => {
     setShowVideoPlayer(false);
-    Alert.alert('Cancelled', 'You must watch the full video to earn drops.');
+    Alert.alert('Cancelled', 'You must watch the full video to earn drips.');
   };
 
   const handleCashout = () => {
@@ -157,13 +157,13 @@ export default function Home() {
       return;
     }
     if (points < 500) {
-      Alert.alert('Low Balance', 'Minimum cashout is 500 drops');
+      Alert.alert('Low Balance', 'Minimum cashout is 500 drips');
       return;
     }
 
     Alert.alert(
       'Confirm Cashout',
-      `Cash out 500 drops for approx ${(5 / (xrpPrice || 1)).toFixed(2)} XRP?\n\nI understand price volatility and acknowledge payouts are at current market rate.`,
+      `Cash out 500 drips for approx ${(5 / (xrpPrice || 1)).toFixed(2)} XRP?\n\nI understand price volatility and acknowledge payouts are at current market rate.`,
       [
         { text: 'Cancel', style: 'cancel' },
         { text: 'Confirm', onPress: () => Alert.alert('Success', 'Payout request sent! (Testnet)') }
@@ -187,15 +187,15 @@ export default function Home() {
 
   const userRewardEstimate = Math.round(AD_REVENUE_CENTS * 0.15);
 
-  const handleShare = async (platform: 'twitter' | 'facebook' | 'text') => {
+  const handleShare = async (platform: 'twitter' | 'facebook' | 'text' | 'instagram') => {
     const shareCount = getDailyShareCount();
     if (shareCount >= 3) {
       Alert.alert('Limit Reached', 'You have reached the maximum 3 shares for today.');
       return;
     }
 
-    const shareMessage = 'Check out droply.io - earn crypto rewards by watching videos! every drop counts. Download now!';
-    const shareUrl = 'https://droply.io';
+    const shareMessage = "Check out Drip'n - earn crypto rewards by watching videos! every drip counts. Download now!";
+    const shareUrl = 'https://dripnapp.com';
     
     try {
       let shared = false;
@@ -212,6 +212,16 @@ export default function Home() {
         const canOpen = await Linking.canOpenURL(facebookUrl);
         if (canOpen) {
           await Linking.openURL(facebookUrl);
+          shared = true;
+        }
+      } else if (platform === 'instagram') {
+        const instagramUrl = 'instagram://app';
+        const canOpen = await Linking.canOpenURL(instagramUrl);
+        if (canOpen) {
+          await Linking.openURL(instagramUrl);
+          shared = true;
+        } else {
+          await Linking.openURL('https://instagram.com');
           shared = true;
         }
       } else if (platform === 'text') {
@@ -269,6 +279,10 @@ export default function Home() {
       {menuOpen && (
         <TouchableOpacity style={styles.menuOverlay} onPress={() => setMenuOpen(false)} activeOpacity={1}>
           <View style={styles.menu}>
+            <TouchableOpacity style={styles.menuItem} onPress={() => { setMenuOpen(false); router.push('/history'); }}>
+              <MaterialCommunityIcons name="history" size={22} color="#4dabf7" />
+              <Text style={styles.menuText}>History</Text>
+            </TouchableOpacity>
             <TouchableOpacity style={styles.menuItem} onPress={() => { setMenuOpen(false); router.push('/learn'); }}>
               <MaterialCommunityIcons name="school" size={22} color="#4dabf7" />
               <Text style={styles.menuText}>Learn Crypto</Text>
@@ -311,7 +325,7 @@ export default function Home() {
         <View style={styles.header}>
           <View style={styles.headerLogoContainer}>
             <Image 
-              source={require('../assets/images/logo-cropped.jpg')}
+              source={require('../assets/images/dripn-logo.jpg')}
               style={styles.headerLogo}
               contentFit="contain"
             />
@@ -342,11 +356,11 @@ export default function Home() {
 
         <View style={[styles.card, isDark && styles.cardDark]}>
           <Text style={[styles.label, isDark && styles.labelDark]}>Your Balance</Text>
-          <Text style={styles.balance}>{points} drops</Text>
+          <Text style={styles.balance}>{points} drips</Text>
           <View style={styles.progressBarBg}>
             <View style={[styles.progressBarFill, { width: `${Math.min((points / 500) * 100, 100)}%` }]} />
           </View>
-          <Text style={styles.progressText}>{Math.min(points, 500)} / 500 drops to cashout</Text>
+          <Text style={styles.progressText}>{Math.min(points, 500)} / 500 drips to cashout</Text>
         </View>
 
         <View style={styles.section}>
@@ -355,7 +369,7 @@ export default function Home() {
             <MaterialCommunityIcons name="water" size={32} color="#fff" />
             <View style={styles.taskInfo}>
               <Text style={styles.taskName}>Watch Rewarded Video</Text>
-              <Text style={styles.taskReward}>+1-4 drops (varies by ad)</Text>
+              <Text style={styles.taskReward}>+1-4 drips (varies by ad)</Text>
             </View>
           </TouchableOpacity>
           
@@ -363,20 +377,19 @@ export default function Home() {
             <View style={styles.shareHeader}>
               <MaterialCommunityIcons name="share-variant" size={24} color="#4dabf7" />
               <View style={styles.shareHeaderText}>
-                <Text style={[styles.shareTitle, isDark && styles.textDark]}>Share droply.io</Text>
+                <Text style={[styles.shareTitle, isDark && styles.textDark]}>Share Drip'n</Text>
                 <Text style={[styles.shareSubtitle, isDark && styles.labelDark]}>
-                  {getDailyShareCount()}/3 shares today • +{getNextShareReward()} drops next
+                  {getDailyShareCount()}/3 shares today • +{getNextShareReward()} drips next
                 </Text>
               </View>
             </View>
             <View style={styles.shareButtons}>
               <TouchableOpacity 
-                style={[styles.shareButton, styles.twitterButton]} 
+                style={[styles.shareButton, styles.xButton]} 
                 onPress={() => handleShare('twitter')}
                 disabled={getDailyShareCount() >= 3}
               >
-                <MaterialCommunityIcons name="twitter" size={20} color="#fff" />
-                <Text style={styles.shareButtonText}>X</Text>
+                <Text style={styles.xButtonText}>𝕏</Text>
               </TouchableOpacity>
               <TouchableOpacity 
                 style={[styles.shareButton, styles.facebookButton]} 
@@ -384,7 +397,13 @@ export default function Home() {
                 disabled={getDailyShareCount() >= 3}
               >
                 <MaterialCommunityIcons name="facebook" size={20} color="#fff" />
-                <Text style={styles.shareButtonText}>Facebook</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.shareButton, styles.instagramButton]} 
+                onPress={() => handleShare('instagram')}
+                disabled={getDailyShareCount() >= 3}
+              >
+                <MaterialCommunityIcons name="instagram" size={20} color="#fff" />
               </TouchableOpacity>
               <TouchableOpacity 
                 style={[styles.shareButton, styles.textButton]} 
@@ -392,7 +411,6 @@ export default function Home() {
                 disabled={getDailyShareCount() >= 3}
               >
                 <MaterialCommunityIcons name="message-text" size={20} color="#fff" />
-                <Text style={styles.shareButtonText}>Text</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -435,7 +453,7 @@ export default function Home() {
 
         <View style={[styles.infoCard, isDark && styles.infoCardDark]}>
           <Text style={[styles.infoText, isDark && styles.infoTextDark]}>Current XRP Price: {xrpPrice ? formatCurrency(xrpPrice) : 'Loading...'}</Text>
-          <Text style={[styles.infoText, isDark && styles.infoTextDark]}>Daily Earnings: {dailyEarnings} / 500 drops</Text>
+          <Text style={[styles.infoText, isDark && styles.infoTextDark]}>Daily Earnings: {dailyEarnings} / 500 drips</Text>
         </View>
       </ScrollView>
     </View>
@@ -457,12 +475,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     paddingVertical: 15,
     paddingTop: 20,
-    backgroundColor: '#0d1117',
+    backgroundColor: '#12122a',
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
   },
   headerLogoContainer: { flex: 1, alignItems: 'center', marginRight: -40, overflow: 'hidden' },
-  headerLogo: { width: 320, height: 50 },
+  headerLogo: { width: 280, height: 45 },
   menuButton: { padding: 8 },
   profileRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, marginTop: 15 },
   levelBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20 },
@@ -489,10 +507,12 @@ const styles = StyleSheet.create({
   shareTitle: { fontSize: 16, fontWeight: '600', color: '#1a1a1a' },
   shareSubtitle: { fontSize: 12, color: '#666', marginTop: 2 },
   shareButtons: { flexDirection: 'row', justifyContent: 'space-between' },
-  shareButton: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 12, borderRadius: 10, marginHorizontal: 4 },
+  shareButton: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 12, borderRadius: 10, marginHorizontal: 3 },
   shareButtonText: { color: '#fff', fontWeight: '600', fontSize: 13, marginLeft: 6 },
-  twitterButton: { backgroundColor: '#1DA1F2' },
+  xButton: { backgroundColor: '#000000' },
+  xButtonText: { color: '#fff', fontSize: 18, fontWeight: 'bold' },
   facebookButton: { backgroundColor: '#4267B2' },
+  instagramButton: { backgroundColor: '#E4405F' },
   textButton: { backgroundColor: '#2f9e44' },
   walletCard: { backgroundColor: '#fff', padding: 20, borderRadius: 15, borderWidth: 1, borderColor: '#eee' },
   walletCardDark: { backgroundColor: '#252542', borderColor: '#3a3a5a' },

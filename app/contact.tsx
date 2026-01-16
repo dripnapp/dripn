@@ -8,7 +8,7 @@ export default function ContactScreen() {
   const isDark = theme === 'dark';
 
   const handleEmailPress = () => {
-    Linking.openURL('mailto:droply.io@proton.me?subject=droply.io Support Request');
+    Linking.openURL("mailto:dripnapp@proton.me?subject=Drip'n Support Request");
   };
 
   return (
@@ -26,7 +26,7 @@ export default function ContactScreen() {
         </Text>
         <TouchableOpacity style={styles.emailButton} onPress={handleEmailPress}>
           <MaterialCommunityIcons name="email-fast" size={20} color="#fff" />
-          <Text style={styles.emailButtonText}>droply.io@proton.me</Text>
+          <Text style={styles.emailButtonText}>dripnapp@proton.me</Text>
         </TouchableOpacity>
       </View>
 

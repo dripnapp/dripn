@@ -19,10 +19,10 @@ export default function LearnScreen() {
     },
     {
       icon: 'water',
-      title: 'What is droply.io?',
-      content: 'droply.io is a rewards app where you earn "drops" by completing simple tasks like watching short videos. Drops are an in-app reward currency used to track your progress and achievements within the app.',
-      isDroply: true,
-      disclaimer: 'Important: Drops earned on droply.io have no monetary value, cash value, or real-world currency equivalent. They are virtual rewards for entertainment purposes only and cannot be exchanged for cash or transferred outside the app.',
+      title: "What is Drip'n?",
+      content: "Drip'n is a rewards app where you earn \"drips\" by completing simple tasks like watching short videos. Drips are an in-app reward currency used to track your progress and achievements within the app.",
+      isDripn: true,
+      disclaimer: "Important: Drips earned on Drip'n have no monetary value, cash value, or real-world currency equivalent. They are virtual rewards for entertainment purposes only and cannot be exchanged for cash or transferred outside the app.",
     },
     {
       icon: 'wallet-outline',
@@ -32,7 +32,7 @@ export default function LearnScreen() {
     {
       icon: 'shield-check',
       title: 'What is Non-Custodial?',
-      content: 'Non-custodial means you maintain complete control of your private keys and funds. droply.io never holds your crypto - we only send rewards directly to your connected wallet.',
+      content: "Non-custodial means you maintain complete control of your private keys and funds. Drip'n never holds your crypto - we only send rewards directly to your connected wallet.",
     },
     {
       icon: 'chart-line-variant',
@@ -47,12 +47,12 @@ export default function LearnScreen() {
       <Text style={[styles.subheader, isDark && styles.textMuted]}>Learn the fundamentals of cryptocurrency and XRP</Text>
 
       {topics.map((topic, index) => (
-        <View key={index} style={[styles.card, topic.isDroply && styles.droplyCard, isDark && styles.cardDark]}>
+        <View key={index} style={[styles.card, topic.isDripn && styles.dripnCard, isDark && styles.cardDark]}>
           <View style={styles.cardHeader}>
             <MaterialCommunityIcons 
               name={topic.icon as any} 
               size={28} 
-              color={topic.isDroply ? '#22E6FF' : '#4dabf7'} 
+              color={topic.isDripn ? '#22E6FF' : '#4dabf7'} 
             />
             <Text style={[styles.cardTitle, isDark && styles.textDark]}>{topic.title}</Text>
           </View>
@@ -69,7 +69,7 @@ export default function LearnScreen() {
       <View style={[styles.tipBox, isDark && styles.tipBoxDark]}>
         <MaterialCommunityIcons name="lightbulb-outline" size={24} color="#f59f00" />
         <Text style={[styles.tipText, isDark && styles.textMuted]}>
-          Pro Tip: Never share your wallet's secret key with anyone, including droply.io. We will never ask for it.
+          Pro Tip: Never share your wallet's secret key with anyone, including Drip'n. We will never ask for it.
         </Text>
       </View>
     </ScrollView>
@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
     elevation: 2,
   },
-  droplyCard: {
+  dripnCard: {
     borderWidth: 1,
     borderColor: '#4dabf7',
     backgroundColor: '#f8fcff',

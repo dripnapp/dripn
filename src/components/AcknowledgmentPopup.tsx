@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Modal, TouchableOpacity, ScrollView, Linking } from 'react-native';
+import { View, Text, StyleSheet, Modal, TouchableOpacity, ScrollView } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
@@ -46,7 +46,7 @@ export default function AcknowledgmentPopup({ visible, onAccept }: Acknowledgmen
         <View style={styles.popup}>
           <Text style={styles.title}>Important Acknowledgments</Text>
           <Text style={styles.description}>
-            Please read and accept the following before using droply.io:
+            Please read and accept the following before using Drip'n:
           </Text>
           
           <ScrollView style={styles.checkList}>
@@ -93,7 +93,7 @@ export default function AcknowledgmentPopup({ visible, onAccept }: Acknowledgmen
             onPress={onAccept}
             disabled={!allChecked}
           >
-            <Text style={styles.acceptButtonText}>Continue to droply.io</Text>
+            <Text style={styles.acceptButtonText}>Continue to Drip'n</Text>
           </TouchableOpacity>
         </View>
       </View>

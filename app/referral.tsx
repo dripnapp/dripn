@@ -41,7 +41,7 @@ export default function ReferralScreen() {
           <View style={styles.inputRow}>
             <TextInput
               style={styles.input}
-              placeholder="Enter code (e.g. DPLY-ABC123)"
+              placeholder="Enter code (e.g. DRPN-ABC123)"
               placeholderTextColor="#999"
               value={inputCode}
               onChangeText={setInputCode}
@@ -67,7 +67,7 @@ export default function ReferralScreen() {
       <View style={[styles.codeCard, isDark && styles.cardDark]}>
         <Text style={[styles.codeLabel, isDark && styles.textMuted]}>Your Referral Code</Text>
         <View style={styles.codeBox}>
-          <Text style={styles.code}>{referralCode || 'DPLY-XXXXXX'}</Text>
+          <Text style={styles.code}>{referralCode || 'DRPN-XXXXXX'}</Text>
           <TouchableOpacity style={styles.copyButton} onPress={copyCode}>
             <MaterialCommunityIcons name="content-copy" size={20} color="#fff" />
           </TouchableOpacity>
@@ -83,7 +83,7 @@ export default function ReferralScreen() {
         <View style={styles.statDivider} />
         <View style={styles.statItem}>
           <Text style={styles.statNumber}>{referralBonusEarned}</Text>
-          <Text style={[styles.statLabel, isDark && styles.textMuted]}>Bonus drops</Text>
+          <Text style={[styles.statLabel, isDark && styles.textMuted]}>Bonus drips</Text>
         </View>
       </View>
 
@@ -102,7 +102,7 @@ export default function ReferralScreen() {
           <View style={styles.stepNumber}><Text style={styles.stepNumberText}>2</Text></View>
           <View style={styles.stepContent}>
             <Text style={[styles.stepTitle, isDark && styles.textDark]}>They Sign Up</Text>
-            <Text style={[styles.stepDesc, isDark && styles.textMuted]}>Your friend downloads droply.io and enters your code</Text>
+            <Text style={[styles.stepDesc, isDark && styles.textMuted]}>Your friend downloads Drip'n and enters your code</Text>
           </View>
         </View>
 
@@ -118,7 +118,7 @@ export default function ReferralScreen() {
       <View style={[styles.infoBox, isDark && styles.infoBoxDark]}>
         <MaterialCommunityIcons name="information-outline" size={20} color="#4dabf7" />
         <Text style={[styles.infoText, isDark && styles.infoTextDark]}>
-          Referral bonuses are paid in drops and can be cashed out once you reach the minimum threshold.
+          Referral bonuses are paid in drips and can be cashed out once you reach the minimum threshold.
         </Text>
       </View>
     </ScrollView>

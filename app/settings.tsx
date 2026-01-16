@@ -4,7 +4,7 @@ import { useRouter } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useStore } from '../src/store/useStore';
 
-const RESERVED_USERNAMES = ['admin', 'droply', 'system', 'support', 'moderator'];
+const RESERVED_USERNAMES = ['admin', 'dripn', 'system', 'support', 'moderator'];
 
 export default function Settings() {
   const router = useRouter();
@@ -92,7 +92,7 @@ export default function Settings() {
 
         <View style={[styles.section, isDark && styles.sectionDark]}>
           <Text style={[styles.sectionTitle, isDark && styles.textDark]}>Appearance</Text>
-          <Text style={[styles.sectionSubtitle, isDark && styles.textMutedDark]}>Choose how droply.io looks to you</Text>
+          <Text style={[styles.sectionSubtitle, isDark && styles.textMutedDark]}>Choose how Drip'n looks to you</Text>
 
           <View style={styles.themeGrid}>
             <TouchableOpacity 
@@ -159,7 +159,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     paddingVertical: 15,
     paddingTop: 20,
-    backgroundColor: '#0d1117',
+    backgroundColor: '#12122a',
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
   },
@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
   },
   previewHeader: { 
     height: 20, 
-    backgroundColor: '#0d1117', 
+    backgroundColor: '#12122a', 
     justifyContent: 'center', 
     alignItems: 'center',
   },

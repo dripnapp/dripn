@@ -54,12 +54,12 @@ export const createSignInRequest = async (): Promise<XummSignInResult> => {
       options: {
         submit: false,
         return_url: {
-          app: 'droply://xumm-callback',
+          app: 'dripn://xumm-callback',
           web: Platform.OS === 'web' ? window.location.href : undefined
         }
       },
       custom_meta: {
-        instruction: 'Sign in to droply.io'
+        instruction: "Sign in to Drip'n"
       }
     });
 
@@ -113,24 +113,23 @@ export const checkPayloadStatus = async (payloadId: string): Promise<XummSignInR
       };
     }
 
-    if (result.meta.signed && result.response?.account) {
-      return {
-        success: true,
-        address: result.response.account,
-        payloadId
-      };
-    }
-
-    if (result.meta.resolved && !result.meta.signed) {
-      return {
-        success: false,
-        error: 'Sign-in was rejected or cancelled'
-      };
+    if (result.meta.resolved) {
+      if (result.meta.signed) {
+        return {
+          success: true,
+          address: result.response?.account || undefined
+        };
+      } else {
+        return {
+          success: false,
+          error: 'Sign-in was rejected or cancelled'
+        };
+      }
     }
 
     return {
       success: false,
-      error: 'Pending user action in Xaman app'
+      error: 'Waiting for user to sign'
     };
   } catch (error: any) {
     console.error('XUMM status check error:', error);
@@ -142,14 +141,15 @@ export const checkPayloadStatus = async (payloadId: string): Promise<XummSignInR
 };
 
 export const pollForSignIn = async (
-  payloadId: string,
-  onStatusUpdate: (status: string) => void,
+  payloadId: string, 
+  onStatusChange?: (status: string) => void,
   maxAttempts: number = 60
 ): Promise<XummSignInResult> => {
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     const result = await checkPayloadStatus(payloadId);
     
     if (result.success && result.address) {
+      onStatusChange?.('Connected!');
       return result;
     }
     
@@ -157,11 +157,10 @@ export const pollForSignIn = async (
       return result;
     }
     
-    onStatusUpdate(`Waiting for approval in Xaman... (${attempt + 1}/${maxAttempts})`);
-    
+    onStatusChange?.(`Waiting for approval... (${attempt + 1}/${maxAttempts})`);
     await new Promise(resolve => setTimeout(resolve, 2000));
   }
-  
+
   return {
     success: false,
     error: 'Connection timed out. Please try again.'

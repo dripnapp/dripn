@@ -14,14 +14,14 @@ export default function TermsScreen() {
       <View style={[styles.section, isDark && styles.sectionDark]}>
         <Text style={[styles.sectionTitle, isDark && styles.textDark]}>1. Acceptance of Terms</Text>
         <Text style={[styles.sectionContent, isDark && styles.textMuted]}>
-          By accessing or using droply.io ("the App"), you agree to be bound by these Terms of Use. If you do not agree to these terms, please do not use the App.
+          By accessing or using Drip'n ("the App"), you agree to be bound by these Terms of Use. If you do not agree to these terms, please do not use the App.
         </Text>
       </View>
 
       <View style={[styles.section, isDark && styles.sectionDark]}>
         <Text style={[styles.sectionTitle, isDark && styles.textDark]}>2. Eligibility</Text>
         <Text style={[styles.sectionContent, isDark && styles.textMuted]}>
-          You must be at least 18 years old to use droply.io. By using the App, you represent and warrant that you meet this age requirement and have the legal capacity to enter into these Terms.
+          You must be at least 18 years old to use Drip'n. By using the App, you represent and warrant that you meet this age requirement and have the legal capacity to enter into these Terms.
         </Text>
       </View>
 
@@ -33,16 +33,16 @@ export default function TermsScreen() {
       </View>
 
       <View style={[styles.section, isDark && styles.sectionDark]}>
-        <Text style={[styles.sectionTitle, isDark && styles.textDark]}>4. Earning Points</Text>
+        <Text style={[styles.sectionTitle, isDark && styles.textDark]}>4. Earning Drips</Text>
         <Text style={[styles.sectionContent, isDark && styles.textMuted]}>
-          Points are earned by completing designated tasks such as watching rewarded videos. Point values are determined by actual ad revenue, with users receiving 15% of the revenue generated. Daily earning caps may apply to prevent abuse.
+          Drips are earned by completing designated tasks such as watching rewarded videos. Drip values are determined by actual ad revenue, with users receiving 15% of the revenue generated. Daily earning caps may apply to prevent abuse.
         </Text>
       </View>
 
       <View style={[styles.section, isDark && styles.sectionDark]}>
         <Text style={[styles.sectionTitle, isDark && styles.textDark]}>5. Cashouts and Payouts</Text>
         <Text style={[styles.sectionContent, isDark && styles.textMuted]}>
-          Points may be cashed out for XRP cryptocurrency once the minimum threshold is reached. Payouts are processed at the current XRP market rate. We reserve the right to delay or deny payouts in cases of suspected fraud.
+          Drips may be cashed out for XRP cryptocurrency once the minimum threshold is reached. Payouts are processed at the current XRP market rate. We reserve the right to delay or deny payouts in cases of suspected fraud.
         </Text>
       </View>
 
@@ -70,19 +70,19 @@ export default function TermsScreen() {
       <View style={[styles.section, isDark && styles.sectionDark]}>
         <Text style={[styles.sectionTitle, isDark && styles.textDark]}>9. Limitation of Liability</Text>
         <Text style={[styles.sectionContent, isDark && styles.textMuted]}>
-          droply.io is provided "as is" without warranties of any kind. We are not liable for any losses arising from cryptocurrency price fluctuations, network issues, or third-party services.
+          Drip'n is provided "as is" without warranties of any kind. We are not liable for any losses arising from cryptocurrency price fluctuations, network issues, or third-party services.
         </Text>
       </View>
 
       <View style={[styles.section, isDark && styles.sectionDark]}>
         <Text style={[styles.sectionTitle, isDark && styles.textDark]}>10. Contact</Text>
         <Text style={[styles.sectionContent, isDark && styles.textMuted]}>
-          For questions about these Terms, please contact us at droply.io@proton.me or through the Contact Us page in the app.
+          For questions about these Terms, please contact us at dripnapp@proton.me or through the Contact Us page in the app.
         </Text>
       </View>
 
       <Text style={styles.footer}>
-        By using droply.io, you acknowledge that you have read, understood, and agree to be bound by these Terms of Use.
+        By using Drip'n, you acknowledge that you have read, understood, and agree to be bound by these Terms of Use.
       </Text>
     </ScrollView>
   );

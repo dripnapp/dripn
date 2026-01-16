@@ -11,8 +11,8 @@ interface OnboardingScreenProps {
 const slides = [
   {
     icon: 'water',
-    title: 'Welcome to droply.io',
-    description: 'Earn cryptocurrency by completing simple tasks like watching videos. Your earnings are tracked in drops.',
+    title: "Welcome to Drip'n",
+    description: 'Earn cryptocurrency by completing simple tasks like watching videos. Your earnings are tracked in drips.',
   },
   {
     icon: 'wallet',
@@ -22,12 +22,12 @@ const slides = [
   {
     icon: 'play-circle',
     title: 'Complete Tasks',
-    description: 'Watch rewarded videos to earn drops. Each video pays based on current ad rates.',
+    description: 'Watch rewarded videos to earn drips. Each video pays based on current ad rates.',
   },
   {
     icon: 'cash-check',
     title: 'Cash Out',
-    description: 'Once you reach 500 drops, you can cash out to XRP at the current market rate. Fast and secure!',
+    description: 'Once you reach 500 drips, you can cash out to XRP at the current market rate. Fast and secure!',
   },
 ];
 

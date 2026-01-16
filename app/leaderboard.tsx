@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, RefreshControl } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useStore } from '../src/store/useStore';
@@ -12,12 +12,12 @@ const baseLeaderboard = [
   { username: 'CoinCollector', points: 3890, level: 'Gold' },
   { username: 'DigiEarner', points: 2750, level: 'Silver' },
   { username: 'CashFlowPro', points: 1980, level: 'Silver' },
-  { username: 'DropsPilot', points: 1540, level: 'Silver' },
+  { username: 'DripsPilot', points: 1540, level: 'Silver' },
   { username: 'RewardRookie', points: 890, level: 'Bronze' },
 ];
 
 export default function LeaderboardScreen() {
-  const { points, userLevel, walletAddress, username, theme } = useStore();
+  const { points, userLevel, walletAddress, username, theme, totalEarned } = useStore();
   const isDark = theme === 'dark';
   const [refreshing, setRefreshing] = useState(false);
 
@@ -33,7 +33,7 @@ export default function LeaderboardScreen() {
   const leaderboardData = useMemo(() => {
     const currentUser = {
       username: displayName,
-      points: points,
+      points: totalEarned || points,
       level: userLevel,
       isCurrentUser: true,
     };
@@ -50,17 +50,17 @@ export default function LeaderboardScreen() {
     }));
 
     return ranked.slice(0, 10);
-  }, [points, userLevel, displayName]);
+  }, [totalEarned, points, userLevel, displayName]);
 
   const userRank = useMemo(() => {
     const allUsers = [
       ...baseLeaderboard.map(u => ({ ...u, isCurrentUser: false })),
-      { username: displayName, points, level: userLevel, isCurrentUser: true },
+      { username: displayName, points: totalEarned || points, level: userLevel, isCurrentUser: true },
     ];
     const sorted = allUsers.sort((a, b) => b.points - a.points);
     const userIndex = sorted.findIndex(u => u.isCurrentUser);
     return userIndex + 1;
-  }, [points, userLevel, displayName]);
+  }, [totalEarned, points, userLevel, displayName]);
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -97,7 +97,7 @@ export default function LeaderboardScreen() {
           <Text style={styles.yourRankNumber}>#{userRank}</Text>
         </View>
         <View style={styles.yourRankRight}>
-          <Text style={styles.yourPoints}>{points.toLocaleString()} drps</Text>
+          <Text style={styles.yourPoints}>{(totalEarned || points).toLocaleString()} drps</Text>
           <Text style={styles.yourLevel}>{userLevel}</Text>
         </View>
       </View>
@@ -140,7 +140,7 @@ export default function LeaderboardScreen() {
       <View style={[styles.infoBox, isDark && styles.infoBoxDark]}>
         <MaterialCommunityIcons name="information-outline" size={18} color="#4dabf7" />
         <Text style={[styles.infoText, isDark && styles.infoTextDark]}>
-          Leaderboard updates live as you earn drops. Keep earning to climb the ranks!
+          Leaderboard uses total earned drips. Keep earning to climb the ranks!
         </Text>
       </View>
     </ScrollView>

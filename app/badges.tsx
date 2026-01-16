@@ -5,9 +5,9 @@ import { useStore, BADGE_REWARDS } from '../src/store/useStore';
 
 const allBadges = [
   { id: 'first_video', name: 'First Steps', description: 'Watch your first video', icon: 'play', unlockPoints: 0 },
-  { id: 'bronze', name: 'Bronze Member', description: 'Earn 100 drops', icon: 'medal', unlockPoints: 100 },
-  { id: 'silver', name: 'Silver Member', description: 'Earn 500 drops', icon: 'medal-outline', unlockPoints: 500 },
-  { id: 'gold', name: 'Gold Member', description: 'Earn 1000 drops', icon: 'trophy', unlockPoints: 1000 },
+  { id: 'bronze', name: 'Bronze Member', description: 'Earn 100 drips', icon: 'medal', unlockPoints: 100 },
+  { id: 'silver', name: 'Silver Member', description: 'Earn 500 drips', icon: 'medal-outline', unlockPoints: 500 },
+  { id: 'gold', name: 'Gold Member', description: 'Earn 1000 drips', icon: 'trophy', unlockPoints: 1000 },
   { id: 'first_cashout', name: 'First Cashout', description: 'Complete your first payout', icon: 'cash-check', unlockPoints: 500 },
   { id: 'referrer', name: 'Referrer', description: 'Refer your first friend', icon: 'account-group', unlockPoints: 0 },
   { id: 'streak_7', name: 'Week Warrior', description: 'Login 7 days in a row', icon: 'fire', unlockPoints: 0 },
@@ -59,7 +59,7 @@ export default function BadgesScreen() {
     if (reward > 0) {
       Alert.alert(
         'Reward Claimed!',
-        `You earned ${reward} drops for unlocking "${badge.name}"!`,
+        `You earned ${reward} drips for unlocking "${badge.name}"!`,
         [{ text: 'Awesome!' }]
       );
     }
@@ -69,7 +69,7 @@ export default function BadgesScreen() {
     const unlocked = isUnlocked(badge);
     if (!unlocked) {
       if (badge.unlockPoints > 0) {
-        Alert.alert('Locked', `Earn ${badge.unlockPoints} drops to unlock this badge.`);
+        Alert.alert('Locked', `Earn ${badge.unlockPoints} drips to unlock this badge.`);
       } else {
         Alert.alert('Locked', `Complete the required action to unlock this badge.`);
       }
@@ -79,7 +79,7 @@ export default function BadgesScreen() {
     if (canClaim(badge.id)) {
       Alert.alert(
         'Claim Reward',
-        `Tap "Claim" to receive ${BADGE_REWARDS[badge.id]} drops for "${badge.name}"!`,
+        `Tap "Claim" to receive ${BADGE_REWARDS[badge.id]} drips for "${badge.name}"!`,
         [
           { text: 'Cancel', style: 'cancel' },
           { text: 'Claim', onPress: () => handleClaimReward(badge) }
@@ -88,7 +88,7 @@ export default function BadgesScreen() {
     } else {
       const reward = getBadgeReward(badge.id);
       if (reward?.claimed) {
-        Alert.alert('Already Claimed', `You already claimed the ${BADGE_REWARDS[badge.id]} drop reward for this badge.`);
+        Alert.alert('Already Claimed', `You already claimed the ${BADGE_REWARDS[badge.id]} drip reward for this badge.`);
       } else {
         Alert.alert(badge.name, badge.description);
       }
@@ -105,7 +105,7 @@ export default function BadgesScreen() {
             <Text style={styles.unlockBadgeName}>{unlockedBadge?.name}</Text>
             <Text style={styles.unlockDesc}>{unlockedBadge?.description}</Text>
             <View style={styles.rewardBox}>
-              <Text style={styles.rewardText}>+{BADGE_REWARDS[unlockedBadge?.id || ''] || 0} Drops</Text>
+              <Text style={styles.rewardText}>+{BADGE_REWARDS[unlockedBadge?.id || ''] || 0} Drips</Text>
             </View>
             <TouchableOpacity 
               style={styles.claimButton} 
@@ -134,7 +134,7 @@ export default function BadgesScreen() {
         </View>
         <View style={[styles.pointsBox, isDark && styles.pointsBoxDark]}>
           <Text style={styles.pointsNumber}>{points}</Text>
-          <Text style={styles.pointsLabel}>Drops</Text>
+          <Text style={styles.pointsLabel}>Drips</Text>
         </View>
       </View>
 

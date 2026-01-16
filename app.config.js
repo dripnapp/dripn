@@ -1,11 +1,11 @@
 export default {
   expo: {
-    name: "droply.io",
-    slug: "droply-io",
+    name: "Drip'n",
+    slug: "dripn",
     version: "1.0.0",
     orientation: "portrait",
     icon: "./assets/images/icon.png",
-    scheme: "droplyio",
+    scheme: "dripn",
     userInterfaceStyle: "automatic",
     newArchEnabled: true,
     ios: {
