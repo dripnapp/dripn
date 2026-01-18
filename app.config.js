@@ -49,8 +49,8 @@ export default {
       [
         "react-native-google-mobile-ads",
         {
-          iosAppId: "ca-app-pub-3940256099942544/1712485313", // Your real iOS App ID
-          // androidAppId: "ca-app-pub-XXXXXXXXXXXXXXXX~ZZZZZZZZZZ", // Add when ready for Android
+          iosAppId: "ca-app-pub-3940256099942544~3347511713", // Google test App ID (iOS)
+          // androidAppId: "ca-app-pub-3940256099942544~3347511713", // test for Android
         },
       ],
     ],
