@@ -7,11 +7,16 @@ export default {
     icon: "./assets/images/icon.png",
     scheme: "dripn",
     userInterfaceStyle: "automatic",
-    newArchEnabled: true,
+    newArchEnabled: true, // Keep enabled for better performance; if issues return, we can toggle
 
     ios: {
       supportsTablet: true,
       bundleIdentifier: "com.dripnapp.dripn",
+      // Added ATT prompt (required for personalized ads on iOS 14+)
+      infoPlist: {
+        NSUserTrackingUsageDescription:
+          "This allows personalized ads to support rewards and features in the app.",
+      },
     },
 
     android: {
@@ -45,7 +50,7 @@ export default {
         "react-native-google-mobile-ads",
         {
           iosAppId: "ca-app-pub-4501953262639636~3485723863", // Your real iOS App ID
-          // androidAppId: "ca-app-pub-XXXXXXXXXXXXXXXX~ZZZZZZZZZZ", // add later if needed
+          // androidAppId: "ca-app-pub-XXXXXXXXXXXXXXXX~ZZZZZZZZZZ", // Add when ready for Android
         },
       ],
     ],
