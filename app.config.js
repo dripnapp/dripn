@@ -11,7 +11,7 @@ export default {
 
     ios: {
       supportsTablet: true,
-      bundleIdentifier: "com.dripnapp.dripn", // ← REQUIRED for EAS iOS builds
+      bundleIdentifier: "com.dripnapp.dripn",
     },
 
     android: {
@@ -20,7 +20,6 @@ export default {
         backgroundColor: "#0d1117",
       },
       edgeToEdgeEnabled: true,
-      // Optional but recommended: add package name for Android consistency
       package: "com.dripnapp.dripn",
     },
 
@@ -42,6 +41,13 @@ export default {
         },
       ],
       "expo-dev-client",
+      [
+        "react-native-google-mobile-ads",
+        {
+          iosAppId: "ca-app-pub-4501953262639636~3485723863", // Your real iOS App ID
+          // androidAppId: "ca-app-pub-XXXXXXXXXXXXXXXX~ZZZZZZZZZZ", // add later if needed
+        },
+      ],
     ],
 
     experiments: {
