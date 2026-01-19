@@ -59,6 +59,13 @@ export default {
           iosAppId: "6027059", // ← Your Unity Game ID
         },
       ],
+      // Temporarily disabled to fix Google-Mobile-Ads-SDK version conflict with AdMob
+      // [
+      //   "expo-ads-admob",
+      //   {
+      //     iosAppId: "6027059",
+      //   },
+      // ],
     ],
 
     experiments: {
