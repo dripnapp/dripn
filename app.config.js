@@ -53,19 +53,6 @@ export default {
           // androidAppId: "ca-app-pub-3940256099942544~3347511713", // test for Android
         },
       ],
-      [
-        "expo-ads-admob",
-        {
-          iosAppId: "6027059", // ← Your Unity Game ID
-        },
-      ],
-      // Temporarily disabled to fix Google-Mobile-Ads-SDK version conflict with AdMob
-      // [
-      //   "expo-ads-admob",
-      //   {
-      //     iosAppId: "6027059",
-      //   },
-      // ],
     ],
 
     experiments: {
