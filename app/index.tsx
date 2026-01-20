@@ -28,12 +28,14 @@ import mobileAds, {
   RewardedAdEventType,
   AdEventType,
 } from "react-native-google-mobile-ads";
-import UnityAds from "expo-unity-ads";
 
-// Test rewarded ad unit ID (fake video always plays during development)
+// Unity Ads - Manual setup (no expo-unity-ads wrapper)
+import * as UnityAds from "expo-unity-ads"; // This is a placeholder - install the correct package or use native module
+
+// Test rewarded ad unit ID for AdMob (fake video always plays)
 const rewardedAdUnitId = __DEV__
-  ? "ca-app-pub-3940256099942544/1712485313" // Google test rewarded video
-  : "YOUR_REAL_REWARDED_UNIT_ID_HERE"; // Replace with real one later
+  ? "ca-app-pub-3940256099942544/1712485313"
+  : "YOUR_REAL_REWARDED_UNIT_ID_HERE";
 
 const rewarded = RewardedAd.createForAdRequest(rewardedAdUnitId);
 
@@ -84,12 +86,13 @@ export default function Home() {
   const [connectionStatus, setConnectionStatus] = useState("");
   const pollingRef = useRef(false);
 
+  // Unity Ads state
   const [unityInitialized, setUnityInitialized] = useState(false);
 
   const DAILY_CAP = 500;
   const AD_REVENUE_CENTS = 5;
 
-  // AdMob Rewarded Ad Setup
+  // AdMob Setup
   useEffect(() => {
     mobileAds()
       .initialize()
@@ -114,16 +117,16 @@ export default function Home() {
     return () => rewardListener();
   }, []);
 
-  // Unity Ads Setup
+  // Unity Ads Setup - Manual initialization
   useEffect(() => {
-    UnityAds.initialize("6027059", true) // true = test mode
-      .then(() => {
-        console.log("Unity Ads initialized successfully");
-        setUnityInitialized(true);
-      })
-      .catch((error: any) => {
-        console.error("Unity Ads init error:", error);
-      });
+    // UnityAds.initialize("6027059", true) // Uncomment when native module is ready
+    //   .then(() => {
+    //     console.log("Unity Ads initialized successfully");
+    //     setUnityInitialized(true);
+    //   })
+    //   .catch((error: any) => {
+    //     console.error("Unity Ads init error:", error);
+    //   });
   }, []);
 
   const showUnityRewarded = async () => {
@@ -133,8 +136,12 @@ export default function Home() {
     }
 
     try {
-      await UnityAds.load("Rewarded_Android");
-      await UnityAds.show("Rewarded_Android");
+      // await UnityAds.load("Rewarded_Android");
+      // await UnityAds.show("Rewarded_Android");
+      Alert.alert("Unity Ads", "Unity rewarded ad would play here (test mode)");
+      // Simulate reward for testing
+      addPoints(5);
+      Alert.alert("Unity Reward Earned!", "You earned 5 drips!");
     } catch (error: any) {
       console.error("Unity show error:", error);
       Alert.alert("Error", "Failed to show Unity ad");
@@ -142,21 +149,11 @@ export default function Home() {
   };
 
   useEffect(() => {
-    UnityAds.setRewardListener(
-      (placementId: string, reward: { amount: number }) => {
-        console.log(
-          "Unity reward earned on placement:",
-          placementId,
-          "amount:",
-          reward.amount,
-        );
-        addPoints(reward.amount);
-        Alert.alert(
-          "Unity Reward Earned!",
-          `You earned ${reward.amount} drips!`,
-        );
-      },
-    );
+    // UnityAds.setRewardListener((placementId: string, reward: { amount: number }) => {
+    //   console.log("Unity reward earned on placement:", placementId, "amount:", reward.amount);
+    //   addPoints(reward.amount);
+    //   Alert.alert("Unity Reward Earned!", `You earned ${reward.amount} drips!`);
+    // });
   }, [addPoints]);
 
   useEffect(() => {
@@ -520,11 +517,20 @@ export default function Home() {
             </View>
           </TouchableOpacity>
 
-          {/* Unity Rewarded Ad button */}
+          {/* Unity Rewarded Ad button (placeholder - actual SDK call will be added after native integration) */}
           <TouchableOpacity
             style={styles.taskButton}
-            onPress={showUnityRewarded}
-            disabled={!unityInitialized}
+            onPress={() => {
+              Alert.alert(
+                "Unity Ads",
+                "Unity rewarded ad integration in progress - test mode simulation",
+              );
+              addPoints(5);
+              Alert.alert(
+                "Unity Reward Earned!",
+                "You earned 5 drips! (simulation)",
+              );
+            }}
           >
             <MaterialCommunityIcons name="video" size={32} color="#fff" />
             <View style={styles.taskInfo}>
