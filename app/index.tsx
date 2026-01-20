@@ -84,30 +84,24 @@ export default function Home() {
   const [connectionStatus, setConnectionStatus] = useState("");
   const pollingRef = useRef(false);
 
+  const [unityInitialized, setUnityInitialized] = useState(false);
+
   const DAILY_CAP = 500;
   const AD_REVENUE_CENTS = 5;
 
   // AdMob Rewarded Ad Setup
   useEffect(() => {
-    // Initialize AdMob SDK
     mobileAds()
       .initialize()
-      .then(() => {
-        console.log("AdMob initialized successfully");
-      })
-      .catch((error: any) => {
-        console.error("AdMob init error:", error);
-      });
+      .then(() => console.log("AdMob initialized successfully"))
+      .catch((error: any) => console.error("AdMob init error:", error));
 
-    // Pre-load the rewarded ad
     rewarded.load();
 
-    // Listen for general ad errors
     rewarded.addAdEventListener(AdEventType.ERROR, (error: any) => {
       console.error("Ad error:", error);
     });
 
-    // Listen for reward earned
     const rewardListener = rewarded.addAdEventListener(
       RewardedAdEventType.EARNED_REWARD,
       (reward) => {
@@ -117,17 +111,12 @@ export default function Home() {
       },
     );
 
-    // Cleanup listener on unmount
-    return () => {
-      rewardListener(); // This removes the listener
-    };
+    return () => rewardListener();
   }, []);
 
   // Unity Ads Setup
-  const [unityInitialized, setUnityInitialized] = useState(false);
-
   useEffect(() => {
-    UnityAds.initialize("6027059", true) // true = test mode (fake ads)
+    UnityAds.initialize("6027059", true) // true = test mode
       .then(() => {
         console.log("Unity Ads initialized successfully");
         setUnityInitialized(true);
@@ -144,18 +133,14 @@ export default function Home() {
     }
 
     try {
-      // Load and show rewarded video (default placement for test mode)
-      await UnityAds.load("Rewarded_Android"); // Use "Rewarded_iOS" if you have a custom placement
+      await UnityAds.load("Rewarded_Android");
       await UnityAds.show("Rewarded_Android");
-
-      // Reward is handled by the global listener below
     } catch (error: any) {
       console.error("Unity show error:", error);
       Alert.alert("Error", "Failed to show Unity ad");
     }
   };
 
-  // Listen for Unity reward event
   useEffect(() => {
     UnityAds.setRewardListener(
       (placementId: string, reward: { amount: number }) => {
@@ -172,7 +157,7 @@ export default function Home() {
         );
       },
     );
-  }, [addPoints]); // Add addPoints as dependency to satisfy TS
+  }, [addPoints]);
 
   useEffect(() => {
     fetchPrice();
@@ -511,7 +496,7 @@ export default function Home() {
             </View>
           </TouchableOpacity>
 
-          {/* NEW: AdMob Rewarded Ad button */}
+          {/* AdMob Rewarded Ad button */}
           <TouchableOpacity
             style={styles.taskButton}
             onPress={() => {
@@ -535,7 +520,7 @@ export default function Home() {
             </View>
           </TouchableOpacity>
 
-          {/* NEW: Unity Rewarded Ad button */}
+          {/* Unity Rewarded Ad button */}
           <TouchableOpacity
             style={styles.taskButton}
             onPress={showUnityRewarded}
