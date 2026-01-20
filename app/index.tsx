@@ -28,6 +28,7 @@ import mobileAds, {
   RewardedAdEventType,
   AdEventType,
 } from "react-native-google-mobile-ads";
+import UnityAds from "expo-unity-ads";
 
 // Test rewarded ad unit ID (fake video always plays during development)
 const rewardedAdUnitId = __DEV__
@@ -86,7 +87,7 @@ export default function Home() {
   const DAILY_CAP = 500;
   const AD_REVENUE_CENTS = 5;
 
-  // Initialize AdMob and rewarded ad
+  // AdMob Rewarded Ad Setup
   useEffect(() => {
     // Initialize AdMob SDK
     mobileAds()
@@ -121,6 +122,57 @@ export default function Home() {
       rewardListener(); // This removes the listener
     };
   }, []);
+
+  // Unity Ads Setup
+  const [unityInitialized, setUnityInitialized] = useState(false);
+
+  useEffect(() => {
+    UnityAds.initialize("6027059", true) // true = test mode (fake ads)
+      .then(() => {
+        console.log("Unity Ads initialized successfully");
+        setUnityInitialized(true);
+      })
+      .catch((error: any) => {
+        console.error("Unity Ads init error:", error);
+      });
+  }, []);
+
+  const showUnityRewarded = async () => {
+    if (!unityInitialized) {
+      Alert.alert("Not ready", "Unity Ads still initializing, try again soon.");
+      return;
+    }
+
+    try {
+      // Load and show rewarded video (default placement for test mode)
+      await UnityAds.load("Rewarded_Android"); // Use "Rewarded_iOS" if you have a custom placement
+      await UnityAds.show("Rewarded_Android");
+
+      // Reward is handled by the global listener below
+    } catch (error: any) {
+      console.error("Unity show error:", error);
+      Alert.alert("Error", "Failed to show Unity ad");
+    }
+  };
+
+  // Listen for Unity reward event
+  useEffect(() => {
+    UnityAds.setRewardListener(
+      (placementId: string, reward: { amount: number }) => {
+        console.log(
+          "Unity reward earned on placement:",
+          placementId,
+          "amount:",
+          reward.amount,
+        );
+        addPoints(reward.amount);
+        Alert.alert(
+          "Unity Reward Earned!",
+          `You earned ${reward.amount} drips!`,
+        );
+      },
+    );
+  }, [addPoints]); // Add addPoints as dependency to satisfy TS
 
   useEffect(() => {
     fetchPrice();
@@ -479,6 +531,19 @@ export default function Home() {
             <MaterialCommunityIcons name="video" size={32} color="#fff" />
             <View style={styles.taskInfo}>
               <Text style={styles.taskName}>Watch AdMob Rewarded Ad</Text>
+              <Text style={styles.taskReward}>Earn drips (test mode)</Text>
+            </View>
+          </TouchableOpacity>
+
+          {/* NEW: Unity Rewarded Ad button */}
+          <TouchableOpacity
+            style={styles.taskButton}
+            onPress={showUnityRewarded}
+            disabled={!unityInitialized}
+          >
+            <MaterialCommunityIcons name="video" size={32} color="#fff" />
+            <View style={styles.taskInfo}>
+              <Text style={styles.taskName}>Watch Unity Video</Text>
               <Text style={styles.taskReward}>Earn drips (test mode)</Text>
             </View>
           </TouchableOpacity>

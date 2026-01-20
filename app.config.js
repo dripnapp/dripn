@@ -45,22 +45,7 @@ export default {
           backgroundColor: "#0d1117",
         },
       ],
-      "expo-dev-client",
-      [
-        "react-native-google-mobile-ads",
-        {
-          iosAppId: "ca-app-pub-3940256099942544~3347511713", // Google test App ID (iOS)
-          // androidAppId: "ca-app-pub-3940256099942544~3347511713", // test for Android
-        },
-      ],
-      [
-        "./plugins/unity-ads/withUnityAds",
-        {
-          iosGameId: "6027059", // Your Unity Game ID
-        },
-      ],
-    ],
-
+    withUnity
     experiments: {
       typedRoutes: true,
     },
