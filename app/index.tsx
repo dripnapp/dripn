@@ -29,8 +29,6 @@ import mobileAds, {
   AdEventType,
 } from "react-native-google-mobile-ads";
 
-// Unity Ads - Using the official SDK (configured via your custom withUnityAds.js plugin)
-
 // AdMob rewarded setup
 const rewardedAdUnitId = __DEV__
   ? "ca-app-pub-3940256099942544/1712485313" // Google test rewarded video
@@ -85,9 +83,6 @@ export default function Home() {
   const [connectionStatus, setConnectionStatus] = useState("");
   const pollingRef = useRef(false);
 
-  // Unity Ads state
-  const [unityInitialized, setUnityInitialized] = useState(false);
-
   const DAILY_CAP = 500;
   const AD_REVENUE_CENTS = 5;
 
@@ -115,53 +110,6 @@ export default function Home() {
 
     return () => rewardListener();
   }, []);
-
-  // Unity Ads Setup - Real SDK calls
-  useEffect(() => {
-    UnityAds.initialize("6027059", true) // true = test mode (fake videos)
-      .then(() => {
-        console.log("Unity Ads initialized successfully");
-        setUnityInitialized(true);
-      })
-      .catch((error: any) => {
-        console.error("Unity Ads init error:", error);
-      });
-  }, []);
-
-  const showUnityRewarded = async () => {
-    if (!unityInitialized) {
-      Alert.alert("Not ready", "Unity Ads still initializing, try again soon.");
-      return;
-    }
-
-    try {
-      // Load and show rewarded video (use your placement ID from Unity dashboard)
-      await UnityAds.load("rewardedVideo"); // Default test placement
-      await UnityAds.show("rewardedVideo");
-    } catch (error: any) {
-      console.error("Unity show error:", error);
-      Alert.alert("Error", "Failed to show Unity ad");
-    }
-  };
-
-  // Unity reward listener
-  useEffect(() => {
-    UnityAds.setRewardListener(
-      (placementId: string, reward: { amount: number }) => {
-        console.log(
-          "Unity reward earned on placement:",
-          placementId,
-          "amount:",
-          reward.amount,
-        );
-        addPoints(reward.amount);
-        Alert.alert(
-          "Unity Reward Earned!",
-          `You earned ${reward.amount} drips!`,
-        );
-      },
-    );
-  }, [addPoints]);
 
   useEffect(() => {
     fetchPrice();
@@ -524,21 +472,27 @@ export default function Home() {
             </View>
           </TouchableOpacity>
 
-          {/* Temporary Unity button (simulation until real SDK rebuild) */}
-<TouchableOpacity
-  style={styles.taskButton}
-  onPress={() => {
-    Alert.alert("Unity Ads (Simulation)", "Unity rewarded ad would play here in real integration");
-    addPoints(5);
-    Alert.alert("Reward Earned!", "You earned 5 drips! (Unity simulation)");
-  }}
->
-  <MaterialCommunityIcons name="video" size={32} color="#fff" />
-  <View style={styles.taskInfo}>
-    <Text style={styles.taskName}>Watch Unity Video</Text>
-    <Text style={styles.taskReward}>Earn drips (test mode)</Text>
-  </View>
-</TouchableOpacity>
+          {/* Unity Rewarded Ad button (simulation until real SDK rebuild) */}
+          <TouchableOpacity
+            style={styles.taskButton}
+            onPress={() => {
+              Alert.alert(
+                "Unity Ads (Simulation)",
+                "Unity rewarded ad would play here in real integration",
+              );
+              addPoints(5);
+              Alert.alert(
+                "Reward Earned!",
+                "You earned 5 drips! (Unity simulation)",
+              );
+            }}
+          >
+            <MaterialCommunityIcons name="video" size={32} color="#fff" />
+            <View style={styles.taskInfo}>
+              <Text style={styles.taskName}>Watch Unity Video</Text>
+              <Text style={styles.taskReward}>Earn drips (test mode)</Text>
+            </View>
+          </TouchableOpacity>
 
           <View style={[styles.shareTaskCard, isDark && styles.cardDark]}>
             <View style={styles.shareHeader}>
