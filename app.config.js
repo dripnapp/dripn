@@ -7,12 +7,11 @@ export default {
     icon: "./assets/images/icon.png",
     scheme: "dripn",
     userInterfaceStyle: "automatic",
-    newArchEnabled: true, // Keep enabled for better performance; if issues return, we can toggle
+    newArchEnabled: true,
 
     ios: {
       supportsTablet: true,
       bundleIdentifier: "com.dripnapp.dripn",
-      // Added ATT prompt (required for personalized ads on iOS 14+)
       infoPlist: {
         NSUserTrackingUsageDescription:
           "This allows personalized ads to support rewards and features in the app.",
@@ -45,7 +44,21 @@ export default {
           backgroundColor: "#0d1117",
         },
       ],
-    withUnity
+      "expo-dev-client",
+      [
+        "react-native-google-mobile-ads",
+        {
+          iosAppId: "ca-app-pub-3940256099942544~3347511713",
+        },
+      ],
+      [
+        "./plugins/unity-ads/withUnityAds",
+        {
+          iosGameId: "6027059",
+        },
+      ],
+    ],
+
     experiments: {
       typedRoutes: true,
     },
