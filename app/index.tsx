@@ -30,7 +30,6 @@ import mobileAds, {
 } from "react-native-google-mobile-ads";
 
 // Unity Ads - Using the official SDK (configured via your custom withUnityAds.js plugin)
-import * as UnityAds from "expo-unity-ads"; // Make sure this package is installed
 
 // AdMob rewarded setup
 const rewardedAdUnitId = __DEV__
@@ -525,18 +524,21 @@ export default function Home() {
             </View>
           </TouchableOpacity>
 
-          {/* Real Unity Rewarded Ad button */}
-          <TouchableOpacity
-            style={styles.taskButton}
-            onPress={showUnityRewarded}
-            disabled={!unityInitialized}
-          >
-            <MaterialCommunityIcons name="video" size={32} color="#fff" />
-            <View style={styles.taskInfo}>
-              <Text style={styles.taskName}>Watch Unity Video</Text>
-              <Text style={styles.taskReward}>Earn drips (test mode)</Text>
-            </View>
-          </TouchableOpacity>
+          {/* Temporary Unity button (simulation until real SDK rebuild) */}
+<TouchableOpacity
+  style={styles.taskButton}
+  onPress={() => {
+    Alert.alert("Unity Ads (Simulation)", "Unity rewarded ad would play here in real integration");
+    addPoints(5);
+    Alert.alert("Reward Earned!", "You earned 5 drips! (Unity simulation)");
+  }}
+>
+  <MaterialCommunityIcons name="video" size={32} color="#fff" />
+  <View style={styles.taskInfo}>
+    <Text style={styles.taskName}>Watch Unity Video</Text>
+    <Text style={styles.taskReward}>Earn drips (test mode)</Text>
+  </View>
+</TouchableOpacity>
 
           <View style={[styles.shareTaskCard, isDark && styles.cardDark]}>
             <View style={styles.shareHeader}>
