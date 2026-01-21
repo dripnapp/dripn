@@ -57,7 +57,6 @@ export default {
           iosGameId: "6027059",
         },
       ],
-      "expo-modules-autolinking",
     ],
 
     experiments: {
