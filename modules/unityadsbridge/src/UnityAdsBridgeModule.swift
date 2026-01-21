@@ -48,7 +48,7 @@ extension UnityAdsBridgeModule: UnityAdsLoadDelegate {
     print("Unity Ads ad loaded: \(placementId)")
   }
 
-  public func unityAdsAdFailed(toLoad placementId: String, error: UnityAdsLoadError, message: String) {
+  public func unityAdsAdFailed(toLoad placementId: String, withError error: UnityAdsLoadError, withMessage message: String) {
     sendEvent("onAdLoadFailed", ["placementId": placementId, "error": message])
     print("Unity Ads ad failed to load: \(placementId) - \(message)")
   }
