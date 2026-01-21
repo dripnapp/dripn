@@ -1,5 +1,5 @@
 Pod::Spec.new do |s|
-  s.name           = 'unityadsbridge'   ← Change this line to lowercase module name
+  s.name           = 'unityadsbridge'
   s.version        = '1.0.0'
   s.summary        = 'Expo native bridge for Unity Ads'
   s.homepage       = 'https://dripn.app'
