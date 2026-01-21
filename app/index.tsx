@@ -9,7 +9,9 @@ import {
   ActivityIndicator,
   Share,
   Linking,
+  Modal,
 } from "react-native";
+import { WebView } from "react-native-webview";
 import { useStore } from "../src/store/useStore";
 import { getXRPPrice } from "../src/services/xrpService";
 import {
@@ -79,6 +81,7 @@ export default function Home() {
   const [showSplash, setShowSplash] = useState(true);
   const [showAcknowledgment, setShowAcknowledgment] = useState(false);
   const [showVideoPlayer, setShowVideoPlayer] = useState(false);
+  const [showAdGemModal, setShowAdGemModal] = useState(false);
   const [showUsernameSetup, setShowUsernameSetup] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState("");
   const pollingRef = useRef(false);
@@ -220,6 +223,10 @@ export default function Home() {
   const handleVideoCancel = () => {
     setShowVideoPlayer(false);
     Alert.alert("Cancelled", "You must watch the full video to earn drips.");
+  };
+
+  const handleAdGemOfferwall = () => {
+    setShowAdGemModal(true);
   };
 
   const handleCashout = () => {
@@ -472,7 +479,21 @@ export default function Home() {
             </View>
           </TouchableOpacity>
 
-          {/* Unity Rewarded Ad button (simulation until real SDK rebuild) */}
+          {/* AdGem Offerwall Button */}
+          <TouchableOpacity
+            style={styles.taskButton}
+            onPress={handleAdGemOfferwall}
+          >
+            <MaterialCommunityIcons name="offer" size={32} color="#fff" />
+            <View style={styles.taskInfo}>
+              <Text style={styles.taskName}>AdGem Offers</Text>
+              <Text style={styles.taskReward}>
+                Earn more drips (surveys, apps)
+              </Text>
+            </View>
+          </TouchableOpacity>
+
+          {/* Unity Rewarded Ad button (simulation) */}
           <TouchableOpacity
             style={styles.taskButton}
             onPress={() => {
@@ -557,6 +578,50 @@ export default function Home() {
             </View>
           </View>
         </View>
+
+        {/* AdGem Offerwall Modal */}
+        <Modal
+          visible={showAdGemModal}
+          animationType="slide"
+          onRequestClose={() => setShowAdGemModal(false)}
+        >
+          <View style={{ flex: 1, backgroundColor: "#000" }}>
+            <WebView
+              source={{
+                uri: `https://offerwall.adgem.com/?app_id=31857&user_id=${walletAddress || "guest_" + Date.now()}`,
+              }}
+              style={{ flex: 1 }}
+              onNavigationStateChange={(navState) => {
+                if (
+                  navState.url.includes("reward") ||
+                  navState.url.includes("complete")
+                ) {
+                  Alert.alert(
+                    "Reward Detected",
+                    "Check your AdGem dashboard or balance",
+                  );
+                }
+              }}
+              onError={(syntheticEvent) => {
+                const { nativeEvent } = syntheticEvent;
+                console.warn("WebView error: ", nativeEvent);
+              }}
+            />
+            <TouchableOpacity
+              style={{
+                padding: 20,
+                backgroundColor: "#4dabf7",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+              onPress={() => setShowAdGemModal(false)}
+            >
+              <Text style={{ color: "#fff", fontSize: 18, fontWeight: "bold" }}>
+                Close Offerwall
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </Modal>
 
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, isDark && styles.textDark]}>
