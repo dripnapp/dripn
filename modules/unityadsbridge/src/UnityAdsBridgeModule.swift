@@ -29,7 +29,7 @@ public class UnityAdsBridgeModule: Module {
 }
 
 // MARK: - Initialization Delegate
-extension UnityAdsBridgeModule: UnityAdsInitializationDelegate {
+// extension UnityAdsBridgeModule: UnityAdsInitializationDelegate {
   public func initializationComplete() {
     sendEvent("onInitComplete", [:])
     print("Unity Ads initialization complete")
@@ -42,7 +42,7 @@ extension UnityAdsBridgeModule: UnityAdsInitializationDelegate {
 }
 
 // MARK: - Load Delegate
-extension UnityAdsBridgeModule: UnityAdsLoadDelegate {
+// extension UnityAdsBridgeModule: UnityAdsLoadDelegate {
   public func unityAdsAdLoaded(_ placementId: String) {
     sendEvent("onAdLoaded", ["placementId": placementId])
     print("Unity Ads ad loaded: \(placementId)")
@@ -55,7 +55,7 @@ extension UnityAdsBridgeModule: UnityAdsLoadDelegate {
 }
 
 // MARK: - Show Delegate
-extension UnityAdsBridgeModule: UnityAdsShowDelegate {
+// extension UnityAdsBridgeModule: UnityAdsShowDelegate {
   public func unityAdsShowStart(_ placementId: String) {
     sendEvent("onAdShowStart", ["placementId": placementId])
     print("Unity Ads show started: \(placementId)")

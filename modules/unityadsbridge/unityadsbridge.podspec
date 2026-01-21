@@ -9,5 +9,5 @@ Pod::Spec.new do |s|
   s.platforms        = { :ios => '13.0' }
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
   s.dependency 'ExpoModulesCore'
-  s.dependency 'UnityAds', '~> 4.12'
+  # s.dependency 'UnityAds', '~> 4.12'
 end
