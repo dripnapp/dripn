@@ -820,3 +820,5 @@ const styles = StyleSheet.create({
   },
   progressText: { fontSize: 12, color: "#868e96", textAlign: "right" },
 });
+
+
