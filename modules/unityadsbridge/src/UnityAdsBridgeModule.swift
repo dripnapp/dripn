@@ -1,16 +1,16 @@
 import ExpoModulesCore
-import UnityAds
+// import UnityAds
 
 public class UnityAdsBridgeModule: Module {
   public func definition() -> ModuleDefinition {
     Name("UnityAdsBridge")
 
     AsyncFunction("initialize") { (gameId: String, testMode: Bool) in
-      UnityAds.initialize(gameId: gameId, testMode: testMode, initializationDelegate: self)
+      // UnityAds.initialize(gameId: gameId, testMode: testMode, initializationDelegate: self)
     }
 
     AsyncFunction("loadRewarded") { (placementId: String) in
-      UnityAds.load(placementId: placementId, loadDelegate: self)
+      // UnityAds.load(placementId: placementId, loadDelegate: self)
     }
 
     AsyncFunction("showRewarded") { (placementId: String) in
@@ -21,7 +21,7 @@ public class UnityAdsBridgeModule: Module {
         print("No root view controller found")
         return
       }
-      UnityAds.show(rootVC, placementId: placementId, showDelegate: self)
+      // UnityAds.show(rootVC, placementId: placementId, showDelegate: self)
     }
 
     Events("onInitComplete", "onInitFailed", "onAdLoaded", "onAdLoadFailed", "onAdShowStart", "onAdShowClick", "onAdShowComplete", "onAdShowFailed")
