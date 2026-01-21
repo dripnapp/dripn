@@ -7,8 +7,9 @@
   "expo": {
     "ios": {
       "modules": [
-        "UnityAdsBridgeModule"
-      ]
+        "UnityAdsBridgeModule"   ← Keep this as the Swift class name
+      ],
+      "podspecPath": "unityadsbridge.podspec"   ← Add this line if missing
     }
   }
 }
