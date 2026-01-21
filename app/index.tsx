@@ -85,6 +85,7 @@ export default function Home() {
   const [showUsernameSetup, setShowUsernameSetup] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState("");
   const pollingRef = useRef(false);
+  // const [unityInitialized, setUnityInitialized] = useState(false);  // ← commented out
 
   const DAILY_CAP = 500;
   const AD_REVENUE_CENTS = 5;
@@ -493,7 +494,7 @@ export default function Home() {
             </View>
           </TouchableOpacity>
 
-          {/* Unity Rewarded Ad button (simulation) */}
+          {/* Unity Rewarded Ad button (simulation until real SDK rebuild) */}
           <TouchableOpacity
             style={styles.taskButton}
             onPress={() => {

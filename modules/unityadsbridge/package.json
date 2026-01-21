@@ -1,0 +1,15 @@
+{
+  "name": "unityadsbridge",
+  "version": "1.0.0",
+  "description": "Expo native bridge for Unity Ads",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
+  "expo": {
+    "ios": {
+      "modules": [
+        "UnityAdsBridgeModule"   ← Keep this as the Swift class name
+      ],
+      "podspecPath": "unityadsbridge.podspec"   ← Add this line if missing
+    }
+  }
+}
