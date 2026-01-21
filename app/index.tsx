@@ -82,6 +82,7 @@ export default function Home() {
   const [showUsernameSetup, setShowUsernameSetup] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState("");
   const pollingRef = useRef(false);
+  const [unityInitialized, setUnityInitialized] = useState(false);
 
   const DAILY_CAP = 500;
   const AD_REVENUE_CENTS = 5;
@@ -110,6 +111,65 @@ export default function Home() {
 
     return () => rewardListener();
   }, []);
+
+  // Unity Ads Bridge Setup - Real native calls
+useEffect(() => {
+  UnityAdsBridge.initialize("6027059", true);
+
+  const initCompleteListener = UnityAdsBridge.addListener("onInitComplete", () => {
+    console.log("Unity Ads initialized successfully");
+    setUnityInitialized(true);
+  });
+
+  const initFailedListener = UnityAdsBridge.addListener("onInitFailed", (event) => {
+    console.error("Unity Ads init failed:", event.error);
+    Alert.alert("Init Error", event.error || "Failed to initialize Unity Ads");
+  });
+
+  return () => {
+    initCompleteListener.remove();
+    initFailedListener.remove();
+  };
+}, []);
+
+const showUnityRewarded = async () => {
+  if (!unityInitialized) {
+    Alert.alert("Not ready", "Unity Ads still initializing, try again soon.");
+    return;
+  }
+
+  try {
+    await UnityAdsBridge.loadRewarded("rewardedVideo");
+    await UnityAdsBridge.showRewarded("rewardedVideo");
+  } catch (error: any) {
+    console.error("Unity show error:", error);
+    Alert.alert("Error", "Failed to show Unity ad");
+  }
+};
+
+// Listen for reward and other events
+useEffect(() => {
+  const rewardListener = UnityAdsBridge.addListener("onReward", (event) => {
+    console.log("Unity reward earned:", event.amount);
+    addPoints(event.amount);
+    Alert.alert("Unity Reward Earned!", `You earned ${event.amount} drips!`);
+  });
+
+  const adFailedListener = UnityAdsBridge.addListener("onAdShowFailed", (event) => {
+    console.error("Unity ad show failed:", event.error);
+    Alert.alert("Ad Error", event.error || "Failed to show ad");
+  });
+
+  const adClosedListener = UnityAdsBridge.addListener("onAdShowComplete", (event) => {
+    console.log("Unity ad closed:", event.state);
+  });
+
+  return () => {
+    rewardListener.remove();
+    adFailedListener.remove();
+    adClosedListener.remove();
+  };
+}, [addPoints]);
 
   useEffect(() => {
     fetchPrice();
@@ -472,27 +532,18 @@ export default function Home() {
             </View>
           </TouchableOpacity>
 
-          {/* Unity Rewarded Ad button (simulation until real SDK rebuild) */}
-          <TouchableOpacity
-            style={styles.taskButton}
-            onPress={() => {
-              Alert.alert(
-                "Unity Ads (Simulation)",
-                "Unity rewarded ad would play here in real integration",
-              );
-              addPoints(5);
-              Alert.alert(
-                "Reward Earned!",
-                "You earned 5 drips! (Unity simulation)",
-              );
-            }}
-          >
-            <MaterialCommunityIcons name="video" size={32} color="#fff" />
-            <View style={styles.taskInfo}>
-              <Text style={styles.taskName}>Watch Unity Video</Text>
-              <Text style={styles.taskReward}>Earn drips (test mode)</Text>
-            </View>
-          </TouchableOpacity>
+          {/* Real Unity Rewarded Ad button */}
+<TouchableOpacity
+  style={styles.taskButton}
+  onPress={showUnityRewarded}
+  disabled={!unityInitialized}
+>
+  <MaterialCommunityIcons name="video" size={32} color="#fff" />
+  <View style={styles.taskInfo}>
+    <Text style={styles.taskName}>Watch Unity Video</Text>
+    <Text style={styles.taskReward}>Earn drips (test mode)</Text>
+  </View>
+</TouchableOpacity>
 
           <View style={[styles.shareTaskCard, isDark && styles.cardDark]}>
             <View style={styles.shareHeader}>

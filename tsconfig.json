@@ -26,6 +26,7 @@
     "**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts",
+    "unityadsbridge.d.ts",
     "expo-unity-ads.d.ts"
   ],
   "exclude": ["node_modules"]
