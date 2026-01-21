@@ -9,6 +9,7 @@
       "distribution": "internal",
       "ios": {
         "resourceClass": "m1-medium"
+      }
     },
     "preview": {
       "distribution": "internal"
