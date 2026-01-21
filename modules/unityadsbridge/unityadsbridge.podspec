@@ -4,10 +4,10 @@ Pod::Spec.new do |s|
   s.summary          = 'Expo native bridge for Unity Ads'
   s.homepage         = 'https://dripn.app'
   s.author           = ''
-  s.source           = { :path => '.' }  # Local files (required)
-  s.source_files     = 'src/**/*.{h,m,swift}'
+  s.source           = { :path => '.' }
+  s.source_files     = 'src/UnityAdsBridgeModule.swift'  # Explicit path to the file
   s.platforms        = { :ios => '13.0' }
-  s.license          = { :type => 'MIT', :file => 'LICENSE' }  # Minimal MIT license
+  s.license          = { :type => 'MIT', :file => 'LICENSE' }
   s.dependency 'ExpoModulesCore'
   s.dependency 'UnityAds', '~> 4.12'
 end
