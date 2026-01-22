@@ -81,6 +81,7 @@ export default function Home() {
   const [showSplash, setShowSplash] = useState(true);
   const [showAcknowledgment, setShowAcknowledgment] = useState(false);
   const [showVideoPlayer, setShowVideoPlayer] = useState(false);
+  const [showBitLabsModal, setShowBitLabsModal] = useState(false);
   const [showAdGemModal, setShowAdGemModal] = useState(false);
   const [showUsernameSetup, setShowUsernameSetup] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState("");
@@ -518,7 +519,7 @@ export default function Home() {
           >
             <MaterialCommunityIcons name="video" size={32} color="#fff" />
             <View style={styles.taskInfo}>
-              <Text style={styles.taskName}>Watch AdMob Rewarded Ad</Text>
+              <Text style={styles.taskName}>Watch AdMob Offers</Text>
               <Text style={styles.taskReward}>Earn drips (test mode)</Text>
             </View>
           </TouchableOpacity>
@@ -533,6 +534,20 @@ export default function Home() {
               <Text style={styles.taskName}>AdGem Offers</Text>
               <Text style={styles.taskReward}>
                 Earn more drips (surveys, apps)
+              </Text>
+            </View>
+          </TouchableOpacity>
+
+          {/* BitLabs Offer Wall Button */}
+          <TouchableOpacity
+            style={styles.taskButton}
+            onPress={() => setShowBitLabsModal(true)}
+          >
+            <MaterialCommunityIcons name="poll" size={32} color="#fff" />
+            <View style={styles.taskInfo}>
+              <Text style={styles.taskName}>BitLabs Offers</Text>
+              <Text style={styles.taskReward}>
+                Earn drips (surveys & tasks)
               </Text>
             </View>
           </TouchableOpacity>
@@ -662,6 +677,51 @@ export default function Home() {
             >
               <Text style={{ color: "#fff", fontSize: 18, fontWeight: "bold" }}>
                 Close Offerwall
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </Modal>
+
+        {/* BitLabs Offer Wall Modal */}
+        <Modal
+          visible={showBitLabsModal}
+          animationType="slide"
+          onRequestClose={() => setShowBitLabsModal(false)}
+        >
+          <View style={{ flex: 1, backgroundColor: "#000" }}>
+            <WebView
+              source={{
+                uri: `https://web.bitlabs.ai?token=f7a85bbf-4336-46fa-87ff-1940b5ccedcc&uid=${walletAddress || "guest_" + Date.now()}`,
+              }}
+              style={{ flex: 1 }}
+              onNavigationStateChange={(navState) => {
+                // Optional: detect reward/completion via URL changes
+                if (
+                  navState.url.includes("reward") ||
+                  navState.url.includes("complete")
+                ) {
+                  Alert.alert(
+                    "Reward Detected",
+                    "Check your BitLabs dashboard or balance",
+                  );
+                }
+              }}
+              onError={(syntheticEvent) => {
+                const { nativeEvent } = syntheticEvent;
+                console.warn("BitLabs WebView error:", nativeEvent);
+              }}
+            />
+            <TouchableOpacity
+              style={{
+                padding: 20,
+                backgroundColor: "#4dabf7",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+              onPress={() => setShowBitLabsModal(false)}
+            >
+              <Text style={{ color: "#fff", fontSize: 18, fontWeight: "bold" }}>
+                Close BitLabs
               </Text>
             </TouchableOpacity>
           </View>
