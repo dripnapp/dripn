@@ -120,6 +120,49 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
+    console.log("Deep link listener is active");
+
+    const handleUrl = ({ url }: { url: string }) => {
+      console.log("Deep link received:", url);
+
+      if (url) {
+        try {
+          const parsedUrl = new URL(url);
+          const path = parsedUrl.pathname.replace(/^\//, ""); // remove leading slash
+          const queryParams = Object.fromEntries(
+            parsedUrl.searchParams.entries(),
+          );
+
+          console.log("Parsed path:", path);
+          console.log("Query params:", queryParams);
+
+          if (
+            path === "redirect" ||
+            path.includes("auth") ||
+            path.includes("callback")
+          ) {
+            Alert.alert("Success", "Wallet connected via Xaman!");
+            // Add your polling or setWallet logic here if needed
+          }
+        } catch (err) {
+          console.error("Failed to parse deep link URL:", err);
+        }
+      }
+    };
+
+    const subscription = Linking.addEventListener("url", handleUrl);
+
+    Linking.getInitialURL().then((initialUrl) => {
+      if (initialUrl) {
+        console.log("App opened from initial deep link:", initialUrl);
+        handleUrl({ url: initialUrl });
+      }
+    });
+
+    return () => subscription.remove();
+  }, []);
+
+  useEffect(() => {
     if (!showSplash && !hasCompletedOnboarding) {
     }
     if (!showSplash && hasCompletedOnboarding && !hasAcceptedTerms) {
