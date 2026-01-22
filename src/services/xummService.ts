@@ -57,8 +57,7 @@ export const createSignInRequest = async (): Promise<XummSignInResult> => {
       options: {
         submit: false,
         return_url: {
-          app: "dripnapp://redirect",
-          web: Platform.OS === "web" ? window.location.href : undefined,
+          app: "dripnapp://redirect", 
         },
       },
       custom_meta: {
