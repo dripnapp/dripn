@@ -12,10 +12,11 @@ export default {
     ios: {
       supportsTablet: true,
       bundleIdentifier: "com.dripnapp.dripn",
+      buildNumber: "2", // ← Start with "1" (increase to "2", "3", etc. for each new build)
       infoPlist: {
         NSUserTrackingUsageDescription:
           "This allows personalized ads to support rewards and features in the app.",
-        ITSAppUsesNonExemptEncryption: false, // ← ADD THIS LINE
+        ITSAppUsesNonExemptEncryption: false,
       },
     },
 
