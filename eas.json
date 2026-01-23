@@ -7,18 +7,21 @@
       "developmentClient": true,
       "distribution": "internal",
       "ios": {
-        "resourceClass": "m1-medium" // or "m1-large" if available; "m1-medium" is safe default
-      },
-      "android": {
-        "resourceClass": "m1-medium"
+        "resourceClass": "medium"
       }
     },
-    "preview": {
-      "distribution": "internal"
+    "testflight": {
+      // ← ADD THIS NEW PROFILE
+      "distribution": "store", // or "internal" for private TestFlight
+      "ios": {
+        "resourceClass": "medium"
+      }
     },
-    "production": {}
-  },
-  "submit": {
-    "production": {}
+    "production": {
+      "distribution": "store",
+      "ios": {
+        "resourceClass": "large"
+      }
+    }
   }
 }
