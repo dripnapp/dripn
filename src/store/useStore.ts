@@ -258,23 +258,13 @@ export const useStore = create<AppState>()(
         const state = get();
         state.checkDailyReset();
         const today = new Date().toDateString();
-        const todayShares = state.dailyShares.filter(s => s.date === today);
+        const todayPlatformShares = state.dailyShares.filter(s => s.date === today && s.platform === platform);
         
-        if (todayShares.length >= 3) {
-          return { success: false, reward: 0, message: 'You have reached the maximum 3 shares for today.' };
+        if (todayPlatformShares.length >= 1) {
+          return { success: false, reward: 0, message: `You have already shared on ${platform} today.` };
         }
         
-        const lastShare = todayShares[todayShares.length - 1];
-        if (lastShare && Date.now() - lastShare.timestamp < 60000) {
-          return { success: false, reward: 0, message: 'Please wait at least 1 minute between shares.' };
-        }
-        
-        const shareNumber = todayShares.length + 1;
-        let reward = 0;
-        if (shareNumber === 1) reward = 1;
-        else if (shareNumber === 2) reward = 1;
-        else if (shareNumber === 3) reward = 3;
-        
+        const reward = 100;
         const newShare: ShareRecord = { date: today, platform, timestamp: Date.now() };
         const newPoints = state.points + reward;
         const newTotalEarned = (state.totalEarned || 0) + reward;

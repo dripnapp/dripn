@@ -185,18 +185,9 @@ export default function Home() {
   };
 
   const handleShare = async (platform: string) => {
-    const dailyCount = getDailyShareCount();
-    if (dailyCount >= 3) {
-      Alert.alert(
-        "Daily Limit",
-        "You've reached the daily share limit. Come back tomorrow!",
-      );
-      return;
-    }
-
-    const { canShare, timeLeft } = recordShare();
-    if (!canShare) {
-      Alert.alert("Cooldown", `Please wait ${timeLeft}s before sharing again.`);
+    const result = recordShare(platform);
+    if (!result.success) {
+      Alert.alert("Limit Reached", result.message);
       return;
     }
 
@@ -218,18 +209,9 @@ export default function Home() {
           "Instagram Share",
           "Copy this message to your story: " + shareMessage,
         );
-      } else {
-        await Share.share({
-          message: `${shareMessage} ${shareUrl}`,
-        });
       }
 
-      const rewards = [1, 1, 3];
-      const reward = rewards[dailyCount] || 0;
-      if (reward > 0) {
-        addPoints(reward);
-        Alert.alert("Shared!", `You earned ${reward} drips!`);
-      }
+      Alert.alert("Shared!", result.message);
     } catch (error) {
       console.error("Error sharing:", error);
     }
@@ -410,19 +392,27 @@ export default function Home() {
 
         <TouchableOpacity
           style={[styles.taskCard, isDark && styles.cardDark]}
-          onPress={() => setShowAdGemModal(true)}
+          onPress={() => {
+            if (Platform.OS === 'web') {
+              Alert.alert("Development", "AdMob is not available on web preview. Points will be added for testing.");
+              addPoints(50);
+            } else {
+              // In a real app, you might show an AdMob rewarded ad or a specific offerwall component
+              handleWatchAd();
+            }
+          }}
         >
           <View
-            style={[styles.taskIconCircle, { backgroundColor: "#7c3aed" }]}
+            style={[styles.taskIconCircle, { backgroundColor: "#4dabf7" }]}
           >
-            <MaterialCommunityIcons name="gift" size={24} color="#fff" />
+            <MaterialCommunityIcons name="ads-lightbulb" size={24} color="#fff" />
           </View>
           <View style={styles.taskInfo}>
             <Text style={[styles.taskTitle, isDark && styles.textDark]}>
-              AdGem Offers
+              AdMob Offers
             </Text>
             <Text style={[styles.taskSubtitle, isDark && styles.textMuted]}>
-              High-paying apps and games
+              Premium video and interactive offers
             </Text>
           </View>
           <MaterialCommunityIcons name="chevron-right" size={24} color="#ccc" />
@@ -448,8 +438,31 @@ export default function Home() {
           <MaterialCommunityIcons name="chevron-right" size={24} color="#ccc" />
         </TouchableOpacity>
 
+        <TouchableOpacity
+          style={[styles.taskCard, isDark && styles.cardDark]}
+          onPress={() => setShowAdGemModal(true)}
+        >
+          <View
+            style={[styles.taskIconCircle, { backgroundColor: "#7c3aed" }]}
+          >
+            <MaterialCommunityIcons name="gift" size={24} color="#fff" />
+          </View>
+          <View style={styles.taskInfo}>
+            <Text style={[styles.taskTitle, isDark && styles.textDark]}>
+              AdGem Offers
+            </Text>
+            <Text style={[styles.taskSubtitle, isDark && styles.textMuted]}>
+              High-paying apps and games
+            </Text>
+          </View>
+          <MaterialCommunityIcons name="chevron-right" size={24} color="#ccc" />
+        </TouchableOpacity>
+
         <Text style={[styles.sectionTitle, isDark && styles.textDark]}>
           Social Sharing
+        </Text>
+        <Text style={[styles.shareInfoText, isDark && styles.textMuted]}>
+          Earn 100 drips per share. 1 share per platform daily.
         </Text>
         <View style={styles.shareRow}>
           <TouchableOpacity
@@ -469,12 +482,6 @@ export default function Home() {
             onPress={() => handleShare("instagram")}
           >
             <MaterialCommunityIcons name="instagram" size={24} color="#fff" />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.shareBtn, { backgroundColor: "#40c057" }]}
-            onPress={() => handleShare("other")}
-          >
-            <MaterialCommunityIcons name="share-variant" size={20} color="#fff" />
           </TouchableOpacity>
         </View>
 
@@ -623,6 +630,10 @@ const styles = StyleSheet.create({
   taskInfo: { flex: 1, marginLeft: 16 },
   taskTitle: { fontSize: 16, fontWeight: "600", color: "#1a1a1a" },
   taskSubtitle: { fontSize: 13, color: "#868e96", marginTop: 2 },
+  shareInfoText: {
+    fontSize: 13,
+    marginBottom: 10,
+  },
   shareRow: { flexDirection: "row", gap: 12, marginBottom: 25 },
   shareBtn: {
     width: 48,
