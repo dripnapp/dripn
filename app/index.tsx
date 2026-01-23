@@ -94,7 +94,12 @@ export default function Home() {
   useEffect(() => {
     if (!showSplash && hasCompletedOnboarding && !hasAcceptedTerms) {
       setShowAcknowledgment(true);
-    } else if (!showSplash && hasCompletedOnboarding && hasAcceptedTerms && !username) {
+    } else if (
+      !showSplash &&
+      hasCompletedOnboarding &&
+      hasAcceptedTerms &&
+      !username
+    ) {
       setShowUsernameSetup(true);
     }
   }, [showSplash, hasCompletedOnboarding, hasAcceptedTerms, username]);
@@ -228,7 +233,7 @@ export default function Home() {
   };
 
   const handleRedeemDrips = () => {
-    Alert.alert("Redeem Drips", "Cash out process coming soon!");
+    Alert.alert("Redeem Drips", "Redeem process coming soon!");
   };
 
   if (showSplash) {
@@ -323,8 +328,8 @@ export default function Home() {
           </Text>
         </View>
 
-        <TouchableOpacity 
-          style={styles.redeemButton} 
+        <TouchableOpacity
+          style={styles.redeemButton}
           onPress={handleRedeemDrips}
         >
           <MaterialCommunityIcons name="cash-multiple" size={24} color="#fff" />
