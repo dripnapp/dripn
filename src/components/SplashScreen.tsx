@@ -1,16 +1,16 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Dimensions, Animated } from 'react-native';
-import { Image } from 'expo-image';
+import React, { useEffect, useState } from "react";
+import { View, Text, StyleSheet, Dimensions, Animated } from "react-native";
+import { Image } from "expo-image";
 
 interface SplashScreenProps {
   onFinish: () => void;
 }
 
-const { width: screenWidth } = Dimensions.get('window');
+const { width: screenWidth } = Dimensions.get("window");
 
 export default function SplashScreen({ onFinish }: SplashScreenProps) {
   const [visible, setVisible] = useState(true);
-  const [dots, setDots] = useState('');
+  const [dots, setDots] = useState("");
   const fadeAnim = useState(new Animated.Value(0.5))[0];
 
   useEffect(() => {
@@ -24,9 +24,9 @@ export default function SplashScreen({ onFinish }: SplashScreenProps) {
 
   useEffect(() => {
     const dotInterval = setInterval(() => {
-      setDots(prev => {
-        if (prev === '...') return '';
-        return prev + '.';
+      setDots((prev) => {
+        if (prev === "...") return "";
+        return prev + ".";
       });
     }, 400);
 
@@ -42,7 +42,7 @@ export default function SplashScreen({ onFinish }: SplashScreenProps) {
           duration: 600,
           useNativeDriver: true,
         }),
-      ])
+      ]),
     ).start();
 
     return () => clearInterval(dotInterval);
@@ -56,8 +56,8 @@ export default function SplashScreen({ onFinish }: SplashScreenProps) {
   return (
     <View style={styles.container}>
       <View style={styles.logoContainer}>
-        <Image 
-          source={require('../../assets/images/dripn-logo.jpg')}
+        <Image
+          source={require("../../assets/images/dripn-logo.jpg")}
           style={{ width: logoWidth, height: logoHeight }}
           contentFit="contain"
         />
@@ -74,22 +74,22 @@ export default function SplashScreen({ onFinish }: SplashScreenProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#12122a', // Match exact background of drip'n logo image
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "#000000", // Match exact background of drip'n logo image
+    justifyContent: "center",
+    alignItems: "center",
   },
   logoContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   loadingContainer: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 80,
   },
   loadingText: {
-    color: '#868e96',
+    color: "#868e96",
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: "500",
     letterSpacing: 2,
   },
 });
