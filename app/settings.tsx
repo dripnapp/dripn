@@ -6,13 +6,49 @@ import AppHeader from '../src/components/AppHeader';
 
 const RESERVED_USERNAMES = ['admin', 'dripn', 'system', 'support', 'moderator'];
 
-const THEMES: { id: ThemeMode; name: string; color: string; bgColor: string }[] = [
-  { id: 'classic', name: 'Classic', color: '#4dabf7', bgColor: '#f8f9fa' },
-  { id: 'dark', name: 'Dark', color: '#4dabf7', bgColor: '#1a1a2e' },
-  { id: 'neon', name: 'Neon', color: '#00ff41', bgColor: '#0d0d0d' },
-  { id: 'ocean', name: 'Ocean', color: '#0077be', bgColor: '#e0f2f1' },
-  { id: 'sunset', name: 'Sunset', color: '#ff4e50', bgColor: '#fff3e0' },
-  { id: 'forest', name: 'Forest', color: '#2d5a27', bgColor: '#f1f8e9' },
+const THEMES: { id: ThemeMode; name: string; color: string; bgColor: string; preview: { header: string; card: string; button: string } }[] = [
+  { 
+    id: 'classic', 
+    name: 'Classic', 
+    color: '#4dabf7', 
+    bgColor: '#f8f9fa',
+    preview: { header: '#12122a', card: '#fff', button: '#4dabf7' }
+  },
+  { 
+    id: 'dark', 
+    name: 'Dark', 
+    color: '#4dabf7', 
+    bgColor: '#1a1a2e',
+    preview: { header: '#12122a', card: '#252542', button: '#4dabf7' }
+  },
+  { 
+    id: 'neon', 
+    name: 'Neon', 
+    color: '#00ff41', 
+    bgColor: '#0d0d0d',
+    preview: { header: '#000', card: '#1a1a1a', button: '#00ff41' }
+  },
+  { 
+    id: 'ocean', 
+    name: 'Ocean', 
+    color: '#0077be', 
+    bgColor: '#e0f2f1',
+    preview: { header: '#004d40', card: '#fff', button: '#0077be' }
+  },
+  { 
+    id: 'sunset', 
+    name: 'Sunset', 
+    color: '#ff4e50', 
+    bgColor: '#fff3e0',
+    preview: { header: '#e65100', card: '#fff', button: '#ff4e50' }
+  },
+  { 
+    id: 'forest', 
+    name: 'Forest', 
+    color: '#2d5a27', 
+    bgColor: '#f1f8e9',
+    preview: { header: '#1b5e20', card: '#fff', button: '#2d5a27' }
+  },
 ];
 
 export default function Settings() {
@@ -133,13 +169,16 @@ export default function Settings() {
                   style={[
                     styles.themeCard, 
                     isSelected && styles.themeCardSelected,
-                    !isUnlocked && styles.themeCardLocked
                   ]} 
                   onPress={() => handleThemePress(t.id)}
                 >
                   <View style={[styles.themePreview, { backgroundColor: t.bgColor }]}>
-                    <View style={styles.previewHeader}>
+                    <View style={[styles.previewHeader, { backgroundColor: t.preview.header }]}>
                       <View style={styles.previewHeaderBar} />
+                    </View>
+                    <View style={styles.previewContent}>
+                       <View style={[styles.previewCard, { backgroundColor: t.preview.card }]} />
+                       <View style={[styles.previewButton, { backgroundColor: t.preview.button }]} />
                     </View>
                     {!isUnlocked && (
                       <View style={styles.lockOverlay}>
@@ -234,8 +273,12 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   themeCardSelected: { borderColor: '#4dabf7' },
-  themeCardLocked: { opacity: 0.8 },
-  themePreview: { height: 80, justifyContent: 'center' },
+  themePreview: { height: 100, overflow: 'hidden' },
+  previewHeader: { height: 15, justifyContent: 'center', alignItems: 'center' },
+  previewHeaderBar: { width: 30, height: 4, backgroundColor: 'rgba(255,255,255,0.3)', borderRadius: 2 },
+  previewContent: { padding: 10, flex: 1, justifyContent: 'center' },
+  previewCard: { height: 30, borderRadius: 6, marginBottom: 8, opacity: 0.8 },
+  previewButton: { height: 15, width: '60%', borderRadius: 4, opacity: 0.8 },
   lockOverlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(0,0,0,0.5)',
@@ -243,8 +286,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   lockText: { color: '#fff', fontSize: 10, fontWeight: 'bold', marginTop: 4 },
-  previewHeader: { height: 15, backgroundColor: '#12122a', justifyContent: 'center', alignItems: 'center', position: 'absolute', top: 0, width: '100%' },
-  previewHeaderBar: { width: 30, height: 4, backgroundColor: 'rgba(255,255,255,0.3)', borderRadius: 2 },
   themeInfo: { flexDirection: 'row', alignItems: 'center', padding: 10, backgroundColor: '#fff' },
   themeRadio: {
     width: 18,

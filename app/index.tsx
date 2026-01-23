@@ -92,11 +92,10 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    if (!showSplash && hasCompletedOnboarding && hasAcceptedTerms && !username) {
-      setShowUsernameSetup(true);
-    }
     if (!showSplash && hasCompletedOnboarding && !hasAcceptedTerms) {
       setShowAcknowledgment(true);
+    } else if (!showSplash && hasCompletedOnboarding && hasAcceptedTerms && !username) {
+      setShowUsernameSetup(true);
     }
   }, [showSplash, hasCompletedOnboarding, hasAcceptedTerms, username]);
 
@@ -228,6 +227,10 @@ export default function Home() {
     return 3;
   };
 
+  const handleRedeemDrips = () => {
+    Alert.alert("Redeem Drips", "Cash out process coming soon!");
+  };
+
   if (showSplash) {
     return <SplashScreen onFinish={handleSplashFinish} />;
   }
@@ -254,7 +257,7 @@ export default function Home() {
         onSave={setUsername}
         onClose={() => {
           if (username) setShowUsernameSetup(false);
-          else Alert.alert("Account Required", "You must create a username to continue.");
+          // Only show warning if user tries to close without a username
         }}
       />
 
@@ -319,6 +322,14 @@ export default function Home() {
             {Math.min(points, 500)} / 500 drips to next level
           </Text>
         </View>
+
+        <TouchableOpacity 
+          style={styles.redeemButton} 
+          onPress={handleRedeemDrips}
+        >
+          <MaterialCommunityIcons name="cash-multiple" size={24} color="#fff" />
+          <Text style={styles.redeemButtonText}>Redeem Drips</Text>
+        </TouchableOpacity>
 
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, isDark && styles.textDark]}>
@@ -625,6 +636,21 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#4dabf7",
     marginVertical: 5,
+  },
+  redeemButton: {
+    backgroundColor: "#40c057",
+    padding: 15,
+    borderRadius: 15,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 20,
+  },
+  redeemButtonText: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "bold",
+    marginLeft: 10,
   },
   section: { marginBottom: 25 },
   sectionTitle: {

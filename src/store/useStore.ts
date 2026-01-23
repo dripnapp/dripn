@@ -95,7 +95,7 @@ export const useStore = create<AppState>()(
       referralBonusEarned: 0,
       username: null,
       theme: 'classic',
-      unlockedThemes: ['classic', 'dark'],
+      unlockedThemes: ['classic'],
       dailyShares: [],
       history: [],
       setPoints: (points) => set({ points }),

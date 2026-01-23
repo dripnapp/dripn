@@ -70,11 +70,19 @@ export default function UsernameSetup({ visible, currentUsername, onSave, onClos
     setError('');
   };
 
+  const handleClose = () => {
+    if (!currentUsername && !username.trim()) {
+      Alert.alert("Account Required", "You must create a username to continue.");
+      return;
+    }
+    onClose();
+  };
+
   return (
     <Modal visible={visible} animationType="slide" transparent>
       <View style={styles.overlay}>
         <View style={styles.container}>
-          <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+          <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
             <MaterialCommunityIcons name="close" size={24} color="#666" />
           </TouchableOpacity>
 
