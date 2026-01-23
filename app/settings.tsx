@@ -7,7 +7,7 @@ import AppHeader from '../src/components/AppHeader';
 const RESERVED_USERNAMES = ['admin', 'dripn', 'system', 'support', 'moderator'];
 
 export default function Settings() {
-  const { username, setUsername, walletAddress, theme, setTheme } = useStore();
+  const { username, setUsername, theme, setTheme } = useStore();
   const [newUsername, setNewUsername] = useState(username || '');
   const [isEditingUsername, setIsEditingUsername] = useState(false);
 
@@ -36,7 +36,7 @@ export default function Settings() {
     Alert.alert('Success', 'Username updated!');
   };
 
-  const displayName = username || (walletAddress ? `${walletAddress.slice(0, 4)}...${walletAddress.slice(-4)}` : 'Not set');
+  const displayName = username || 'Not set';
 
   return (
     <View style={[styles.container, isDark && styles.containerDark]}>

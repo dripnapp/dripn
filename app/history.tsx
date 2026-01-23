@@ -8,21 +8,16 @@ export default function HistoryScreen() {
   const { history, points, totalEarned, theme } = useStore();
   const isDark = theme === 'dark';
 
-  const totalCashouts = history
-    .filter(h => h.type === 'cashout')
-    .reduce((sum, h) => sum + h.amount, 0);
-
   const getSourceIcon = (source: string) => {
     if (source.includes('Video')) return 'play-circle';
     if (source.includes('Share')) return 'share-variant';
     if (source.includes('Badge')) return 'medal';
     if (source.includes('Referral')) return 'account-group';
-    if (source.includes('Cashout')) return 'cash';
     return 'star';
   };
 
   const getSourceColor = (type: string) => {
-    return type === 'cashout' ? '#e03131' : '#40c057';
+    return '#40c057';
   };
 
   return (
@@ -40,14 +35,6 @@ export default function HistoryScreen() {
             <MaterialCommunityIcons name="chart-line" size={28} color="#40c057" />
             <Text style={[styles.statValue, isDark && styles.textDark]}>{totalEarned || 0}</Text>
             <Text style={[styles.statLabel, isDark && styles.textMuted]}>Total Earned</Text>
-          </View>
-        </View>
-
-        <View style={[styles.statCardWide, isDark && styles.cardDark]}>
-          <MaterialCommunityIcons name="cash-multiple" size={28} color="#f59f00" />
-          <View style={styles.statCardWideContent}>
-            <Text style={[styles.statValue, isDark && styles.textDark]}>{totalCashouts}</Text>
-            <Text style={[styles.statLabel, isDark && styles.textMuted]}>Total Cashed Out</Text>
           </View>
         </View>
 
@@ -87,7 +74,7 @@ export default function HistoryScreen() {
                   styles.historyAmount,
                   { color: getSourceColor(item.type) }
                 ]}>
-                  {item.type === 'cashout' ? '-' : '+'}{item.amount} drps
+                  +{item.amount} drps
                 </Text>
               </View>
             ))}
@@ -97,7 +84,7 @@ export default function HistoryScreen() {
         <View style={[styles.infoBox, isDark && styles.infoBoxDark]}>
           <MaterialCommunityIcons name="information-outline" size={18} color="#4dabf7" />
           <Text style={[styles.infoText, isDark && styles.infoTextDark]}>
-            Total earned drips are used for leaderboard ranking, so you can cash out while still climbing the ranks!
+            Total earned drips are used for level progression. Earn more to unlock higher membership tiers!
           </Text>
         </View>
       </ScrollView>
@@ -123,20 +110,6 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
     elevation: 2,
   },
-  statCardWide: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 25,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 5,
-    elevation: 2,
-  },
-  statCardWideContent: { marginLeft: 15 },
   cardDark: { backgroundColor: '#252542' },
   statValue: { fontSize: 24, fontWeight: 'bold', color: '#1a1a1a', marginTop: 8 },
   statLabel: { fontSize: 12, color: '#868e96', marginTop: 4 },

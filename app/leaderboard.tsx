@@ -18,18 +18,11 @@ const baseLeaderboard = [
 ];
 
 export default function LeaderboardScreen() {
-  const { points, userLevel, walletAddress, username, theme, totalEarned } = useStore();
+  const { points, userLevel, username, theme, totalEarned } = useStore();
   const isDark = theme === 'dark';
   const [refreshing, setRefreshing] = useState(false);
 
-  const getDisplayName = () => {
-    if (username) return username;
-    if (walletAddress) {
-      return `${walletAddress.slice(0, 4)}...${walletAddress.slice(-4)}`;
-    }
-    return 'You';
-  };
-  const displayName = getDisplayName();
+  const displayName = username || 'You';
 
   const leaderboardData = useMemo(() => {
     const currentUser = {

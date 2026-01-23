@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,18 +6,12 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
-  ActivityIndicator,
   Share,
   Linking,
   Modal,
 } from "react-native";
 import { WebView } from "react-native-webview";
 import { useStore } from "../src/store/useStore";
-import { getXRPPrice } from "../src/services/xrpService";
-import {
-  createSignInRequest,
-  pollForSignIn,
-} from "../src/services/xummService";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import SplashScreen from "../src/components/SplashScreen";
 import OnboardingScreen from "../src/components/OnboardingScreen";
@@ -38,27 +32,9 @@ const rewardedAdUnitId = __DEV__
 
 const rewarded = RewardedAd.createForAdRequest(rewardedAdUnitId);
 
-const formatCurrency = (value: number, locale?: string): string => {
-  const userLocale =
-    locale || (typeof navigator !== "undefined" ? navigator.language : "en-US");
-  try {
-    return new Intl.NumberFormat(userLocale, {
-      style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 4,
-      maximumFractionDigits: 4,
-    }).format(value);
-  } catch {
-    return `$${value.toFixed(4)}`;
-  }
-};
-
 export default function Home() {
   const {
     points,
-    walletAddress,
-    isWalletConnected,
-    setWallet,
     addPoints,
     dailyEarnings,
     hasCompletedOnboarding,
@@ -66,7 +42,6 @@ export default function Home() {
     completeOnboarding,
     acceptTerms,
     userLevel,
-    disconnectWallet,
     username,
     setUsername,
     theme,
@@ -76,7 +51,6 @@ export default function Home() {
 
   const isDark = theme === "dark";
 
-  const [xrpPrice, setXrpPrice] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
   const [showAcknowledgment, setShowAcknowledgment] = useState(false);
@@ -84,9 +58,6 @@ export default function Home() {
   const [showBitLabsModal, setShowBitLabsModal] = useState(false);
   const [showAdGemModal, setShowAdGemModal] = useState(false);
   const [showUsernameSetup, setShowUsernameSetup] = useState(false);
-  const [connectionStatus, setConnectionStatus] = useState("");
-  const pollingRef = useRef(false);
-  // const [unityInitialized, setUnityInitialized] = useState(false);  // ← commented out
 
   const DAILY_CAP = 500;
   const AD_REVENUE_CENTS = 5;
@@ -117,64 +88,12 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    fetchPrice();
-  }, []);
-
-  useEffect(() => {
-    console.log("Deep link listener is active");
-
-    const handleUrl = ({ url }: { url: string }) => {
-      console.log("Deep link received:", url);
-
-      if (url) {
-        try {
-          const parsedUrl = new URL(url);
-          const path = parsedUrl.pathname.replace(/^\//, ""); // remove leading slash
-          const queryParams = Object.fromEntries(
-            parsedUrl.searchParams.entries(),
-          );
-
-          console.log("Parsed path:", path);
-          console.log("Query params:", queryParams);
-
-          if (
-            path === "redirect" ||
-            path.includes("auth") ||
-            path.includes("callback")
-          ) {
-            Alert.alert("Success", "Wallet connected via Xaman!");
-            // Add your polling or setWallet logic here if needed
-          }
-        } catch (err) {
-          console.error("Failed to parse deep link URL:", err);
-        }
-      }
-    };
-
-    const subscription = Linking.addEventListener("url", handleUrl);
-
-    Linking.getInitialURL().then((initialUrl) => {
-      if (initialUrl) {
-        console.log("App opened from initial deep link:", initialUrl);
-        handleUrl({ url: initialUrl });
-      }
-    });
-
-    return () => subscription.remove();
-  }, []);
-
-  useEffect(() => {
     if (!showSplash && !hasCompletedOnboarding) {
     }
     if (!showSplash && hasCompletedOnboarding && !hasAcceptedTerms) {
       setShowAcknowledgment(true);
     }
   }, [showSplash, hasCompletedOnboarding, hasAcceptedTerms]);
-
-  const fetchPrice = async () => {
-    const price = await getXRPPrice();
-    setXrpPrice(price);
-  };
 
   const handleSplashFinish = () => {
     setShowSplash(false);
@@ -188,64 +107,6 @@ export default function Home() {
   const handleAcceptTerms = () => {
     acceptTerms();
     setShowAcknowledgment(false);
-  };
-
-  const handleConnectWallet = async () => {
-    if (pollingRef.current) return;
-
-    setLoading(true);
-    setConnectionStatus("Initializing connection...");
-
-    try {
-      const result = await createSignInRequest();
-
-      if (!result.success) {
-        Alert.alert(
-          "Connection Error",
-          result.error || "Failed to create sign-in request",
-        );
-        setLoading(false);
-        setConnectionStatus("");
-        return;
-      }
-
-      if (result.payloadId) {
-        setConnectionStatus(
-          "Open Xaman app and approve the sign-in request...",
-        );
-
-        pollingRef.current = true;
-
-        const pollResult = await pollForSignIn(
-          result.payloadId,
-          (status) => setConnectionStatus(status),
-          60,
-        );
-
-        pollingRef.current = false;
-
-        if (pollResult.success && pollResult.address) {
-          setWallet(pollResult.address);
-          Alert.alert("Success", "Wallet connected successfully!");
-
-          if (!username) {
-            setTimeout(() => setShowUsernameSetup(true), 500);
-          }
-        } else {
-          Alert.alert(
-            "Connection Failed",
-            pollResult.error || "Could not connect wallet",
-          );
-        }
-      }
-    } catch (error: any) {
-      console.error("Wallet connection error:", error);
-      Alert.alert("Error", error.message || "Failed to connect wallet");
-    } finally {
-      setLoading(false);
-      setConnectionStatus("");
-      pollingRef.current = false;
-    }
   };
 
   const handleWatchAd = () => {
@@ -272,48 +133,6 @@ export default function Home() {
 
   const handleAdGemOfferwall = () => {
     setShowAdGemModal(true);
-  };
-
-  const handleCashout = () => {
-    if (!isWalletConnected) {
-      Alert.alert("Error", "Please connect your wallet first");
-      return;
-    }
-    if (points < 500) {
-      Alert.alert("Low Balance", "Minimum cashout is 500 drips");
-      return;
-    }
-
-    Alert.alert(
-      "Confirm Cashout",
-      `Cash out 500 drips for approx ${(5 / (xrpPrice || 1)).toFixed(2)} XRP?\n\nI understand price volatility and acknowledge payouts are at current market rate.`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Confirm",
-          onPress: () =>
-            Alert.alert("Success", "Payout request sent! (Testnet)"),
-        },
-      ],
-    );
-  };
-
-  const handleLogout = () => {
-    Alert.alert(
-      "Disconnect Wallet",
-      "Are you sure you want to disconnect your wallet? You can reconnect anytime.",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Disconnect",
-          style: "destructive",
-          onPress: () => {
-            disconnectWallet();
-            Alert.alert("Disconnected", "Your wallet has been disconnected.");
-          },
-        },
-      ],
-    );
   };
 
   const handleShare = async (
@@ -445,24 +264,19 @@ export default function Home() {
               {userLevel} Member
             </Text>
           </View>
-          {isWalletConnected && (
-            <TouchableOpacity
-              style={[styles.profileButton, isDark && styles.profileButtonDark]}
-              onPress={() => setShowUsernameSetup(true)}
-            >
-              <MaterialCommunityIcons
-                name="account-edit"
-                size={16}
-                color="#4dabf7"
-              />
-              <Text style={styles.profileButtonText}>
-                {username ||
-                  (walletAddress
-                    ? `${walletAddress.slice(0, 4)}...${walletAddress.slice(-4)}`
-                    : "Set Username")}
-              </Text>
-            </TouchableOpacity>
-          )}
+          <TouchableOpacity
+            style={[styles.profileButton, isDark && styles.profileButtonDark]}
+            onPress={() => setShowUsernameSetup(true)}
+          >
+            <MaterialCommunityIcons
+              name="account-edit"
+              size={16}
+              color="#4dabf7"
+            />
+            <Text style={styles.profileButtonText}>
+              {username || "Set Username"}
+            </Text>
+          </TouchableOpacity>
         </View>
 
         <View style={[styles.card, isDark && styles.cardDark]}>
@@ -479,7 +293,7 @@ export default function Home() {
             />
           </View>
           <Text style={styles.progressText}>
-            {Math.min(points, 500)} / 500 drips to cashout
+            {Math.min(points, 500)} / 500 drips to next level
           </Text>
         </View>
 
@@ -500,7 +314,6 @@ export default function Home() {
             </View>
           </TouchableOpacity>
 
-          {/* AdMob Rewarded Ad button */}
           <TouchableOpacity
             style={styles.taskButton}
             onPress={() => {
@@ -524,7 +337,6 @@ export default function Home() {
             </View>
           </TouchableOpacity>
 
-          {/* AdGem Offerwall Button */}
           <TouchableOpacity
             style={styles.taskButton}
             onPress={handleAdGemOfferwall}
@@ -538,7 +350,6 @@ export default function Home() {
             </View>
           </TouchableOpacity>
 
-          {/* BitLabs Offer Wall Button */}
           <TouchableOpacity
             style={styles.taskButton}
             onPress={() => setShowBitLabsModal(true)}
@@ -549,28 +360,6 @@ export default function Home() {
               <Text style={styles.taskReward}>
                 Earn drips (surveys & tasks)
               </Text>
-            </View>
-          </TouchableOpacity>
-
-          {/* Unity Rewarded Ad button (simulation until real SDK rebuild) */}
-          <TouchableOpacity
-            style={styles.taskButton}
-            onPress={() => {
-              Alert.alert(
-                "Unity Ads (Simulation)",
-                "Unity rewarded ad would play here in real integration",
-              );
-              addPoints(5);
-              Alert.alert(
-                "Reward Earned!",
-                "You earned 5 drips! (Unity simulation)",
-              );
-            }}
-          >
-            <MaterialCommunityIcons name="video" size={32} color="#fff" />
-            <View style={styles.taskInfo}>
-              <Text style={styles.taskName}>Watch Unity Video</Text>
-              <Text style={styles.taskReward}>Earn drips (test mode)</Text>
             </View>
           </TouchableOpacity>
 
@@ -647,7 +436,7 @@ export default function Home() {
           <View style={{ flex: 1, backgroundColor: "#000" }}>
             <WebView
               source={{
-                uri: `https://offerwall.adgem.com/?app_id=31857&user_id=${walletAddress || "guest_" + Date.now()}`,
+                uri: `https://offerwall.adgem.com/?app_id=31857&user_id=${"guest_" + Date.now()}`,
               }}
               style={{ flex: 1 }}
               onNavigationStateChange={(navState) => {
@@ -691,11 +480,10 @@ export default function Home() {
           <View style={{ flex: 1, backgroundColor: "#000" }}>
             <WebView
               source={{
-                uri: `https://web.bitlabs.ai?token=f7a85bbf-4336-46fa-87ff-1940b5ccedcc&uid=${walletAddress || "guest_" + Date.now()}`,
+                uri: `https://web.bitlabs.ai?token=f7a85bbf-4336-46fa-87ff-1940b5ccedcc&uid=${"guest_" + Date.now()}`,
               }}
               style={{ flex: 1 }}
               onNavigationStateChange={(navState) => {
-                // Optional: detect reward/completion via URL changes
                 if (
                   navState.url.includes("reward") ||
                   navState.url.includes("complete")
@@ -708,7 +496,7 @@ export default function Home() {
               }}
               onError={(syntheticEvent) => {
                 const { nativeEvent } = syntheticEvent;
-                console.warn("BitLabs WebView error:", nativeEvent);
+                console.warn("WebView error: ", nativeEvent);
               }}
             />
             <TouchableOpacity
@@ -721,76 +509,13 @@ export default function Home() {
               onPress={() => setShowBitLabsModal(false)}
             >
               <Text style={{ color: "#fff", fontSize: 18, fontWeight: "bold" }}>
-                Close BitLabs
+                Close Offerwall
               </Text>
             </TouchableOpacity>
           </View>
         </Modal>
 
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, isDark && styles.textDark]}>
-            Wallet Status
-          </Text>
-          <View style={[styles.walletCard, isDark && styles.walletCardDark]}>
-            {isWalletConnected ? (
-              <>
-                <Text style={[styles.addressLabel, isDark && styles.labelDark]}>
-                  Connected Address (Testnet):
-                </Text>
-                <Text style={[styles.address, isDark && styles.textDark]}>
-                  {walletAddress}
-                </Text>
-                <TouchableOpacity
-                  style={styles.cashoutButton}
-                  onPress={handleCashout}
-                >
-                  <Text style={styles.buttonText}>Cash Out to XRP</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.logoutButton}
-                  onPress={handleLogout}
-                >
-                  <MaterialCommunityIcons
-                    name="logout"
-                    size={18}
-                    color="#868e96"
-                  />
-                  <Text style={styles.logoutText}>Disconnect Wallet</Text>
-                </TouchableOpacity>
-              </>
-            ) : (
-              <View>
-                <TouchableOpacity
-                  style={styles.connectButton}
-                  onPress={handleConnectWallet}
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <View style={styles.loadingRow}>
-                      <ActivityIndicator color="#fff" size="small" />
-                      <Text style={[styles.buttonText, { marginLeft: 10 }]}>
-                        Connecting...
-                      </Text>
-                    </View>
-                  ) : (
-                    <Text style={styles.buttonText}>Connect with Xaman</Text>
-                  )}
-                </TouchableOpacity>
-                {connectionStatus ? (
-                  <Text style={styles.connectionStatus}>
-                    {connectionStatus}
-                  </Text>
-                ) : null}
-              </View>
-            )}
-          </View>
-        </View>
-
         <View style={[styles.infoCard, isDark && styles.infoCardDark]}>
-          <Text style={[styles.infoText, isDark && styles.infoTextDark]}>
-            Current XRP Price:{" "}
-            {xrpPrice ? formatCurrency(xrpPrice) : "Loading..."}
-          </Text>
           <Text style={[styles.infoText, isDark && styles.infoTextDark]}>
             Daily Earnings: {dailyEarnings} / 500 drips
           </Text>
@@ -881,7 +606,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 15,
+    marginBottom: 10,
   },
   taskInfo: { marginLeft: 15 },
   taskName: { color: "#fff", fontSize: 18, fontWeight: "600" },
@@ -894,7 +619,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#e9ecef",
   },
-  shareHeader: { flexDirection: "row", alignItems: "center", marginBottom: 15 },
+  shareHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 15,
+  },
   shareHeaderText: { marginLeft: 12, flex: 1 },
   shareTitle: { fontSize: 16, fontWeight: "600", color: "#1a1a1a" },
   shareSubtitle: { fontSize: 12, color: "#666", marginTop: 2 },
@@ -919,48 +648,7 @@ const styles = StyleSheet.create({
   facebookButton: { backgroundColor: "#4267B2" },
   instagramButton: { backgroundColor: "#E4405F" },
   textButton: { backgroundColor: "#2f9e44" },
-  walletCard: {
-    backgroundColor: "#fff",
-    padding: 20,
-    borderRadius: 15,
-    borderWidth: 1,
-    borderColor: "#eee",
-  },
-  walletCardDark: { backgroundColor: "#252542", borderColor: "#3a3a5a" },
-  addressLabel: { fontSize: 12, color: "#666", marginBottom: 5 },
-  address: { fontSize: 12, color: "#333", fontWeight: "500", marginBottom: 15 },
-  connectButton: {
-    backgroundColor: "#1a1a1a",
-    padding: 15,
-    borderRadius: 12,
-    alignItems: "center",
-  },
-  cashoutButton: {
-    backgroundColor: "#2f9e44",
-    padding: 15,
-    borderRadius: 12,
-    alignItems: "center",
-  },
-  logoutButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 12,
-    paddingVertical: 10,
-  },
-  logoutText: { color: "#868e96", fontSize: 14, marginLeft: 6 },
   buttonText: { color: "#fff", fontSize: 16, fontWeight: "600" },
-  loadingRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  connectionStatus: {
-    fontSize: 12,
-    color: "#4dabf7",
-    textAlign: "center",
-    marginTop: 10,
-  },
   infoCard: {
     padding: 15,
     backgroundColor: "#e9ecef",

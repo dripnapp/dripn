@@ -51,12 +51,12 @@ export default {
           iosAppId: "ca-app-pub-3940256099942544~3347511713",
         },
       ],
-      [
-        "./plugins/unity-ads/withUnityAds",
-        {
-          iosGameId: "6027059",
-        },
-      ],
+      //[
+      //  "./plugins/unity-ads/withUnityAds",
+      //  {
+      //    iosGameId: "6027059",
+      //  },
+      //  ],
     ],
 
     experiments: {

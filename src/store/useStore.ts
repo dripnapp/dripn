@@ -18,7 +18,7 @@ interface ShareRecord {
 
 interface HistoryRecord {
   id: string;
-  type: 'reward' | 'cashout';
+  type: 'reward';
   amount: number;
   source: string;
   timestamp: number;
@@ -28,8 +28,6 @@ interface HistoryRecord {
 interface AppState {
   points: number;
   totalEarned: number;
-  walletAddress: string | null;
-  isWalletConnected: boolean;
   dailyEarnings: number;
   lastEarningsDate: string | null;
   hasCompletedOnboarding: boolean;
@@ -42,14 +40,11 @@ interface AppState {
   enteredReferralCode: string | null;
   referralBonusEarned: number;
   username: string | null;
-  xummPayloadId: string | null;
   theme: ThemeMode;
   dailyShares: ShareRecord[];
   history: HistoryRecord[];
   setPoints: (points: number) => void;
   addPoints: (amount: number, source?: string) => void;
-  setWallet: (address: string | null) => void;
-  disconnectWallet: () => void;
   resetDaily: () => void;
   completeOnboarding: () => void;
   acceptTerms: () => void;
@@ -58,11 +53,9 @@ interface AppState {
   setReferralCode: (code: string) => void;
   enterReferralCode: (code: string) => boolean;
   setUsername: (username: string) => void;
-  setXummPayloadId: (payloadId: string | null) => void;
   setTheme: (theme: ThemeMode) => void;
   recordShare: (platform: string) => { success: boolean; reward: number; message: string };
   getDailyShareCount: () => number;
-  recordCashout: (amount: number) => void;
 }
 
 const generateReferralCode = () => {
@@ -74,7 +67,6 @@ const BADGE_REWARDS: Record<string, number> = {
   bronze: 25,
   silver: 50,
   gold: 100,
-  first_cashout: 50,
   referrer: 25,
   streak_7: 35,
   streak_30: 150,
@@ -85,8 +77,6 @@ export const useStore = create<AppState>()(
     (set, get) => ({
       points: 0,
       totalEarned: 0,
-      walletAddress: null,
-      isWalletConnected: false,
       dailyEarnings: 0,
       lastEarningsDate: null,
       hasCompletedOnboarding: false,
@@ -99,7 +89,6 @@ export const useStore = create<AppState>()(
       enteredReferralCode: null,
       referralBonusEarned: 0,
       username: null,
-      xummPayloadId: null,
       theme: 'classic',
       dailyShares: [],
       history: [],
@@ -131,14 +120,6 @@ export const useStore = create<AppState>()(
           userLevel,
           history: [historyRecord, ...state.history].slice(0, 100),
         };
-      }),
-      setWallet: (address) => set({ 
-        walletAddress: address, 
-        isWalletConnected: !!address 
-      }),
-      disconnectWallet: () => set({
-        walletAddress: null,
-        isWalletConnected: false
       }),
       resetDaily: () => set({ dailyEarnings: 0, lastEarningsDate: new Date().toDateString() }),
       completeOnboarding: () => set({ hasCompletedOnboarding: true }),
@@ -200,7 +181,6 @@ export const useStore = create<AppState>()(
         return true;
       },
       setUsername: (username) => set({ username }),
-      setXummPayloadId: (payloadId) => set({ xummPayloadId: payloadId }),
       setTheme: (theme) => set({ theme }),
       getDailyShareCount: () => {
         const state = get();
@@ -256,20 +236,6 @@ export const useStore = create<AppState>()(
         
         return { success: true, reward, message: `Share successful! You earned ${reward} drips.` };
       },
-      recordCashout: (amount: number) => set((state) => {
-        const historyRecord: HistoryRecord = {
-          id: Date.now().toString(),
-          type: 'cashout',
-          amount,
-          source: 'XRP Cashout',
-          timestamp: Date.now(),
-          date: new Date().toLocaleDateString(),
-        };
-        return {
-          points: state.points - amount,
-          history: [historyRecord, ...state.history].slice(0, 100),
-        };
-      }),
     }),
     {
       name: 'dripn-storage',
