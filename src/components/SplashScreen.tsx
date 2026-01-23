@@ -74,7 +74,7 @@ export default function SplashScreen({ onFinish }: SplashScreenProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#12122a',
+    backgroundColor: '#12122a', // Match exact background of drip'n logo image
     justifyContent: 'center',
     alignItems: 'center',
   },

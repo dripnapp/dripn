@@ -492,27 +492,32 @@ export default function Home() {
         animationType="slide"
         onRequestClose={() => setShowAdGemModal(false)}
       >
-        <View style={styles.modalHeader}>
-          <Text style={styles.modalTitle}>AdGem Offerwall</Text>
-          <TouchableOpacity onPress={() => setShowAdGemModal(false)}>
-            <MaterialCommunityIcons name="close" size={28} color="#000" />
-          </TouchableOpacity>
+        <View style={styles.modalContent}>
+          <WebView
+            source={{
+              uri: "https://api.adgem.com/v1/wall?appid=YOUR_ADGEM_APP_ID",
+            }}
+            onNavigationStateChange={(navState: any) => {
+              if (navState.url.includes("success")) {
+                addPoints(50);
+                setShowAdGemModal(false);
+              }
+            }}
+            onError={(syntheticEvent: any) => {
+              const { nativeEvent } = syntheticEvent;
+              console.warn('WebView error: ', nativeEvent);
+            }}
+          />
+          <View style={styles.modalFooter}>
+            <Text style={styles.modalFooterTitle}>AdGem Offerwall</Text>
+            <TouchableOpacity 
+              style={styles.closeFooterBtn}
+              onPress={() => setShowAdGemModal(false)}
+            >
+              <Text style={styles.closeFooterText}>Exit Offerwall</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-        <WebView
-          source={{
-            uri: "https://api.adgem.com/v1/wall?appid=YOUR_ADGEM_APP_ID",
-          }}
-          onNavigationStateChange={(navState: any) => {
-            if (navState.url.includes("success")) {
-              addPoints(50);
-              setShowAdGemModal(false);
-            }
-          }}
-          onError={(syntheticEvent: any) => {
-            const { nativeEvent } = syntheticEvent;
-            console.warn('WebView error: ', nativeEvent);
-          }}
-        />
       </Modal>
 
       <Modal
@@ -520,27 +525,32 @@ export default function Home() {
         animationType="slide"
         onRequestClose={() => setShowBitLabsModal(false)}
       >
-        <View style={styles.modalHeader}>
-          <Text style={styles.modalTitle}>BitLabs Surveys</Text>
-          <TouchableOpacity onPress={() => setShowBitLabsModal(false)}>
-            <MaterialCommunityIcons name="close" size={28} color="#000" />
-          </TouchableOpacity>
+        <View style={styles.modalContent}>
+          <WebView
+            source={{
+              uri: "https://web.bitlabs.ai/?token=YOUR_BITLABS_TOKEN",
+            }}
+            onNavigationStateChange={(navState: any) => {
+              if (navState.url.includes("complete")) {
+                addPoints(25);
+                setShowBitLabsModal(false);
+              }
+            }}
+            onError={(syntheticEvent: any) => {
+              const { nativeEvent } = syntheticEvent;
+              console.warn('WebView error: ', nativeEvent);
+            }}
+          />
+          <View style={styles.modalFooter}>
+            <Text style={styles.modalFooterTitle}>BitLabs Surveys</Text>
+            <TouchableOpacity 
+              style={styles.closeFooterBtn}
+              onPress={() => setShowBitLabsModal(false)}
+            >
+              <Text style={styles.closeFooterText}>Exit Offerwall</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-        <WebView
-          source={{
-            uri: "https://web.bitlabs.ai/?token=YOUR_BITLABS_TOKEN",
-          }}
-          onNavigationStateChange={(navState: any) => {
-            if (navState.url.includes("complete")) {
-              addPoints(25);
-              setShowBitLabsModal(false);
-            }
-          }}
-          onError={(syntheticEvent: any) => {
-            const { nativeEvent } = syntheticEvent;
-            console.warn('WebView error: ', nativeEvent);
-          }}
-        />
       </Modal>
     </View>
   );
@@ -640,4 +650,34 @@ const styles = StyleSheet.create({
     borderBottomColor: "#eee",
   },
   modalTitle: { fontSize: 18, fontWeight: "bold" },
+  modalContent: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  modalFooter: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 20,
+    borderTopWidth: 1,
+    borderTopColor: "#eee",
+    backgroundColor: '#fff',
+    paddingBottom: Platform.OS === 'ios' ? 40 : 20,
+  },
+  modalFooterTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: '#333',
+  },
+  closeFooterBtn: {
+    backgroundColor: '#f1f3f5',
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 8,
+  },
+  closeFooterText: {
+    color: '#fa5252',
+    fontWeight: '600',
+    fontSize: 14,
+  },
 });

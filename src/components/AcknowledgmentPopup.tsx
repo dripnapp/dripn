@@ -15,6 +15,7 @@ export default function AcknowledgmentPopup({ visible, onAccept }: Acknowledgmen
     age: false,
     risks: false,
     terms: false,
+    payout: false,
   });
 
   const allChecked = Object.values(checks).every(Boolean);
@@ -71,7 +72,15 @@ export default function AcknowledgmentPopup({ visible, onAccept }: Acknowledgmen
               onPress={() => toggleCheck('risks')}
             >
               <Text style={styles.checkLabel}>
-                I acknowledge payouts are in XRP at current market rate at time of cashout.
+                I acknowledge payouts are in XRP at current market rate at time of redemption.
+              </Text>
+            </CheckItem>
+            <CheckItem 
+              checked={checks.payout} 
+              onPress={() => toggleCheck('payout')}
+            >
+              <Text style={styles.checkLabel}>
+                I acknowledge that payouts are handled by a third-party (CoinGate) and may take 1-3 business days to be received.
               </Text>
             </CheckItem>
             <CheckItem 

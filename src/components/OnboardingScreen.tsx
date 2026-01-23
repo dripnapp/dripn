@@ -17,7 +17,7 @@ const slides = [
   {
     icon: 'wallet',
     title: 'Connect Your Wallet',
-    description: 'Enter your XRP wallet address during redemption to receive payouts via CoinGate. We never hold your private keys.',
+    description: 'Link your XRP wallet during redeeming process to receive payouts. We never hold your private keys.',
   },
   {
     icon: 'play-circle',
@@ -26,8 +26,8 @@ const slides = [
   },
   {
     icon: 'cash-check',
-    title: 'Redeem Drips',
-    description: 'Once you reach 1,000 drips, you can redeem them for XRP via CoinGate. Safe and secure!',
+    title: 'Receive Payouts',
+    description: 'Once you reach 1,000 drips, you can receive payouts in XRP via CoinGate. Safe and secure!',
   },
 ];
 
