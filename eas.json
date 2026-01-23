@@ -1,22 +1,22 @@
 {
   "cli": {
-    "version": ">= 16.28.0",
-    "appVersionSource": "remote"
+    "version": ">= 5.0.0"
   },
   "build": {
     "development": {
       "developmentClient": true,
       "distribution": "internal",
       "ios": {
-        "resourceClass": "m-large"
+        "resourceClass": "m1-medium" // or "m1-large" if available; "m1-medium" is safe default
+      },
+      "android": {
+        "resourceClass": "m1-medium"
       }
     },
     "preview": {
       "distribution": "internal"
     },
-    "production": {
-      "autoIncrement": true
-    }
+    "production": {}
   },
   "submit": {
     "production": {}
