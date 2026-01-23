@@ -15,6 +15,7 @@ export default {
       infoPlist: {
         NSUserTrackingUsageDescription:
           "This allows personalized ads to support rewards and features in the app.",
+        ITSAppUsesNonExemptEncryption: false, // ← ADD THIS LINE
       },
     },
 
@@ -49,14 +50,9 @@ export default {
         "react-native-google-mobile-ads",
         {
           iosAppId: "ca-app-pub-3940256099942544~3347511713",
+          androidAppId: "ca-app-pub-3940256099942544~3347511713", // ← ADD THIS LINE (test ID is fine for now)
         },
       ],
-      //[
-      //  "./plugins/unity-ads/withUnityAds",
-      //  {
-      //    iosGameId: "6027059",
-      //  },
-      //  ],
     ],
 
     experiments: {
