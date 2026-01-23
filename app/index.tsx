@@ -290,7 +290,7 @@ export default function Home() {
   }
 
   if (!hasCompletedOnboarding) {
-    return <OnboardingScreen onFinish={handleOnboardingComplete} />;
+    return <OnboardingScreen onComplete={handleOnboardingComplete} />;
   }
 
   return (

@@ -17,7 +17,7 @@ const slides = [
   {
     icon: 'wallet',
     title: 'Connect Your Wallet',
-    description: 'Link your XRP wallet using XUMM (Xaman) to receive payouts. We never hold your private keys.',
+    description: 'Enter your XRP wallet address during redemption to receive payouts via CoinGate. We never hold your private keys.',
   },
   {
     icon: 'play-circle',
@@ -26,8 +26,8 @@ const slides = [
   },
   {
     icon: 'cash-check',
-    title: 'Cash Out',
-    description: 'Once you reach 500 drips, you can cash out to XRP at the current market rate. Fast and secure!',
+    title: 'Redeem Drips',
+    description: 'Once you reach 1,000 drips, you can redeem them for XRP via CoinGate. Safe and secure!',
   },
 ];
 
