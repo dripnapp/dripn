@@ -306,6 +306,7 @@ export default function Home() {
       />
       <UsernameSetup
         visible={showUsernameSetup}
+        onSave={(name) => setUsername(name)}
         onClose={() => {
           if (username) setShowUsernameSetup(false);
         }}
