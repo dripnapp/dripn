@@ -337,20 +337,6 @@ export default function Home() {
         <View style={styles.actionRow}>
           <TouchableOpacity
             style={[styles.actionCard, isDark && styles.cardDark]}
-            onPress={handleConnectWallet}
-          >
-            <MaterialCommunityIcons
-              name={walletAddress ? "wallet-check" : "wallet-plus"}
-              size={32}
-              color="#4dabf7"
-            />
-            <Text style={[styles.actionText, isDark && styles.textDark]}>
-              {walletAddress ? "Wallet Connected" : "Connect Wallet"}
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.actionCard, isDark && styles.cardDark]}
             onPress={handleRedeemDrips}
           >
             <MaterialCommunityIcons

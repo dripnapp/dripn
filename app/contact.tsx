@@ -35,7 +35,7 @@ export default function ContactScreen() {
           <Text style={[styles.infoTitle, isDark && styles.textDark]}>What to Include</Text>
           <View style={styles.infoItem}>
             <MaterialCommunityIcons name="check-circle" size={18} color="#40c057" />
-            <Text style={[styles.infoText, isDark && styles.textMuted]}>Your username or wallet address (first 4...last 4 characters)</Text>
+            <Text style={[styles.infoText, isDark && styles.textMuted]}>Your username or email address attached to your account</Text>
           </View>
           <View style={styles.infoItem}>
             <MaterialCommunityIcons name="check-circle" size={18} color="#40c057" />
