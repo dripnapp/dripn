@@ -47,9 +47,10 @@ export default function Home() {
     theme,
     recordShare,
     getDailyShareCount,
+    checkDailyReset,
   } = useStore();
 
-  const isDark = theme === "dark";
+  const isDark = theme === "dark" || theme === "neon";
 
   const [loading, setLoading] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
@@ -78,7 +79,6 @@ export default function Home() {
     const rewardListener = rewarded.addAdEventListener(
       RewardedAdEventType.EARNED_REWARD,
       (reward) => {
-        console.log("AdMob reward earned!", reward.amount);
         addPoints(reward.amount);
         Alert.alert("Reward Earned!", `You earned ${reward.amount} drips!`);
       },
@@ -88,12 +88,17 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    if (!showSplash && !hasCompletedOnboarding) {
+    checkDailyReset();
+  }, []);
+
+  useEffect(() => {
+    if (!showSplash && hasCompletedOnboarding && hasAcceptedTerms && !username) {
+      setShowUsernameSetup(true);
     }
     if (!showSplash && hasCompletedOnboarding && !hasAcceptedTerms) {
       setShowAcknowledgment(true);
     }
-  }, [showSplash, hasCompletedOnboarding, hasAcceptedTerms]);
+  }, [showSplash, hasCompletedOnboarding, hasAcceptedTerms, username]);
 
   const handleSplashFinish = () => {
     setShowSplash(false);
@@ -107,9 +112,16 @@ export default function Home() {
   const handleAcceptTerms = () => {
     acceptTerms();
     setShowAcknowledgment(false);
+    if (!username) {
+      setShowUsernameSetup(true);
+    }
   };
 
   const handleWatchAd = () => {
+    if (!username) {
+      setShowUsernameSetup(true);
+      return;
+    }
     if (dailyEarnings >= DAILY_CAP) {
       Alert.alert(
         "Limit Reached",
@@ -132,12 +144,20 @@ export default function Home() {
   };
 
   const handleAdGemOfferwall = () => {
+    if (!username) {
+      setShowUsernameSetup(true);
+      return;
+    }
     setShowAdGemModal(true);
   };
 
   const handleShare = async (
     platform: "twitter" | "facebook" | "text" | "instagram",
   ) => {
+    if (!username) {
+      setShowUsernameSetup(true);
+      return;
+    }
     const shareCount = getDailyShareCount();
     if (shareCount >= 3) {
       Alert.alert(
@@ -232,7 +252,10 @@ export default function Home() {
         visible={showUsernameSetup}
         currentUsername={username}
         onSave={setUsername}
-        onClose={() => setShowUsernameSetup(false)}
+        onClose={() => {
+          if (username) setShowUsernameSetup(false);
+          else Alert.alert("Account Required", "You must create a username to continue.");
+        }}
       />
 
       <AppHeader showLogo />
@@ -317,6 +340,10 @@ export default function Home() {
           <TouchableOpacity
             style={styles.taskButton}
             onPress={() => {
+              if (!username) {
+                setShowUsernameSetup(true);
+                return;
+              }
               if (rewarded.loaded) {
                 rewarded
                   .show()
@@ -352,7 +379,13 @@ export default function Home() {
 
           <TouchableOpacity
             style={styles.taskButton}
-            onPress={() => setShowBitLabsModal(true)}
+            onPress={() => {
+              if (!username) {
+                setShowUsernameSetup(true);
+                return;
+              }
+              setShowBitLabsModal(true);
+            }}
           >
             <MaterialCommunityIcons name="poll" size={32} color="#fff" />
             <View style={styles.taskInfo}>
@@ -436,7 +469,7 @@ export default function Home() {
           <View style={{ flex: 1, backgroundColor: "#000" }}>
             <WebView
               source={{
-                uri: `https://offerwall.adgem.com/?app_id=31857&user_id=${"guest_" + Date.now()}`,
+                uri: `https://offerwall.adgem.com/?app_id=31857&user_id=${username || "guest_" + Date.now()}`,
               }}
               style={{ flex: 1 }}
               onNavigationStateChange={(navState) => {
@@ -480,7 +513,7 @@ export default function Home() {
           <View style={{ flex: 1, backgroundColor: "#000" }}>
             <WebView
               source={{
-                uri: `https://web.bitlabs.ai?token=f7a85bbf-4336-46fa-87ff-1940b5ccedcc&uid=${"guest_" + Date.now()}`,
+                uri: `https://web.bitlabs.ai?token=f7a85bbf-4336-46fa-87ff-1940b5ccedcc&uid=${username || "guest_" + Date.now()}`,
               }}
               style={{ flex: 1 }}
               onNavigationStateChange={(navState) => {

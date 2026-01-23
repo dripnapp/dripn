@@ -8,7 +8,7 @@ interface BadgeReward {
   claimed: boolean;
 }
 
-type ThemeMode = 'classic' | 'dark';
+export type ThemeMode = 'classic' | 'dark' | 'neon' | 'ocean' | 'sunset' | 'forest';
 
 interface ShareRecord {
   date: string;
@@ -18,7 +18,7 @@ interface ShareRecord {
 
 interface HistoryRecord {
   id: string;
-  type: 'reward';
+  type: 'reward' | 'purchase';
   amount: number;
   source: string;
   timestamp: number;
@@ -41,6 +41,7 @@ interface AppState {
   referralBonusEarned: number;
   username: string | null;
   theme: ThemeMode;
+  unlockedThemes: ThemeMode[];
   dailyShares: ShareRecord[];
   history: HistoryRecord[];
   setPoints: (points: number) => void;
@@ -54,8 +55,10 @@ interface AppState {
   enterReferralCode: (code: string) => boolean;
   setUsername: (username: string) => void;
   setTheme: (theme: ThemeMode) => void;
+  unlockTheme: (theme: ThemeMode) => boolean;
   recordShare: (platform: string) => { success: boolean; reward: number; message: string };
   getDailyShareCount: () => number;
+  checkDailyReset: () => void;
 }
 
 const generateReferralCode = () => {
@@ -71,6 +74,8 @@ const BADGE_REWARDS: Record<string, number> = {
   streak_7: 35,
   streak_30: 150,
 };
+
+const THEME_COST = 1000;
 
 export const useStore = create<AppState>()(
   persist(
@@ -90,15 +95,18 @@ export const useStore = create<AppState>()(
       referralBonusEarned: 0,
       username: null,
       theme: 'classic',
+      unlockedThemes: ['classic', 'dark'],
       dailyShares: [],
       history: [],
       setPoints: (points) => set({ points }),
       addPoints: (amount, source = 'Task') => set((state) => {
+        state.checkDailyReset();
+        const updatedState = get();
         const today = new Date().toDateString();
-        const dailyEarnings = state.lastEarningsDate === today ? state.dailyEarnings + amount : amount;
-        const newPoints = state.points + amount;
-        const newTotalEarned = (state.totalEarned || 0) + amount;
-        let userLevel = state.userLevel;
+        const dailyEarnings = updatedState.lastEarningsDate === today ? updatedState.dailyEarnings + amount : amount;
+        const newPoints = updatedState.points + amount;
+        const newTotalEarned = (updatedState.totalEarned || 0) + amount;
+        let userLevel = updatedState.userLevel;
         if (newTotalEarned >= 1000) userLevel = 'Gold';
         else if (newTotalEarned >= 500) userLevel = 'Silver';
         else if (newTotalEarned >= 100) userLevel = 'Bronze';
@@ -118,10 +126,17 @@ export const useStore = create<AppState>()(
           dailyEarnings,
           lastEarningsDate: today,
           userLevel,
-          history: [historyRecord, ...state.history].slice(0, 100),
+          history: [historyRecord, ...updatedState.history].slice(0, 100),
         };
       }),
       resetDaily: () => set({ dailyEarnings: 0, lastEarningsDate: new Date().toDateString() }),
+      checkDailyReset: () => {
+        const state = get();
+        const today = new Date().toDateString();
+        if (state.lastEarningsDate !== today) {
+          set({ dailyEarnings: 0, lastEarningsDate: today });
+        }
+      },
       completeOnboarding: () => set({ hasCompletedOnboarding: true }),
       acceptTerms: () => set({ hasAcceptedTerms: true }),
       addBadge: (badge) => set((state) => {
@@ -182,13 +197,36 @@ export const useStore = create<AppState>()(
       },
       setUsername: (username) => set({ username }),
       setTheme: (theme) => set({ theme }),
+      unlockTheme: (theme) => {
+        const state = get();
+        if (state.unlockedThemes.includes(theme)) return true;
+        if (state.points < THEME_COST) return false;
+        
+        const historyRecord: HistoryRecord = {
+          id: Date.now().toString(),
+          type: 'purchase',
+          amount: THEME_COST,
+          source: `Unlocked Theme: ${theme}`,
+          timestamp: Date.now(),
+          date: new Date().toLocaleDateString(),
+        };
+        
+        set({
+          points: state.points - THEME_COST,
+          unlockedThemes: [...state.unlockedThemes, theme],
+          history: [historyRecord, ...state.history].slice(0, 100),
+        });
+        return true;
+      },
       getDailyShareCount: () => {
         const state = get();
+        state.checkDailyReset();
         const today = new Date().toDateString();
         return state.dailyShares.filter(s => s.date === today).length;
       },
       recordShare: (platform: string) => {
         const state = get();
+        state.checkDailyReset();
         const today = new Date().toDateString();
         const todayShares = state.dailyShares.filter(s => s.date === today);
         

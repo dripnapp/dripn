@@ -1,17 +1,26 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, Alert, Modal } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useStore } from '../src/store/useStore';
+import { useStore, ThemeMode } from '../src/store/useStore';
 import AppHeader from '../src/components/AppHeader';
 
 const RESERVED_USERNAMES = ['admin', 'dripn', 'system', 'support', 'moderator'];
 
+const THEMES: { id: ThemeMode; name: string; color: string; bgColor: string }[] = [
+  { id: 'classic', name: 'Classic', color: '#4dabf7', bgColor: '#f8f9fa' },
+  { id: 'dark', name: 'Dark', color: '#4dabf7', bgColor: '#1a1a2e' },
+  { id: 'neon', name: 'Neon', color: '#00ff41', bgColor: '#0d0d0d' },
+  { id: 'ocean', name: 'Ocean', color: '#0077be', bgColor: '#e0f2f1' },
+  { id: 'sunset', name: 'Sunset', color: '#ff4e50', bgColor: '#fff3e0' },
+  { id: 'forest', name: 'Forest', color: '#2d5a27', bgColor: '#f1f8e9' },
+];
+
 export default function Settings() {
-  const { username, setUsername, theme, setTheme } = useStore();
+  const { username, setUsername, theme, setTheme, unlockedThemes, unlockTheme, points } = useStore();
   const [newUsername, setNewUsername] = useState(username || '');
   const [isEditingUsername, setIsEditingUsername] = useState(false);
 
-  const isDark = theme === 'dark';
+  const isDark = theme === 'dark' || theme === 'neon';
 
   const handleSaveUsername = () => {
     const trimmed = newUsername.trim();
@@ -36,6 +45,32 @@ export default function Settings() {
     Alert.alert('Success', 'Username updated!');
   };
 
+  const handleThemePress = (targetTheme: ThemeMode) => {
+    if (unlockedThemes.includes(targetTheme)) {
+      setTheme(targetTheme);
+    } else {
+      Alert.alert(
+        'Unlock Theme',
+        `Unlock the ${targetTheme} theme for 1,000 drips?`,
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { 
+            text: 'Unlock', 
+            onPress: () => {
+              const success = unlockTheme(targetTheme);
+              if (success) {
+                setTheme(targetTheme);
+                Alert.alert('Success', `${targetTheme} theme unlocked!`);
+              } else {
+                Alert.alert('Insufficient Drips', 'You need 1,000 drips to unlock this theme.');
+              }
+            }
+          }
+        ]
+      );
+    }
+  };
+
   const displayName = username || 'Not set';
 
   return (
@@ -48,7 +83,7 @@ export default function Settings() {
           
           <View style={[styles.settingRow, isDark && styles.settingRowDark]}>
             <View style={styles.settingInfo}>
-              <MaterialCommunityIcons name="account" size={24} color={isDark ? '#4dabf7' : '#4dabf7'} />
+              <MaterialCommunityIcons name="account" size={24} color="#4dabf7" />
               <View style={styles.settingText}>
                 <Text style={[styles.settingLabel, isDark && styles.textDark]}>Username</Text>
                 {isEditingUsername ? (
@@ -88,53 +123,40 @@ export default function Settings() {
           <Text style={[styles.sectionSubtitle, isDark && styles.textMutedDark]}>Choose how Drip'n looks to you</Text>
 
           <View style={styles.themeGrid}>
-            <TouchableOpacity 
-              style={[
-                styles.themeCard, 
-                theme === 'classic' && styles.themeCardSelected
-              ]} 
-              onPress={() => setTheme('classic')}
-            >
-              <View style={styles.themePreviewClassic}>
-                <View style={styles.previewHeader}>
-                  <View style={styles.previewHeaderBar} />
-                </View>
-                <View style={styles.previewContentClassic}>
-                  <View style={styles.previewCardClassic} />
-                  <View style={styles.previewButtonClassic} />
-                </View>
-              </View>
-              <View style={styles.themeInfo}>
-                <View style={styles.themeRadio}>
-                  {theme === 'classic' && <View style={styles.themeRadioInner} />}
-                </View>
-                <Text style={[styles.themeName, theme === 'classic' && styles.themeNameSelected]}>Classic</Text>
-              </View>
-            </TouchableOpacity>
-
-            <TouchableOpacity 
-              style={[
-                styles.themeCard, 
-                theme === 'dark' && styles.themeCardSelected
-              ]} 
-              onPress={() => setTheme('dark')}
-            >
-              <View style={styles.themePreviewDark}>
-                <View style={styles.previewHeader}>
-                  <View style={styles.previewHeaderBar} />
-                </View>
-                <View style={styles.previewContentDark}>
-                  <View style={styles.previewCardDark} />
-                  <View style={styles.previewButtonDark} />
-                </View>
-              </View>
-              <View style={styles.themeInfo}>
-                <View style={styles.themeRadio}>
-                  {theme === 'dark' && <View style={styles.themeRadioInner} />}
-                </View>
-                <Text style={[styles.themeName, theme === 'dark' && styles.themeNameSelected]}>Dark</Text>
-              </View>
-            </TouchableOpacity>
+            {THEMES.map((t) => {
+              const isUnlocked = unlockedThemes.includes(t.id);
+              const isSelected = theme === t.id;
+              
+              return (
+                <TouchableOpacity 
+                  key={t.id}
+                  style={[
+                    styles.themeCard, 
+                    isSelected && styles.themeCardSelected,
+                    !isUnlocked && styles.themeCardLocked
+                  ]} 
+                  onPress={() => handleThemePress(t.id)}
+                >
+                  <View style={[styles.themePreview, { backgroundColor: t.bgColor }]}>
+                    <View style={styles.previewHeader}>
+                      <View style={styles.previewHeaderBar} />
+                    </View>
+                    {!isUnlocked && (
+                      <View style={styles.lockOverlay}>
+                        <MaterialCommunityIcons name="lock" size={24} color="#fff" />
+                        <Text style={styles.lockText}>1,000 drips</Text>
+                      </View>
+                    )}
+                  </View>
+                  <View style={styles.themeInfo}>
+                    <View style={styles.themeRadio}>
+                      {isSelected && <View style={styles.themeRadioInner} />}
+                    </View>
+                    <Text style={[styles.themeName, isSelected && styles.themeNameSelected]}>{t.name}</Text>
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
           </View>
         </View>
       </ScrollView>
@@ -202,41 +224,43 @@ const styles = StyleSheet.create({
     backgroundColor: '#1a1a2e',
     color: '#fff',
   },
-  themeGrid: { flexDirection: 'row', justifyContent: 'space-between' },
+  themeGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
   themeCard: {
     width: '48%',
     borderRadius: 12,
     borderWidth: 2,
     borderColor: '#e9ecef',
     overflow: 'hidden',
+    marginBottom: 15,
   },
   themeCardSelected: { borderColor: '#4dabf7' },
-  themePreviewClassic: { height: 100, backgroundColor: '#f8f9fa' },
-  themePreviewDark: { height: 100, backgroundColor: '#1a1a2e' },
-  previewHeader: { height: 20, backgroundColor: '#12122a', justifyContent: 'center', alignItems: 'center' },
-  previewHeaderBar: { width: 40, height: 6, backgroundColor: 'rgba(255,255,255,0.3)', borderRadius: 3 },
-  previewContentClassic: { flex: 1, padding: 10, justifyContent: 'space-between' },
-  previewContentDark: { flex: 1, padding: 10, justifyContent: 'space-between' },
-  previewCardClassic: { height: 30, backgroundColor: '#fff', borderRadius: 6 },
-  previewCardDark: { height: 30, backgroundColor: '#252542', borderRadius: 6 },
-  previewButtonClassic: { height: 20, width: '60%', backgroundColor: '#4dabf7', borderRadius: 4 },
-  previewButtonDark: { height: 20, width: '60%', backgroundColor: '#4dabf7', borderRadius: 4 },
-  themeInfo: { flexDirection: 'row', alignItems: 'center', padding: 12, backgroundColor: '#fff' },
+  themeCardLocked: { opacity: 0.8 },
+  themePreview: { height: 80, justifyContent: 'center' },
+  lockOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  lockText: { color: '#fff', fontSize: 10, fontWeight: 'bold', marginTop: 4 },
+  previewHeader: { height: 15, backgroundColor: '#12122a', justifyContent: 'center', alignItems: 'center', position: 'absolute', top: 0, width: '100%' },
+  previewHeaderBar: { width: 30, height: 4, backgroundColor: 'rgba(255,255,255,0.3)', borderRadius: 2 },
+  themeInfo: { flexDirection: 'row', alignItems: 'center', padding: 10, backgroundColor: '#fff' },
   themeRadio: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
+    width: 18,
+    height: 18,
+    borderRadius: 9,
     borderWidth: 2,
     borderColor: '#4dabf7',
     justifyContent: 'center',
     alignItems: 'center',
   },
   themeRadioInner: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
     backgroundColor: '#4dabf7',
   },
-  themeName: { marginLeft: 10, fontSize: 14, fontWeight: '500', color: '#1a1a1a' },
+  themeName: { marginLeft: 8, fontSize: 13, fontWeight: '500', color: '#1a1a1a' },
   themeNameSelected: { color: '#4dabf7' },
 });

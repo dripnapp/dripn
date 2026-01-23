@@ -1,14 +1,15 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useStore } from '../src/store/useStore';
 import AppHeader from '../src/components/AppHeader';
 
 export default function HistoryScreen() {
   const { history, points, totalEarned, theme } = useStore();
-  const isDark = theme === 'dark';
+  const isDark = theme === 'dark' || theme === 'neon';
 
-  const getSourceIcon = (source: string) => {
+  const getSourceIcon = (source: string, type: string) => {
+    if (type === 'purchase') return 'cart';
     if (source.includes('Video')) return 'play-circle';
     if (source.includes('Share')) return 'share-variant';
     if (source.includes('Badge')) return 'medal';
@@ -17,7 +18,7 @@ export default function HistoryScreen() {
   };
 
   const getSourceColor = (type: string) => {
-    return '#40c057';
+    return type === 'purchase' ? '#e03131' : '#40c057';
   };
 
   return (
@@ -61,7 +62,7 @@ export default function HistoryScreen() {
               >
                 <View style={[styles.iconCircle, { backgroundColor: getSourceColor(item.type) + '20' }]}>
                   <MaterialCommunityIcons 
-                    name={getSourceIcon(item.source) as any} 
+                    name={getSourceIcon(item.source, item.type) as any} 
                     size={20} 
                     color={getSourceColor(item.type)} 
                   />
@@ -74,7 +75,7 @@ export default function HistoryScreen() {
                   styles.historyAmount,
                   { color: getSourceColor(item.type) }
                 ]}>
-                  +{item.amount} drps
+                  {item.type === 'purchase' ? '-' : '+'}{item.amount} drps
                 </Text>
               </View>
             ))}
@@ -84,7 +85,7 @@ export default function HistoryScreen() {
         <View style={[styles.infoBox, isDark && styles.infoBoxDark]}>
           <MaterialCommunityIcons name="information-outline" size={18} color="#4dabf7" />
           <Text style={[styles.infoText, isDark && styles.infoTextDark]}>
-            Total earned drips are used for level progression. Earn more to unlock higher membership tiers!
+            Total earned drips are used for level progression. Themes cost 1,000 drips to unlock forever!
           </Text>
         </View>
       </ScrollView>
