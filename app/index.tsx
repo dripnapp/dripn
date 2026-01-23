@@ -9,6 +9,7 @@ import {
   Share,
   Linking,
   Modal,
+  Platform,
 } from "react-native";
 import { WebView } from "react-native-webview";
 import { useStore } from "../src/store/useStore";
@@ -20,11 +21,23 @@ import VideoPlayer from "../src/components/VideoPlayer";
 import UsernameSetup from "../src/components/UsernameSetup";
 import AppHeader from "../src/components/AppHeader";
 import RedeemDripsModal from "../src/components/RedeemDripsModal";
-import mobileAds, {
-  RewardedAd,
-  RewardedAdEventType,
-  AdEventType,
-} from "react-native-google-mobile-ads";
+
+let mobileAds: any = () => ({ initialize: () => Promise.resolve() });
+let RewardedAd: any = { createForAdRequest: () => ({ load: () => {}, addAdEventListener: () => () => {} }) };
+let RewardedAdEventType: any = { EARNED_REWARD: 'earned_reward' };
+let AdEventType: any = { ERROR: 'error' };
+
+if (Platform.OS !== 'web') {
+  try {
+    const ads = require("react-native-google-mobile-ads");
+    mobileAds = ads.default;
+    RewardedAd = ads.RewardedAd;
+    RewardedAdEventType = ads.RewardedAdEventType;
+    AdEventType = ads.AdEventType;
+  } catch (e) {
+    console.warn("Mobile ads failed to load:", e);
+  }
+}
 
 const rewardedAdUnitId = __DEV__
   ? "ca-app-pub-3940256099942544/1712485313"
@@ -72,26 +85,28 @@ export default function Home() {
   const AD_REVENUE_CENTS = 5;
 
   useEffect(() => {
-    mobileAds()
-      .initialize()
-      .then(() => console.log("AdMob initialized successfully"))
-      .catch((error: any) => console.error("AdMob init error:", error));
+    if (Platform.OS !== 'web') {
+      mobileAds()
+        .initialize()
+        .then(() => console.log("AdMob initialized successfully"))
+        .catch((error: any) => console.error("AdMob init error:", error));
 
-    rewarded.load();
+      rewarded.load();
 
-    rewarded.addAdEventListener(AdEventType.ERROR, (error: any) => {
-      console.error("Ad error:", error);
-    });
+      rewarded.addAdEventListener(AdEventType.ERROR, (error: any) => {
+        console.error("Ad error:", error);
+      });
 
-    const rewardListener = rewarded.addAdEventListener(
-      RewardedAdEventType.EARNED_REWARD,
-      (reward) => {
-        addPoints(reward.amount);
-        Alert.alert("Reward Earned!", `You earned ${reward.amount} drips!`);
-      },
-    );
+      const rewardListener = rewarded.addAdEventListener(
+        RewardedAdEventType.EARNED_REWARD,
+        (reward: any) => {
+          addPoints(reward.amount);
+          Alert.alert("Reward Earned!", `You earned ${reward.amount} drips!`);
+        },
+      );
 
-    return () => rewardListener();
+      return () => rewardListener();
+    }
   }, []);
 
   useEffect(() => {
@@ -123,125 +138,99 @@ export default function Home() {
   const handleAcceptTerms = () => {
     acceptTerms();
     setShowAcknowledgment(false);
-    if (!username) {
-      setShowUsernameSetup(true);
-    }
   };
 
   const handleWatchAd = () => {
-    if (!username) {
-      setShowUsernameSetup(true);
-      return;
-    }
     if (dailyEarnings >= DAILY_CAP) {
+      Alert.alert("Daily Limit Reached", "Come back tomorrow for more drips!");
+      return;
+    }
+
+    if (Platform.OS === 'web') {
+      Alert.alert("Development", "Ads are not available on web preview. Points will be added for testing.");
+      addPoints(10);
+      return;
+    }
+
+    if (rewarded.loaded) {
+      rewarded.show();
+    } else {
+      setLoading(true);
+      rewarded.load();
+      setTimeout(() => {
+        setLoading(false);
+        if (rewarded.loaded) {
+          rewarded.show();
+        } else {
+          setShowVideoPlayer(true);
+        }
+      }, 2000);
+    }
+  };
+
+  const handleVideoComplete = (drips: number) => {
+    addPoints(drips);
+    setShowVideoPlayer(false);
+    Alert.alert("Success!", `You earned ${drips} drips!`);
+  };
+
+  const handleShare = async (platform: string) => {
+    const dailyCount = getDailyShareCount();
+    if (dailyCount >= 3) {
       Alert.alert(
-        "Limit Reached",
-        "You have reached your daily earning limit. Come back tomorrow!",
+        "Daily Limit",
+        "You've reached the daily share limit. Come back tomorrow!",
       );
       return;
     }
-    setShowVideoPlayer(true);
-  };
 
-  const handleVideoComplete = (reward: number) => {
-    addPoints(reward);
-    setShowVideoPlayer(false);
-    Alert.alert("Reward Earned!", `You earned ${reward} drips!`);
-  };
-
-  const handleVideoCancel = () => {
-    setShowVideoPlayer(false);
-    Alert.alert("Cancelled", "You must watch the full video to earn drips.");
-  };
-
-  const handleAdGemOfferwall = () => {
-    if (!username) {
-      setShowUsernameSetup(true);
-      return;
-    }
-    setShowAdGemModal(true);
-  };
-
-  const handleShare = async (
-    platform: "twitter" | "facebook" | "text" | "instagram",
-  ) => {
-    if (!username) {
-      setShowUsernameSetup(true);
-      return;
-    }
-    const shareCount = getDailyShareCount();
-    if (shareCount >= 3) {
-      Alert.alert(
-        "Limit Reached",
-        "You have reached the maximum 3 shares for today.",
-      );
+    const { canShare, timeLeft } = recordShare();
+    if (!canShare) {
+      Alert.alert("Cooldown", `Please wait ${timeLeft}s before sharing again.`);
       return;
     }
 
     const shareMessage =
-      "Check out Drip'n - earn rewards and redeem them for crypto! every drip counts. Download now!";
-    const shareUrl = "https://dripnapp.com";
+      "Check out Drip'n! I'm earning crypto rewards by completing simple tasks. Join me and start earning today! #Dripn #CryptoRewards #XRP";
+    const shareUrl = "https://dripn.io";
 
     try {
-      let shared = false;
-
-      if (platform === "twitter") {
-        const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareMessage)}&url=${encodeURIComponent(shareUrl)}`;
-        const canOpen = await Linking.canOpenURL(twitterUrl);
-        if (canOpen) {
-          await Linking.openURL(twitterUrl);
-          shared = true;
-        }
+      if (platform === "x") {
+        await Linking.openURL(
+          `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareMessage)}&url=${encodeURIComponent(shareUrl)}`,
+        );
       } else if (platform === "facebook") {
-        const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(shareMessage)}`;
-        const canOpen = await Linking.canOpenURL(facebookUrl);
-        if (canOpen) {
-          await Linking.openURL(facebookUrl);
-          shared = true;
-        }
+        await Linking.openURL(
+          `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
+        );
       } else if (platform === "instagram") {
-        const instagramUrl = "instagram://app";
-        const canOpen = await Linking.canOpenURL(instagramUrl);
-        if (canOpen) {
-          await Linking.openURL(instagramUrl);
-          shared = true;
-        } else {
-          await Linking.openURL("https://instagram.com");
-          shared = true;
-        }
-      } else if (platform === "text") {
-        const result = await Share.share({
+        Alert.alert(
+          "Instagram Share",
+          "Copy this message to your story: " + shareMessage,
+        );
+      } else {
+        await Share.share({
           message: `${shareMessage} ${shareUrl}`,
         });
-        if (result.action === Share.sharedAction) {
-          shared = true;
-        }
       }
 
-      if (shared) {
-        const shareResult = recordShare(platform);
-        if (shareResult.success) {
-          Alert.alert("Reward Earned!", shareResult.message);
-        } else {
-          Alert.alert("Notice", shareResult.message);
-        }
+      const rewards = [1, 1, 3];
+      const reward = rewards[dailyCount] || 0;
+      if (reward > 0) {
+        addPoints(reward);
+        Alert.alert("Shared!", `You earned ${reward} drips!`);
       }
     } catch (error) {
-      console.error("Share error:", error);
+      console.error("Error sharing:", error);
     }
   };
 
-  const getNextShareReward = () => {
-    const count = getDailyShareCount();
-    if (count >= 3) return 0;
-    if (count === 0) return 1;
-    if (count === 1) return 1;
-    return 3;
-  };
-
   const handleRedeemDrips = () => {
-    if (!username) {
-      setShowUsernameSetup(true);
+    if (points < MIN_REDEMPTION) {
+      Alert.alert(
+        "Insufficient Drips",
+        `You need at least ${MIN_REDEMPTION.toLocaleString()} drips to redeem.`,
+      );
       return;
     }
     setShowRedeemModal(true);
@@ -291,25 +280,22 @@ export default function Home() {
   }
 
   if (!hasCompletedOnboarding) {
-    return <OnboardingScreen onComplete={handleOnboardingComplete} />;
+    return <OnboardingScreen onFinish={handleOnboardingComplete} />;
   }
 
   return (
-    <View style={[styles.wrapper, isDark && styles.wrapperDark]}>
+    <View style={[styles.container, isDark && styles.containerDark]}>
       <AcknowledgmentPopup
         visible={showAcknowledgment}
         onAccept={handleAcceptTerms}
       />
       <VideoPlayer
         visible={showVideoPlayer}
+        onClose={() => setShowVideoPlayer(false)}
         onComplete={handleVideoComplete}
-        onCancel={handleVideoCancel}
-        adRevenue={AD_REVENUE_CENTS / 100}
       />
       <UsernameSetup
         visible={showUsernameSetup}
-        currentUsername={username}
-        onSave={setUsername}
         onClose={() => {
           if (username) setShowUsernameSetup(false);
         }}
@@ -326,520 +312,321 @@ export default function Home() {
       <AppHeader showLogo />
 
       <ScrollView
-        style={styles.container}
-        contentContainerStyle={styles.contentContainer}
+        style={styles.content}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
       >
-        <View style={styles.profileRow}>
-          <View style={[styles.levelBadge, isDark && styles.levelBadgeDark]}>
-            <MaterialCommunityIcons
-              name={
-                userLevel === "Gold"
-                  ? "trophy"
-                  : userLevel === "Silver"
-                    ? "medal-outline"
-                    : "medal"
-              }
-              size={16}
-              color={
-                userLevel === "Gold"
-                  ? "#f59f00"
-                  : userLevel === "Silver"
-                    ? "#868e96"
-                    : "#cd7f32"
-              }
-            />
-            <Text style={[styles.levelText, isDark && styles.textDark]}>
-              {userLevel} Member
+        <View style={[styles.balanceSection, isDark && styles.cardDark]}>
+          <Text style={[styles.balanceLabel, isDark && styles.textMuted]}>
+            YOUR DRIPS
+          </Text>
+          <View style={styles.balanceRow}>
+            <MaterialCommunityIcons name="water" size={32} color="#4dabf7" />
+            <Text style={[styles.balanceValue, isDark && styles.textDark]}>
+              {points.toLocaleString()}
             </Text>
           </View>
+          <View style={styles.earningsRow}>
+            <Text style={[styles.earningsText, isDark && styles.textMuted]}>
+              Today: {dailyEarnings}/{DAILY_CAP}
+            </Text>
+            <View style={styles.progressBar}>
+              <View
+                style={[
+                  styles.progressFill,
+                  { width: `${(dailyEarnings / DAILY_CAP) * 100}%` },
+                ]}
+              />
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.actionRow}>
           <TouchableOpacity
-            style={[styles.profileButton, isDark && styles.profileButtonDark]}
-            onPress={() => setShowUsernameSetup(true)}
+            style={[styles.actionCard, isDark && styles.cardDark]}
+            onPress={handleConnectWallet}
           >
             <MaterialCommunityIcons
-              name="account-edit"
-              size={16}
+              name={walletAddress ? "wallet-check" : "wallet-plus"}
+              size={32}
               color="#4dabf7"
             />
-            <Text style={styles.profileButtonText}>
-              {username || "Set Username"}
+            <Text style={[styles.actionText, isDark && styles.textDark]}>
+              {walletAddress ? "Wallet Connected" : "Connect Wallet"}
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.actionCard, isDark && styles.cardDark]}
+            onPress={handleRedeemDrips}
+          >
+            <MaterialCommunityIcons
+              name="cash-multiple"
+              size={32}
+              color="#40c057"
+            />
+            <Text style={[styles.actionText, isDark && styles.textDark]}>
+              Redeem Drips
             </Text>
           </TouchableOpacity>
         </View>
 
-        <View style={[styles.card, isDark && styles.cardDark]}>
-          <Text style={[styles.label, isDark && styles.labelDark]}>
-            Your Balance
-          </Text>
-          <Text style={styles.balance}>{points} drips</Text>
-          <View style={styles.progressBarBg}>
-            <View
-              style={[
-                styles.progressBarFill,
-                { width: `${Math.min((points / 500) * 100, 100)}%` },
-              ]}
-            />
-          </View>
-          <Text style={styles.progressText}>
-            {Math.min(points, 500)} / 500 drips to next level
-          </Text>
-        </View>
+        <Text style={[styles.sectionTitle, isDark && styles.textDark]}>
+          Quick Tasks
+        </Text>
 
         <TouchableOpacity
-          style={styles.connectWalletButton}
-          onPress={handleConnectWallet}
+          style={[styles.taskCard, isDark && styles.cardDark]}
+          onPress={handleWatchAd}
         >
-          <MaterialCommunityIcons name="wallet-plus" size={24} color="#fff" />
-          <Text style={styles.connectWalletText}>
-            {walletAddress ? "Wallet Connected" : "Connect Wallet"}
-          </Text>
+          <View style={styles.taskIconCircle}>
+            <MaterialCommunityIcons name="play-circle" size={28} color="#fff" />
+          </View>
+          <View style={styles.taskInfo}>
+            <Text style={[styles.taskTitle, isDark && styles.textDark]}>
+              Watch Video Ad
+            </Text>
+            <Text style={[styles.taskSubtitle, isDark && styles.textMuted]}>
+              Earn 1-5 drips per video
+            </Text>
+          </View>
+          <MaterialCommunityIcons name="chevron-right" size={24} color="#ccc" />
+        </TouchableOpacity>
+
+        <Text style={[styles.sectionTitle, isDark && styles.textDark]}>
+          Offerwalls
+        </Text>
+
+        <TouchableOpacity
+          style={[styles.taskCard, isDark && styles.cardDark]}
+          onPress={() => setShowAdGemModal(true)}
+        >
+          <View
+            style={[styles.taskIconCircle, { backgroundColor: "#7c3aed" }]}
+          >
+            <MaterialCommunityIcons name="gift" size={24} color="#fff" />
+          </View>
+          <View style={styles.taskInfo}>
+            <Text style={[styles.taskTitle, isDark && styles.textDark]}>
+              AdGem Offers
+            </Text>
+            <Text style={[styles.taskSubtitle, isDark && styles.textMuted]}>
+              High-paying apps and games
+            </Text>
+          </View>
+          <MaterialCommunityIcons name="chevron-right" size={24} color="#ccc" />
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={styles.redeemButton}
-          onPress={handleRedeemDrips}
+          style={[styles.taskCard, isDark && styles.cardDark]}
+          onPress={() => setShowBitLabsModal(true)}
         >
-          <MaterialCommunityIcons name="cash-multiple" size={24} color="#fff" />
-          <Text style={styles.redeemButtonText}>Redeem Drips</Text>
+          <View
+            style={[styles.taskIconCircle, { backgroundColor: "#f59f00" }]}
+          >
+            <MaterialCommunityIcons name="clipboard-text" size={24} color="#fff" />
+          </View>
+          <View style={styles.taskInfo}>
+            <Text style={[styles.taskTitle, isDark && styles.textDark]}>
+              BitLabs Surveys
+            </Text>
+            <Text style={[styles.taskSubtitle, isDark && styles.textMuted]}>
+              Share your opinion for drips
+            </Text>
+          </View>
+          <MaterialCommunityIcons name="chevron-right" size={24} color="#ccc" />
         </TouchableOpacity>
 
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, isDark && styles.textDark]}>
-            Quick Tasks
-          </Text>
-
+        <Text style={[styles.sectionTitle, isDark && styles.textDark]}>
+          Social Sharing
+        </Text>
+        <View style={styles.shareRow}>
           <TouchableOpacity
-            style={styles.taskButton}
-            onPress={handleWatchAd}
-            disabled={loading}
+            style={[styles.shareBtn, { backgroundColor: "#000000" }]}
+            onPress={() => handleShare("x")}
           >
-            <MaterialCommunityIcons name="water" size={32} color="#fff" />
-            <View style={styles.taskInfo}>
-              <Text style={styles.taskName}>Watch Rewarded Video</Text>
-              <Text style={styles.taskReward}>+1-4 drips (varies by ad)</Text>
-            </View>
+            <MaterialCommunityIcons name="close" size={20} color="#fff" />
           </TouchableOpacity>
-
           <TouchableOpacity
-            style={styles.taskButton}
-            onPress={() => {
-              if (!username) {
-                setShowUsernameSetup(true);
-                return;
-              }
-              if (rewarded.loaded) {
-                rewarded
-                  .show()
-                  .catch((error) => console.error("Ad show error:", error));
-              } else {
-                Alert.alert(
-                  "Not ready",
-                  "Ad is still loading, try again in a moment.",
-                );
-                rewarded.load();
-              }
-            }}
+            style={[styles.shareBtn, { backgroundColor: "#1877f2" }]}
+            onPress={() => handleShare("facebook")}
           >
-            <MaterialCommunityIcons name="video" size={32} color="#fff" />
-            <View style={styles.taskInfo}>
-              <Text style={styles.taskName}>Watch AdMob Offers</Text>
-              <Text style={styles.taskReward}>Earn drips (test mode)</Text>
-            </View>
+            <MaterialCommunityIcons name="facebook" size={24} color="#fff" />
           </TouchableOpacity>
-
           <TouchableOpacity
-            style={styles.taskButton}
-            onPress={handleAdGemOfferwall}
+            style={[styles.shareBtn, { backgroundColor: "#e4405f" }]}
+            onPress={() => handleShare("instagram")}
           >
-            <MaterialCommunityIcons name="offer" size={32} color="#fff" />
-            <View style={styles.taskInfo}>
-              <Text style={styles.taskName}>AdGem Offers</Text>
-              <Text style={styles.taskReward}>
-                Earn more drips (surveys, apps)
-              </Text>
-            </View>
+            <MaterialCommunityIcons name="instagram" size={24} color="#fff" />
           </TouchableOpacity>
-
           <TouchableOpacity
-            style={styles.taskButton}
-            onPress={() => {
-              if (!username) {
-                setShowUsernameSetup(true);
-                return;
-              }
-              setShowBitLabsModal(true);
-            }}
+            style={[styles.shareBtn, { backgroundColor: "#40c057" }]}
+            onPress={() => handleShare("other")}
           >
-            <MaterialCommunityIcons name="poll" size={32} color="#fff" />
-            <View style={styles.taskInfo}>
-              <Text style={styles.taskName}>BitLabs Offers</Text>
-              <Text style={styles.taskReward}>
-                Earn drips (surveys & tasks)
-              </Text>
-            </View>
+            <MaterialCommunityIcons name="share-variant" size={20} color="#fff" />
           </TouchableOpacity>
-
-          <View style={[styles.shareTaskCard, isDark && styles.cardDark]}>
-            <View style={styles.shareHeader}>
-              <MaterialCommunityIcons
-                name="share-variant"
-                size={24}
-                color="#4dabf7"
-              />
-              <View style={styles.shareHeaderText}>
-                <Text style={[styles.shareTitle, isDark && styles.textDark]}>
-                  Share Drip'n
-                </Text>
-                <Text
-                  style={[styles.shareSubtitle, isDark && styles.labelDark]}
-                >
-                  {getDailyShareCount()}/3 shares today • +
-                  {getNextShareReward()} drips next
-                </Text>
-              </View>
-            </View>
-            <View style={styles.shareButtons}>
-              <TouchableOpacity
-                style={[styles.shareButton, styles.xButton]}
-                onPress={() => handleShare("twitter")}
-                disabled={getDailyShareCount() >= 3}
-              >
-                <Text style={styles.xButtonText}>𝕏</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.shareButton, styles.facebookButton]}
-                onPress={() => handleShare("facebook")}
-                disabled={getDailyShareCount() >= 3}
-              >
-                <MaterialCommunityIcons
-                  name="facebook"
-                  size={20}
-                  color="#fff"
-                />
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.shareButton, styles.instagramButton]}
-                onPress={() => handleShare("instagram")}
-                disabled={getDailyShareCount() >= 3}
-              >
-                <MaterialCommunityIcons
-                  name="instagram"
-                  size={20}
-                  color="#fff"
-                />
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.shareButton, styles.textButton]}
-                onPress={() => handleShare("text")}
-                disabled={getDailyShareCount() >= 3}
-              >
-                <MaterialCommunityIcons
-                  name="message-text"
-                  size={20}
-                  color="#fff"
-                />
-              </TouchableOpacity>
-            </View>
-          </View>
         </View>
 
-        <Modal
-          visible={showAdGemModal}
-          animationType="slide"
-          onRequestClose={() => setShowAdGemModal(false)}
-        >
-          <View style={{ flex: 1, backgroundColor: "#000" }}>
-            <WebView
-              source={{
-                uri: `https://offerwall.adgem.com/?app_id=31857&user_id=${username || "guest_" + Date.now()}`,
-              }}
-              style={{ flex: 1 }}
-              onNavigationStateChange={(navState) => {
-                if (
-                  navState.url.includes("reward") ||
-                  navState.url.includes("complete")
-                ) {
-                  Alert.alert(
-                    "Reward Detected",
-                    "Check your AdGem dashboard or balance",
-                  );
-                }
-              }}
-              onError={(syntheticEvent) => {
-                const { nativeEvent } = syntheticEvent;
-                console.warn("WebView error: ", nativeEvent);
-              }}
-            />
-            <TouchableOpacity
-              style={{
-                padding: 20,
-                backgroundColor: "#4dabf7",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-              onPress={() => setShowAdGemModal(false)}
-            >
-              <Text style={{ color: "#fff", fontSize: 18, fontWeight: "bold" }}>
-                Close Offerwall
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </Modal>
-
-        <Modal
-          visible={showBitLabsModal}
-          animationType="slide"
-          onRequestClose={() => setShowBitLabsModal(false)}
-        >
-          <View style={{ flex: 1, backgroundColor: "#000" }}>
-            <WebView
-              source={{
-                uri: `https://web.bitlabs.ai?token=f7a85bbf-4336-46fa-87ff-1940b5ccedcc&uid=${username || "guest_" + Date.now()}`,
-              }}
-              style={{ flex: 1 }}
-              onNavigationStateChange={(navState) => {
-                if (
-                  navState.url.includes("reward") ||
-                  navState.url.includes("complete")
-                ) {
-                  Alert.alert(
-                    "Reward Detected",
-                    "Check your BitLabs dashboard or balance",
-                  );
-                }
-              }}
-              onError={(syntheticEvent) => {
-                const { nativeEvent } = syntheticEvent;
-                console.warn("WebView error: ", nativeEvent);
-              }}
-            />
-            <TouchableOpacity
-              style={{
-                padding: 20,
-                backgroundColor: "#4dabf7",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-              onPress={() => setShowBitLabsModal(false)}
-            >
-              <Text style={{ color: "#fff", fontSize: 18, fontWeight: "bold" }}>
-                Close Offerwall
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </Modal>
-
-        <View style={[styles.infoCard, isDark && styles.infoCardDark]}>
-          <Text style={[styles.infoText, isDark && styles.infoTextDark]}>
-            Daily Earnings: {dailyEarnings} / 500 drips
-          </Text>
-        </View>
-
-        <View style={[styles.disclaimerCard, isDark && styles.cardDark]}>
-          <MaterialCommunityIcons name="information" size={16} color="#868e96" />
-          <Text style={styles.disclaimerText}>
-            Drip'n does not hold, custody, or transfer funds. All crypto payouts are processed by CoinGate, a licensed third-party payment processor.
+        <View style={[styles.infoBox, isDark && styles.cardDark]}>
+          <MaterialCommunityIcons name="information-outline" size={20} color="#4dabf7" />
+          <Text style={[styles.infoText, isDark && styles.textMuted]}>
+            Redemptions are processed by CoinGate. Final XRP amount depends on the market rate at the time of processing.
           </Text>
         </View>
       </ScrollView>
+
+      {/* Offerwall Modals */}
+      <Modal
+        visible={showAdGemModal}
+        animationType="slide"
+        onRequestClose={() => setShowAdGemModal(false)}
+      >
+        <View style={styles.modalHeader}>
+          <Text style={styles.modalTitle}>AdGem Offerwall</Text>
+          <TouchableOpacity onPress={() => setShowAdGemModal(false)}>
+            <MaterialCommunityIcons name="close" size={28} color="#000" />
+          </TouchableOpacity>
+        </View>
+        <WebView
+          source={{
+            uri: "https://api.adgem.com/v1/wall?appid=YOUR_ADGEM_APP_ID",
+          }}
+          onNavigationStateChange={(navState: any) => {
+            if (navState.url.includes("success")) {
+              addPoints(50);
+              setShowAdGemModal(false);
+            }
+          }}
+          onError={(syntheticEvent: any) => {
+            const { nativeEvent } = syntheticEvent;
+            console.warn('WebView error: ', nativeEvent);
+          }}
+        />
+      </Modal>
+
+      <Modal
+        visible={showBitLabsModal}
+        animationType="slide"
+        onRequestClose={() => setShowBitLabsModal(false)}
+      >
+        <View style={styles.modalHeader}>
+          <Text style={styles.modalTitle}>BitLabs Surveys</Text>
+          <TouchableOpacity onPress={() => setShowBitLabsModal(false)}>
+            <MaterialCommunityIcons name="close" size={28} color="#000" />
+          </TouchableOpacity>
+        </View>
+        <WebView
+          source={{
+            uri: "https://web.bitlabs.ai/?token=YOUR_BITLABS_TOKEN",
+          }}
+          onNavigationStateChange={(navState: any) => {
+            if (navState.url.includes("complete")) {
+              addPoints(25);
+              setShowBitLabsModal(false);
+            }
+          }}
+          onError={(syntheticEvent: any) => {
+            const { nativeEvent } = syntheticEvent;
+            console.warn('WebView error: ', nativeEvent);
+          }}
+        />
+      </Modal>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  wrapper: { flex: 1, backgroundColor: "#f8f9fa" },
-  wrapperDark: { backgroundColor: "#1a1a2e" },
-  container: { flex: 1 },
-  contentContainer: { padding: 20, paddingBottom: 40 },
-  profileRow: {
+  container: { flex: 1, backgroundColor: "#f8f9fa" },
+  containerDark: { backgroundColor: "#1a1a2e" },
+  cardDark: { backgroundColor: "#252542" },
+  textDark: { color: "#fff" },
+  textMuted: { color: "#a0a0a0" },
+  content: { flex: 1 },
+  scrollContent: { padding: 20, paddingTop: 60 },
+  balanceSection: {
+    backgroundColor: "#fff",
+    borderRadius: 20,
+    padding: 25,
+    alignItems: "center",
+    marginBottom: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 5,
+  },
+  balanceLabel: { fontSize: 12, fontWeight: "bold", color: "#868e96", letterSpacing: 1 },
+  balanceRow: { flexDirection: "row", alignItems: "center", marginTop: 10 },
+  balanceValue: { fontSize: 42, fontWeight: "bold", color: "#1a1a1a", marginLeft: 10 },
+  earningsRow: { width: "100%", marginTop: 20 },
+  earningsText: { fontSize: 13, color: "#868e96", marginBottom: 8 },
+  progressBar: { height: 6, backgroundColor: "#f1f3f5", borderRadius: 3, overflow: "hidden" },
+  progressFill: { height: "100%", backgroundColor: "#4dabf7" },
+  actionRow: { flexDirection: "row", gap: 15, marginBottom: 25 },
+  actionCard: {
+    flex: 1,
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    padding: 15,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 5,
+    elevation: 2,
+  },
+  actionText: { fontSize: 13, fontWeight: "600", color: "#495057", marginTop: 10, textAlign: "center" },
+  sectionTitle: { fontSize: 18, fontWeight: "bold", color: "#1a1a1a", marginBottom: 15 },
+  taskCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 5,
+    elevation: 2,
+  },
+  taskIconCircle: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "#4dabf7",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  taskInfo: { flex: 1, marginLeft: 16 },
+  taskTitle: { fontSize: 16, fontWeight: "600", color: "#1a1a1a" },
+  taskSubtitle: { fontSize: 13, color: "#868e96", marginTop: 2 },
+  shareRow: { flexDirection: "row", gap: 12, marginBottom: 25 },
+  shareBtn: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 2,
+  },
+  infoBox: {
+    flexDirection: "row",
+    backgroundColor: "rgba(77, 171, 247, 0.1)",
+    padding: 15,
+    borderRadius: 12,
+    alignItems: "center",
+    marginBottom: 30,
+  },
+  infoText: { flex: 1, marginLeft: 12, fontSize: 12, color: "#495057", lineHeight: 18 },
+  modalHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 20,
-    marginTop: 15,
-  },
-  levelBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#fff",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-  },
-  levelBadgeDark: { backgroundColor: "#252542" },
-  levelText: {
-    marginLeft: 6,
-    fontSize: 12,
-    fontWeight: "600",
-    color: "#495057",
-  },
-  textDark: { color: "#fff" },
-  profileButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#e7f5ff",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-  },
-  profileButtonDark: { backgroundColor: "#252542" },
-  profileButtonText: {
-    marginLeft: 6,
-    fontSize: 12,
-    fontWeight: "600",
-    color: "#4dabf7",
-  },
-  card: {
-    backgroundColor: "#fff",
-    padding: 25,
-    borderRadius: 20,
-    elevation: 3,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    marginBottom: 20,
-  },
-  cardDark: { backgroundColor: "#252542" },
-  labelDark: { color: "#a0a0a0" },
-  label: {
-    fontSize: 14,
-    color: "#666",
-    textTransform: "uppercase",
-    letterSpacing: 1,
-  },
-  balance: {
-    fontSize: 42,
-    fontWeight: "bold",
-    color: "#4dabf7",
-    marginVertical: 5,
-  },
-  connectWalletButton: {
-    backgroundColor: "#7c3aed",
-    padding: 15,
-    borderRadius: 15,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 10,
-  },
-  connectWalletText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-    marginLeft: 10,
-  },
-  redeemButton: {
-    backgroundColor: "#40c057",
-    padding: 15,
-    borderRadius: 15,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 20,
-  },
-  redeemButtonText: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "bold",
-    marginLeft: 10,
-  },
-  section: { marginBottom: 25 },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-    marginBottom: 15,
-    color: "#1a1a1a",
-  },
-  taskButton: {
-    backgroundColor: "#4dabf7",
     padding: 20,
-    borderRadius: 15,
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
   },
-  taskInfo: { marginLeft: 15 },
-  taskName: { color: "#fff", fontSize: 18, fontWeight: "600" },
-  taskReward: { color: "#e7f5ff", fontSize: 14 },
-  shareTaskCard: {
-    backgroundColor: "#fff",
-    borderRadius: 15,
-    padding: 20,
-    marginTop: 15,
-    borderWidth: 1,
-    borderColor: "#e9ecef",
-  },
-  shareHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 15,
-  },
-  shareHeaderText: { marginLeft: 12, flex: 1 },
-  shareTitle: { fontSize: 16, fontWeight: "600", color: "#1a1a1a" },
-  shareSubtitle: { fontSize: 12, color: "#666", marginTop: 2 },
-  shareButtons: { flexDirection: "row", justifyContent: "space-between" },
-  shareButton: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 12,
-    borderRadius: 10,
-    marginHorizontal: 3,
-  },
-  shareButtonText: {
-    color: "#fff",
-    fontWeight: "600",
-    fontSize: 13,
-    marginLeft: 6,
-  },
-  xButton: { backgroundColor: "#000000" },
-  xButtonText: { color: "#fff", fontSize: 18, fontWeight: "bold" },
-  facebookButton: { backgroundColor: "#4267B2" },
-  instagramButton: { backgroundColor: "#E4405F" },
-  textButton: { backgroundColor: "#2f9e44" },
-  buttonText: { color: "#fff", fontSize: 16, fontWeight: "600" },
-  infoCard: {
-    padding: 15,
-    backgroundColor: "#e9ecef",
-    borderRadius: 12,
-    marginTop: 20,
-  },
-  infoCardDark: { backgroundColor: "#252542" },
-  infoText: {
-    fontSize: 12,
-    color: "#495057",
-    textAlign: "center",
-    marginVertical: 2,
-  },
-  infoTextDark: { color: "#a0a0a0" },
-  progressBarBg: {
-    height: 8,
-    backgroundColor: "#e9ecef",
-    borderRadius: 4,
-    marginTop: 15,
-    marginBottom: 5,
-  },
-  progressBarFill: {
-    height: "100%",
-    backgroundColor: "#4dabf7",
-    borderRadius: 4,
-  },
-  progressText: { fontSize: 12, color: "#868e96", textAlign: "right" },
-  disclaimerCard: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    padding: 15,
-    backgroundColor: "#f8f9fa",
-    borderRadius: 12,
-    marginTop: 15,
-  },
-  disclaimerText: {
-    fontSize: 11,
-    color: "#868e96",
-    marginLeft: 10,
-    flex: 1,
-    lineHeight: 16,
-  },
+  modalTitle: { fontSize: 18, fontWeight: "bold" },
 });
