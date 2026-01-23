@@ -19,18 +19,21 @@ import AcknowledgmentPopup from "../src/components/AcknowledgmentPopup";
 import VideoPlayer from "../src/components/VideoPlayer";
 import UsernameSetup from "../src/components/UsernameSetup";
 import AppHeader from "../src/components/AppHeader";
+import RedeemDripsModal from "../src/components/RedeemDripsModal";
 import mobileAds, {
   RewardedAd,
   RewardedAdEventType,
   AdEventType,
 } from "react-native-google-mobile-ads";
 
-// AdMob rewarded setup
 const rewardedAdUnitId = __DEV__
-  ? "ca-app-pub-3940256099942544/1712485313" // Google test rewarded video
+  ? "ca-app-pub-3940256099942544/1712485313"
   : "YOUR_REAL_REWARDED_UNIT_ID_HERE";
 
 const rewarded = RewardedAd.createForAdRequest(rewardedAdUnitId);
+
+const DRIPS_TO_USD_RATE = 0.001284;
+const MIN_REDEMPTION = 1000;
 
 export default function Home() {
   const {
@@ -48,6 +51,10 @@ export default function Home() {
     recordShare,
     getDailyShareCount,
     checkDailyReset,
+    walletAddress,
+    setWalletAddress,
+    createRedemption,
+    updateRedemptionStatus,
   } = useStore();
 
   const isDark = theme === "dark" || theme === "neon";
@@ -59,11 +66,11 @@ export default function Home() {
   const [showBitLabsModal, setShowBitLabsModal] = useState(false);
   const [showAdGemModal, setShowAdGemModal] = useState(false);
   const [showUsernameSetup, setShowUsernameSetup] = useState(false);
+  const [showRedeemModal, setShowRedeemModal] = useState(false);
 
   const DAILY_CAP = 500;
   const AD_REVENUE_CENTS = 5;
 
-  // AdMob Rewarded Setup
   useEffect(() => {
     mobileAds()
       .initialize()
@@ -172,7 +179,7 @@ export default function Home() {
     }
 
     const shareMessage =
-      "Check out Drip'n - earn crypto rewards by watching videos! every drip counts. Download now!";
+      "Check out Drip'n - earn rewards and redeem them for crypto! every drip counts. Download now!";
     const shareUrl = "https://dripnapp.com";
 
     try {
@@ -233,7 +240,50 @@ export default function Home() {
   };
 
   const handleRedeemDrips = () => {
-    Alert.alert("Redeem Drips", "Redeem process coming soon!");
+    if (!username) {
+      setShowUsernameSetup(true);
+      return;
+    }
+    setShowRedeemModal(true);
+  };
+
+  const handleConnectWallet = () => {
+    Alert.alert(
+      "Connect Wallet",
+      "To receive redemptions, you'll enter your XRP wallet address during the redemption process.",
+      [{ text: "OK" }]
+    );
+  };
+
+  const handleRedemptionSubmit = async (dripsAmount: number, xrpPrice: number) => {
+    try {
+      const usdAmount = dripsAmount * DRIPS_TO_USD_RATE;
+      const xrpAmount = usdAmount / xrpPrice;
+
+      const redemption = createRedemption(
+        dripsAmount,
+        usdAmount,
+        xrpAmount,
+        xrpPrice,
+        walletAddress || ""
+      );
+
+      setTimeout(() => {
+        const mockTransactionId = `TXN-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+        updateRedemptionStatus(redemption.id, "completed", mockTransactionId);
+      }, 2000);
+
+      return {
+        success: true,
+        xrpAmount,
+        transactionId: `PENDING-${redemption.id}`,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: "Failed to process redemption. Please try again.",
+      };
+    }
   };
 
   if (showSplash) {
@@ -262,8 +312,15 @@ export default function Home() {
         onSave={setUsername}
         onClose={() => {
           if (username) setShowUsernameSetup(false);
-          // Only show warning if user tries to close without a username
         }}
+      />
+      <RedeemDripsModal
+        visible={showRedeemModal}
+        onClose={() => setShowRedeemModal(false)}
+        availableBalance={points}
+        walletAddress={walletAddress}
+        onSubmit={handleRedemptionSubmit}
+        onSetWalletAddress={setWalletAddress}
       />
 
       <AppHeader showLogo />
@@ -327,6 +384,16 @@ export default function Home() {
             {Math.min(points, 500)} / 500 drips to next level
           </Text>
         </View>
+
+        <TouchableOpacity
+          style={styles.connectWalletButton}
+          onPress={handleConnectWallet}
+        >
+          <MaterialCommunityIcons name="wallet-plus" size={24} color="#fff" />
+          <Text style={styles.connectWalletText}>
+            {walletAddress ? "Wallet Connected" : "Connect Wallet"}
+          </Text>
+        </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.redeemButton}
@@ -476,7 +543,6 @@ export default function Home() {
           </View>
         </View>
 
-        {/* AdGem Offerwall Modal */}
         <Modal
           visible={showAdGemModal}
           animationType="slide"
@@ -520,7 +586,6 @@ export default function Home() {
           </View>
         </Modal>
 
-        {/* BitLabs Offer Wall Modal */}
         <Modal
           visible={showBitLabsModal}
           animationType="slide"
@@ -567,6 +632,13 @@ export default function Home() {
         <View style={[styles.infoCard, isDark && styles.infoCardDark]}>
           <Text style={[styles.infoText, isDark && styles.infoTextDark]}>
             Daily Earnings: {dailyEarnings} / 500 drips
+          </Text>
+        </View>
+
+        <View style={[styles.disclaimerCard, isDark && styles.cardDark]}>
+          <MaterialCommunityIcons name="information" size={16} color="#868e96" />
+          <Text style={styles.disclaimerText}>
+            Drip'n does not hold, custody, or transfer funds. All crypto payouts are processed by CoinGate, a licensed third-party payment processor.
           </Text>
         </View>
       </ScrollView>
@@ -641,6 +713,21 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#4dabf7",
     marginVertical: 5,
+  },
+  connectWalletButton: {
+    backgroundColor: "#7c3aed",
+    padding: 15,
+    borderRadius: 15,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 10,
+  },
+  connectWalletText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+    marginLeft: 10,
   },
   redeemButton: {
     backgroundColor: "#40c057",
@@ -740,4 +827,19 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   progressText: { fontSize: 12, color: "#868e96", textAlign: "right" },
+  disclaimerCard: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    padding: 15,
+    backgroundColor: "#f8f9fa",
+    borderRadius: 12,
+    marginTop: 15,
+  },
+  disclaimerText: {
+    fontSize: 11,
+    color: "#868e96",
+    marginLeft: 10,
+    flex: 1,
+    lineHeight: 16,
+  },
 });

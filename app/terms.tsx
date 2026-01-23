@@ -31,54 +31,61 @@ export default function TermsScreen() {
         <View style={[styles.section, isDark && styles.sectionDark]}>
           <Text style={[styles.sectionTitle, isDark && styles.textDark]}>3. Account Responsibilities</Text>
           <Text style={[styles.sectionContent, isDark && styles.textMuted]}>
-            You are responsible for maintaining the confidentiality of your wallet and account information. You agree to accept responsibility for all activities that occur under your account.
+            You are responsible for maintaining the confidentiality of your wallet address and account information. You agree to accept responsibility for all activities that occur under your account.
           </Text>
         </View>
 
         <View style={[styles.section, isDark && styles.sectionDark]}>
           <Text style={[styles.sectionTitle, isDark && styles.textDark]}>4. Earning Drips</Text>
           <Text style={[styles.sectionContent, isDark && styles.textMuted]}>
-            Drips are earned by completing designated tasks such as watching rewarded videos. Drip values are determined by actual ad revenue, with users receiving 15% of the revenue generated. Daily earning caps may apply to prevent abuse.
+            Drips are earned by completing designated tasks such as watching rewarded videos, completing surveys, and sharing the app. Drip values are determined by actual ad revenue, with users receiving a portion of the revenue generated. Daily earning caps may apply to prevent abuse.
           </Text>
         </View>
 
         <View style={[styles.section, isDark && styles.sectionDark]}>
-          <Text style={[styles.sectionTitle, isDark && styles.textDark]}>5. Cashouts and Payouts</Text>
+          <Text style={[styles.sectionTitle, isDark && styles.textDark]}>5. Redemptions and Payouts</Text>
           <Text style={[styles.sectionContent, isDark && styles.textMuted]}>
-            Drips may be cashed out for XRP cryptocurrency once the minimum threshold is reached. Payouts are processed at the current XRP market rate. We reserve the right to delay or deny payouts in cases of suspected fraud.
+            Drips may be redeemed for XRP cryptocurrency once the minimum threshold is reached. All redemptions are processed by CoinGate, a licensed third-party payment processor. CoinGate converts your drip value to XRP at real-time market rates and sends the XRP directly to your connected wallet. Drip'n does not hold, custody, or transfer any funds. Processing takes 1-3 business days. Once submitted, redemption requests cannot be cancelled, re-redeemed, or transferred to another user.
           </Text>
         </View>
 
         <View style={[styles.section, isDark && styles.sectionDark]}>
-          <Text style={[styles.sectionTitle, isDark && styles.textDark]}>6. Prohibited Activities</Text>
+          <Text style={[styles.sectionTitle, isDark && styles.textDark]}>6. Third-Party Services</Text>
+          <Text style={[styles.sectionContent, isDark && styles.textMuted]}>
+            Drip'n uses CoinGate for all cryptocurrency redemption processing. By using the redemption feature, you also agree to CoinGate's terms of service. Drip'n is not responsible for any issues, delays, or disputes arising from CoinGate's services.
+          </Text>
+        </View>
+
+        <View style={[styles.section, isDark && styles.sectionDark]}>
+          <Text style={[styles.sectionTitle, isDark && styles.textDark]}>7. Prohibited Activities</Text>
           <Text style={[styles.sectionContent, isDark && styles.textMuted]}>
             You agree not to: use bots or automated systems, create multiple accounts, exploit bugs or glitches, engage in fraudulent activity, or violate any applicable laws while using the App.
           </Text>
         </View>
 
         <View style={[styles.section, isDark && styles.sectionDark]}>
-          <Text style={[styles.sectionTitle, isDark && styles.textDark]}>7. Referral Program</Text>
+          <Text style={[styles.sectionTitle, isDark && styles.textDark]}>8. Referral Program</Text>
           <Text style={[styles.sectionContent, isDark && styles.textMuted]}>
             Referrers earn 10% of their referees' earnings for 30 days after signup. Abuse of the referral program, including self-referrals, will result in account termination.
           </Text>
         </View>
 
         <View style={[styles.section, isDark && styles.sectionDark]}>
-          <Text style={[styles.sectionTitle, isDark && styles.textDark]}>8. Modifications</Text>
+          <Text style={[styles.sectionTitle, isDark && styles.textDark]}>9. Modifications</Text>
           <Text style={[styles.sectionContent, isDark && styles.textMuted]}>
             We reserve the right to modify these Terms at any time. Continued use of the App after changes constitutes acceptance of the modified Terms.
           </Text>
         </View>
 
         <View style={[styles.section, isDark && styles.sectionDark]}>
-          <Text style={[styles.sectionTitle, isDark && styles.textDark]}>9. Limitation of Liability</Text>
+          <Text style={[styles.sectionTitle, isDark && styles.textDark]}>10. Limitation of Liability</Text>
           <Text style={[styles.sectionContent, isDark && styles.textMuted]}>
-            Drip'n is provided "as is" without warranties of any kind. We are not liable for any losses arising from cryptocurrency price fluctuations, network issues, or third-party services.
+            Drip'n is provided "as is" without warranties of any kind. We are not liable for any losses arising from cryptocurrency price fluctuations, network issues, third-party services (including CoinGate), or incorrect wallet addresses provided by users.
           </Text>
         </View>
 
         <View style={[styles.section, isDark && styles.sectionDark]}>
-          <Text style={[styles.sectionTitle, isDark && styles.textDark]}>10. Contact</Text>
+          <Text style={[styles.sectionTitle, isDark && styles.textDark]}>11. Contact</Text>
           <Text style={[styles.sectionContent, isDark && styles.textMuted]}>
             For questions about these Terms, please contact us at dripnapp@proton.me or through the Contact Us page in the app.
           </Text>

@@ -18,11 +18,27 @@ interface ShareRecord {
 
 interface HistoryRecord {
   id: string;
-  type: 'reward' | 'purchase';
+  type: 'reward' | 'purchase' | 'redemption';
   amount: number;
   source: string;
   timestamp: number;
   date: string;
+  xrpAmount?: number;
+  transactionId?: string;
+  status?: 'pending' | 'processing' | 'completed' | 'failed';
+}
+
+interface RedemptionRecord {
+  id: string;
+  dripsAmount: number;
+  usdAmount: number;
+  xrpAmount: number;
+  xrpPrice: number;
+  walletAddress: string;
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+  transactionId?: string;
+  createdAt: number;
+  completedAt?: number;
 }
 
 interface AppState {
@@ -44,8 +60,11 @@ interface AppState {
   unlockedThemes: ThemeMode[];
   dailyShares: ShareRecord[];
   history: HistoryRecord[];
+  walletAddress: string | null;
+  redemptions: RedemptionRecord[];
   setPoints: (points: number) => void;
   addPoints: (amount: number, source?: string) => void;
+  deductPoints: (amount: number) => boolean;
   resetDaily: () => void;
   completeOnboarding: () => void;
   acceptTerms: () => void;
@@ -59,6 +78,9 @@ interface AppState {
   recordShare: (platform: string) => { success: boolean; reward: number; message: string };
   getDailyShareCount: () => number;
   checkDailyReset: () => void;
+  setWalletAddress: (address: string | null) => void;
+  createRedemption: (dripsAmount: number, usdAmount: number, xrpAmount: number, xrpPrice: number, walletAddress: string) => RedemptionRecord;
+  updateRedemptionStatus: (id: string, status: RedemptionRecord['status'], transactionId?: string) => void;
 }
 
 const generateReferralCode = () => {
@@ -98,6 +120,8 @@ export const useStore = create<AppState>()(
       unlockedThemes: ['classic'],
       dailyShares: [],
       history: [],
+      walletAddress: null,
+      redemptions: [],
       setPoints: (points) => set({ points }),
       addPoints: (amount, source = 'Task') => set((state) => {
         state.checkDailyReset();
@@ -129,6 +153,12 @@ export const useStore = create<AppState>()(
           history: [historyRecord, ...updatedState.history].slice(0, 100),
         };
       }),
+      deductPoints: (amount) => {
+        const state = get();
+        if (state.points < amount) return false;
+        set({ points: state.points - amount });
+        return true;
+      },
       resetDaily: () => set({ dailyEarnings: 0, lastEarningsDate: new Date().toDateString() }),
       checkDailyReset: () => {
         const state = get();
@@ -273,6 +303,55 @@ export const useStore = create<AppState>()(
         });
         
         return { success: true, reward, message: `Share successful! You earned ${reward} drips.` };
+      },
+      setWalletAddress: (address) => set({ walletAddress: address }),
+      createRedemption: (dripsAmount, usdAmount, xrpAmount, xrpPrice, walletAddress) => {
+        const state = get();
+        const redemption: RedemptionRecord = {
+          id: Date.now().toString(),
+          dripsAmount,
+          usdAmount,
+          xrpAmount,
+          xrpPrice,
+          walletAddress,
+          status: 'pending',
+          createdAt: Date.now(),
+        };
+        
+        const historyRecord: HistoryRecord = {
+          id: redemption.id,
+          type: 'redemption',
+          amount: dripsAmount,
+          source: 'Redemption Request',
+          timestamp: Date.now(),
+          date: new Date().toLocaleDateString(),
+          xrpAmount,
+          status: 'pending',
+        };
+        
+        set({
+          points: state.points - dripsAmount,
+          redemptions: [redemption, ...state.redemptions],
+          history: [historyRecord, ...state.history].slice(0, 100),
+        });
+        
+        return redemption;
+      },
+      updateRedemptionStatus: (id, status, transactionId) => {
+        const state = get();
+        set({
+          redemptions: state.redemptions.map(r => 
+            r.id === id ? { 
+              ...r, 
+              status, 
+              transactionId,
+              completedAt: status === 'completed' ? Date.now() : r.completedAt 
+            } : r
+          ),
+          history: state.history.map(h =>
+            h.id === id ? { ...h, status, transactionId } : h
+          ),
+        });
       },
     }),
     {

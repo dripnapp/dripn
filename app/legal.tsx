@@ -19,9 +19,16 @@ export default function LegalScreen() {
         </View>
 
         <View style={[styles.section, isDark && styles.sectionDark]}>
+          <Text style={[styles.sectionTitle, isDark && styles.textDark]}>Third-Party Payment Processing</Text>
+          <Text style={[styles.sectionContent, isDark && styles.textMuted]}>
+            All cryptocurrency redemptions and payouts are processed by CoinGate, a licensed third-party payment processor. Drip'n does not hold, custody, or transfer funds. Drip'n does not have access to your private keys and does not sign any cryptocurrency transactions. CoinGate is solely responsible for executing all XRP transfers to your wallet.
+          </Text>
+        </View>
+
+        <View style={[styles.section, isDark && styles.sectionDark]}>
           <Text style={[styles.sectionTitle, isDark && styles.textDark]}>Cryptocurrency Risk Disclosure</Text>
           <Text style={[styles.sectionContent, isDark && styles.textMuted]}>
-            Cryptocurrency investments are subject to high market risk. The value of XRP and other cryptocurrencies can fluctuate significantly. Past performance is not indicative of future results. You should only transact with cryptocurrency if you understand the risks involved and can afford potential losses.
+            Cryptocurrency values are subject to high market volatility. The value of XRP and other cryptocurrencies can fluctuate significantly. The XRP amount you receive during redemption is determined by real-time market rates at the time of processing. Past performance is not indicative of future results.
           </Text>
         </View>
 
@@ -33,30 +40,37 @@ export default function LegalScreen() {
         </View>
 
         <View style={[styles.section, isDark && styles.sectionDark]}>
-          <Text style={[styles.sectionTitle, isDark && styles.textDark]}>Non-Custodial Service</Text>
+          <Text style={[styles.sectionTitle, isDark && styles.textDark]}>Redemption Process</Text>
           <Text style={[styles.sectionContent, isDark && styles.textMuted]}>
-            Drip'n operates as a non-custodial service. We do not hold, store, or have access to your private keys or funds. You are solely responsible for the security of your wallet and private keys.
+            When you submit a redemption request, Drip'n sends your request to CoinGate. CoinGate then processes the conversion from your drip value to XRP at current market rates and sends the XRP directly to your connected wallet address. Processing typically takes 1-3 business days. Once submitted, redemption requests cannot be cancelled.
           </Text>
         </View>
 
         <View style={[styles.section, isDark && styles.sectionDark]}>
-          <Text style={[styles.sectionTitle, isDark && styles.textDark]}>Payout Disclaimer</Text>
+          <Text style={[styles.sectionTitle, isDark && styles.textDark]}>Wallet Responsibility</Text>
           <Text style={[styles.sectionContent, isDark && styles.textMuted]}>
-            All payouts are made in XRP at the current market rate at the time of the transaction. Due to price volatility, the USD equivalent value of your payout may differ from your drip balance. Network fees may apply.
+            You are solely responsible for providing a valid XRP wallet address and maintaining access to your wallet. Drip'n and CoinGate are not responsible for funds sent to incorrect wallet addresses or wallets you no longer have access to.
           </Text>
         </View>
 
         <View style={[styles.section, isDark && styles.sectionDark]}>
           <Text style={[styles.sectionTitle, isDark && styles.textDark]}>Age Requirement</Text>
           <Text style={[styles.sectionContent, isDark && styles.textMuted]}>
-            You must be at least 18 years of age to use Drip'n. By using this app, you confirm that you meet this age requirement and are legally permitted to engage in cryptocurrency transactions in your jurisdiction.
+            You must be at least 18 years of age to use Drip'n and redeem drips for cryptocurrency. By using this app, you confirm that you meet this age requirement and are legally permitted to receive cryptocurrency in your jurisdiction.
           </Text>
         </View>
 
         <View style={[styles.section, isDark && styles.sectionDark]}>
           <Text style={[styles.sectionTitle, isDark && styles.textDark]}>Regulatory Compliance</Text>
           <Text style={[styles.sectionContent, isDark && styles.textMuted]}>
-            Cryptocurrency regulations vary by jurisdiction. It is your responsibility to ensure compliance with all applicable laws and regulations in your country or region.
+            Cryptocurrency regulations vary by jurisdiction. It is your responsibility to ensure compliance with all applicable laws and regulations in your country or region regarding receiving cryptocurrency.
+          </Text>
+        </View>
+
+        <View style={[styles.section, isDark && styles.sectionDark]}>
+          <Text style={[styles.sectionTitle, isDark && styles.textDark]}>About CoinGate</Text>
+          <Text style={[styles.sectionContent, isDark && styles.textMuted]}>
+            CoinGate is a licensed cryptocurrency payment processor that handles all Drip'n redemption payouts. For questions about specific transactions or payout status, transaction IDs provided during redemption can be used to track payments. CoinGate's terms and conditions apply to all redemption transactions.
           </Text>
         </View>
 

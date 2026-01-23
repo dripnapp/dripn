@@ -2,9 +2,9 @@
 
 ## Overview
 
-A React Native Expo mobile application that functions as a crypto rewards platform. Users earn drips (the in-app currency) by completing micro-tasks (watching rewarded video ads, AdMob, offerwalls, and sharing). Drips are used for in-app level progression and achievements.
+A React Native Expo mobile application that functions as a crypto rewards platform. Users earn drips (the in-app currency) by completing micro-tasks (watching rewarded video ads, AdMob, offerwalls, and sharing). Users can redeem accumulated drips for XRP cryptocurrency through CoinGate, a licensed third-party payment processor.
 
-The app is non-custodial and focuses on providing an engaging rewards experience through various ad networks and social sharing.
+**IMPORTANT LEGAL DISTINCTION**: Drip'n does NOT hold funds, custody cryptocurrency, hold private keys, or sign transactions. All cryptocurrency payouts are processed and executed by CoinGate. Drip'n simply sends redemption requests to CoinGate, which then converts the drip value to XRP at real-time market rates and sends the XRP directly to the user's connected wallet.
 
 **Tagline:** "every drip counts"
 
@@ -14,52 +14,57 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (January 2026)
 
-- **APP STORE COMPLIANCE**: Removed all cryptocurrency wallet features, Xaman integration, and XRP price tracking to comply with App Store regulations regarding money transfers.
-- Rebranded the app to focus on in-app rewards and level progression rather than financial payouts.
-- Removed "Connect Wallet", "Cashout", and "Disconnect Wallet" functionalities.
-- Cleaned up the main dashboard to remove XRP price and wallet-related UI elements.
+### Redemption System (NEW)
+- **Multi-step Redemption Flow**: Users go through input → warnings → terms acceptance → final confirmation → processing → success
+- **Real-time XRP Pricing**: Fetches current XRP/USD price from CoinGecko/Binance APIs at time of redemption
+- **CoinGate Integration**: All payouts processed by CoinGate (third-party payment processor)
+- **Transaction Tracking**: Transaction IDs provided for tracking redemptions
+- **Redemption Terms**: 1-3 day processing, non-cancellable, non-transferable
+- **Visual Success Banner**: Animated confirmation when redemption is submitted
+
+### Connect Wallet
+- **Connect Wallet Button**: Re-added to main dashboard (placeholder for future wallet connection)
+- Users will need to connect an XRP wallet address to receive redemptions
+
+### Legal Compliance Updates
+- Updated all app screens with new legal language about CoinGate processing
+- Clear disclaimers that Drip'n does not hold/custody/transfer funds
+- Updated Learn, Legal, Terms, and History pages with redemption information
+
+### Previous Changes
 - **MAJOR REBRAND**: Changed app name from "droply.io" to "Drip'n"
 - Changed all "drops" references to "drips" throughout the app
 - Updated logo with new Drip'n branding (assets/images/dripn-logo.jpg)
-- Updated splash screen with animated "Loading..." text
-- Added Instagram as share option alongside X, Facebook, and Text/SMS
-- Updated X (Twitter) share button with proper X icon and black background
-- Created History page for tracking rewards and level milestones
-- Added totalEarned tracking for leaderboard (separate from current balance)
-- Updated contact email to dripnapp@proton.me
-- Updated referral code prefix from "DPLY-" to "DRPN-"
-- **NAVIGATION UPDATE**: Created shared AppHeader component with hamburger menu visible on ALL pages
-- Lowered header position (50px top padding) for better mobile accessibility
+- Premium theme store: 6 themes (Classic free, 5 premium at 1,000 drips each)
+- Daily earning reset at midnight user timezone with 500 drip cap
+- Share Task Features: 3x daily limit, 1-minute cooldown, progressive rewards
 
-### Share Task Features
-- Anti-abuse measures: 3x daily limit, 1-minute cooldown between shares
-- Share rewards: 1 drip (first), 1 drip (second), 3 drips (third) = 5 drips max per day
-- Share options: X (Twitter), Facebook, Instagram, or Text/SMS
+## Redemption Flow Architecture
 
-### Reward System
-- Standard ads: 10-15s duration, 1-2 drips reward
-- Premium ads: 20-30s duration, 3-4 drips reward
-- AdMob, AdGem, and BitLabs integrations for additional drip earning opportunities
+### User Flow
+1. User taps "Redeem Drips" button on main dashboard
+2. Input screen: Enter drips amount (min 1,000), shows available balance
+3. Warning screen: Terms displayed (1-3 days processing, no cancellation, no transfer)
+4. User must check acceptance checkbox
+5. Confirmation screen: "You are submitting X Drips to be Redeemed?"
+6. Processing screen: Animated loader while request is submitted
+7. Success screen: Visual banner with XRP amount and transaction ID
 
-### History Page Features
-- View available drips balance
-- View total earned drips (lifetime)
-- Recent activity list with source, date, and amount
-- Total earned used for leaderboard ranking and level progression
+### Technical Flow
+1. App fetches real-time XRP/USD price from CoinGecko (fallback: Binance)
+2. Conversion: drips → USD (at 0.001284 rate) → XRP (at market rate)
+3. App sends request to CoinGate API
+4. CoinGate processes payout and sends XRP to user's wallet
+5. CoinGate provides transaction ID
+6. App displays success confirmation
 
-### Logo Notes
-- Custom logo PNG provided by user (gradient water drop with play button + "drip'n" text)
-- Logo saved as `assets/images/dripn-logo.jpg`
-- Header and splash screen use the same logo with dark background (#12122a)
-
-### Previous Changes
-- Implemented one-time acknowledgment popup with checkboxes (18+, risks, terms)
-- Created step-by-step onboarding tutorial for first-time users
-- Added hamburger menu with navigation to all app sections
-- Created dedicated screens: Learn, Legal, Terms, Referral, Badges, Leaderboard, History
-- Added user levels (Bronze, Silver, Gold) and badge system with rewards
-- Added referral program with unique codes and input for entering codes
-- Added unique username system for user profiles (shown on leaderboard)
+### Key Legal Points
+- Drip'n does NOT hold funds
+- Drip'n does NOT custody cryptocurrency
+- Drip'n does NOT hold private keys
+- Drip'n does NOT sign transactions
+- CoinGate is the payment processor and sender of XRP
+- All conversion rates are real-time market rates (no fixed exchange rates exposed)
 
 ## System Architecture
 
@@ -71,19 +76,20 @@ Preferred communication style: Simple, everyday language.
 - **UI Components**: Custom themed components with light/dark mode support
 
 ### App Screens (in `/app` directory)
-- `index.tsx` - Main dashboard with balance, tasks (video, offerwalls, share)
-- `history.tsx` - History page with rewards and total earned tracking
+- `index.tsx` - Main dashboard with balance, tasks, Connect Wallet, Redeem Drips
+- `history.tsx` - History page with rewards, redemptions, and transaction tracking
 - `settings.tsx` - User settings (username, theme selection)
 - `contact.tsx` - Contact/support page with email link
-- `learn.tsx` - Crypto basics and app education
-- `legal.tsx` - Legal disclaimers and disclosures
-- `terms.tsx` - Terms of Use
+- `learn.tsx` - How redemptions work and crypto education
+- `legal.tsx` - Legal disclaimers including CoinGate processing info
+- `terms.tsx` - Terms of Use with redemption terms
 - `referral.tsx` - Referral program with unique codes
 - `badges.tsx` - User badges and level progression
 - `leaderboard.tsx` - Top earners ranking (uses totalEarned)
 
 ### Components (in `/src/components`)
-- `AppHeader.tsx` - Shared header with hamburger menu navigation (used on all pages)
+- `AppHeader.tsx` - Shared header with hamburger menu navigation
+- `RedeemDripsModal.tsx` - Multi-step redemption flow modal
 - `SplashScreen.tsx` - Animated loading screen with Drip'n branding
 - `OnboardingScreen.tsx` - Step-by-step tutorial for new users
 - `AcknowledgmentPopup.tsx` - Required checkboxes before using app
@@ -91,24 +97,25 @@ Preferred communication style: Simple, everyday language.
 - `UsernameSetup.tsx` - Profile username configuration
 
 ### Key Application Features
-- **Splash Screen**: Animated loading screen with Drip'n logo on app launch
+- **Splash Screen**: Animated loading screen with Drip'n logo
 - **Onboarding**: 4-step tutorial explaining how the app works
 - **Acknowledgment Popup**: Required checkboxes for age, risks, and terms
-- **Drips System**: Rewards currency for in-app achievements
+- **Drips System**: Rewards currency that can be redeemed for XRP
 - **Levels & Badges**: Bronze (100 drips), Silver (500 drips), Gold (1000 drips)
-- **Referral Program**: 10% of referee earnings for 30 days, codes prefixed with "DRPN-"
-- **History Tracking**: All rewards logged with timestamps
+- **Referral Program**: 10% of referee earnings for 30 days
+- **Redemption**: Multi-step flow to convert drips to XRP via CoinGate
+- **History Tracking**: All rewards and redemptions logged with timestamps
 
 ### State Management Pattern
 The app uses Zustand store (`src/store/useStore.ts`) with the following state:
 - Drips balance and daily earnings tracking
 - Total earned tracking (lifetime, for leaderboard)
-- History records for rewards
-- Onboarding completion status
-- Terms acceptance status
-- User level (Bronze/Silver/Gold)
-- Badges collection
-- Referral code and count
+- History records for rewards and redemptions
+- Wallet address storage
+- Redemption records with status tracking
+- Onboarding/terms acceptance status
+- User level and badges
+- Theme preferences and unlocked themes
 - Persistence to AsyncStorage for session continuity
 
 ### Security Considerations
@@ -116,6 +123,8 @@ The app uses Zustand store (`src/store/useStore.ts`) with the following state:
 - Required acknowledgment checkboxes before accessing tasks
 - Age verification (18+)
 - Clear legal disclaimers throughout app
+- No storage of private keys or sensitive wallet data
+- Transaction IDs for tracking all redemptions
 
 ## External Dependencies
 
@@ -123,8 +132,12 @@ The app uses Zustand store (`src/store/useStore.ts`) with the following state:
 - **react-native-google-mobile-ads**: AdMob rewarded video ads
 - **react-native-webview**: Hosting offerwall providers like AdGem and BitLabs
 
+### Payment Processing
+- **CoinGate API**: Third-party payment processor for XRP payouts (to be integrated)
+- **CoinGecko/Binance APIs**: Real-time XRP/USD price fetching
+
 ### Storage & Data
-- **@react-native-async-storage/async-storage**: Local device storage for persisting user data
+- **@react-native-async-storage/async-storage**: Local device storage
 - **zustand**: Lightweight state management with persistence middleware
 
 ### HTTP & Networking

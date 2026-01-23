@@ -1,24 +1,56 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet, ScrollView, FlatList } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useStore } from '../src/store/useStore';
 import AppHeader from '../src/components/AppHeader';
 
 export default function HistoryScreen() {
-  const { history, points, totalEarned, theme } = useStore();
+  const { theme, points, totalEarned, history, redemptions } = useStore();
   const isDark = theme === 'dark' || theme === 'neon';
 
-  const getSourceIcon = (source: string, type: string) => {
-    if (type === 'purchase') return 'cart';
+  const getItemIcon = (type: string, source: string, status?: string) => {
+    if (type === 'redemption') {
+      if (status === 'completed') return 'check-circle';
+      if (status === 'processing') return 'clock-outline';
+      if (status === 'failed') return 'alert-circle';
+      return 'clock-outline';
+    }
+    if (type === 'purchase') return 'shopping';
     if (source.includes('Video')) return 'play-circle';
     if (source.includes('Share')) return 'share-variant';
     if (source.includes('Badge')) return 'medal';
     if (source.includes('Referral')) return 'account-group';
-    return 'star';
+    return 'water';
   };
 
-  const getSourceColor = (type: string) => {
-    return type === 'purchase' ? '#e03131' : '#40c057';
+  const getItemColor = (type: string, status?: string) => {
+    if (type === 'redemption') {
+      if (status === 'completed') return '#40c057';
+      if (status === 'processing') return '#f59f00';
+      if (status === 'failed') return '#fa5252';
+      return '#f59f00';
+    }
+    if (type === 'purchase') return '#7c3aed';
+    return '#40c057';
+  };
+
+  const formatAmount = (item: any) => {
+    if (item.type === 'redemption') {
+      return `-${item.amount} drips`;
+    }
+    if (item.type === 'purchase') {
+      return `-${item.amount} drips`;
+    }
+    return `+${item.amount} drips`;
+  };
+
+  const getStatusText = (status?: string) => {
+    if (!status) return '';
+    if (status === 'pending') return ' (Pending)';
+    if (status === 'processing') return ' (Processing)';
+    if (status === 'completed') return ' (Completed)';
+    if (status === 'failed') return ' (Failed)';
+    return '';
   };
 
   return (
@@ -29,15 +61,27 @@ export default function HistoryScreen() {
         <View style={styles.statsRow}>
           <View style={[styles.statCard, isDark && styles.cardDark]}>
             <MaterialCommunityIcons name="wallet" size={28} color="#4dabf7" />
-            <Text style={[styles.statValue, isDark && styles.textDark]}>{points}</Text>
+            <Text style={[styles.statValue, isDark && styles.textDark]}>{points.toLocaleString()}</Text>
             <Text style={[styles.statLabel, isDark && styles.textMuted]}>Available Drips</Text>
           </View>
           <View style={[styles.statCard, isDark && styles.cardDark]}>
             <MaterialCommunityIcons name="chart-line" size={28} color="#40c057" />
-            <Text style={[styles.statValue, isDark && styles.textDark]}>{totalEarned || 0}</Text>
+            <Text style={[styles.statValue, styles.totalValue, isDark && styles.textDark]}>{(totalEarned || 0).toLocaleString()}</Text>
             <Text style={[styles.statLabel, isDark && styles.textMuted]}>Total Earned</Text>
           </View>
         </View>
+
+        {redemptions && redemptions.length > 0 && (
+          <View style={[styles.redemptionsSummary, isDark && styles.cardDark]}>
+            <MaterialCommunityIcons name="cash-multiple" size={24} color="#40c057" />
+            <View style={styles.redemptionInfo}>
+              <Text style={[styles.redemptionTitle, isDark && styles.textDark]}>Redemptions</Text>
+              <Text style={[styles.redemptionSubtitle, isDark && styles.textMuted]}>
+                {redemptions.length} total • Processed by CoinGate
+              </Text>
+            </View>
+          </View>
+        )}
 
         <Text style={[styles.sectionTitle, isDark && styles.textDark]}>Recent Activity</Text>
 
@@ -46,7 +90,7 @@ export default function HistoryScreen() {
             <MaterialCommunityIcons name="history" size={48} color="#868e96" />
             <Text style={[styles.emptyText, isDark && styles.textMuted]}>No activity yet</Text>
             <Text style={[styles.emptySubtext, isDark && styles.textMuted]}>
-              Start earning drips by watching videos or sharing the app!
+              Complete tasks to start earning drips!
             </Text>
           </View>
         ) : (
@@ -60,22 +104,30 @@ export default function HistoryScreen() {
                   isDark && styles.historyRowDark
                 ]}
               >
-                <View style={[styles.iconCircle, { backgroundColor: getSourceColor(item.type) + '20' }]}>
+                <View style={[styles.iconCircle, { backgroundColor: getItemColor(item.type, item.status) + '20' }]}>
                   <MaterialCommunityIcons 
-                    name={getSourceIcon(item.source, item.type) as any} 
+                    name={getItemIcon(item.type, item.source, item.status) as any} 
                     size={20} 
-                    color={getSourceColor(item.type)} 
+                    color={getItemColor(item.type, item.status)} 
                   />
                 </View>
                 <View style={styles.historyInfo}>
-                  <Text style={[styles.historySource, isDark && styles.textDark]}>{item.source}</Text>
+                  <Text style={[styles.historySource, isDark && styles.textDark]}>
+                    {item.source}{getStatusText(item.status)}
+                  </Text>
                   <Text style={[styles.historyDate, isDark && styles.textMuted]}>{item.date}</Text>
+                  {item.xrpAmount && (
+                    <Text style={styles.xrpAmount}>~{item.xrpAmount.toFixed(6)} XRP</Text>
+                  )}
+                  {item.transactionId && (
+                    <Text style={styles.transactionId}>ID: {item.transactionId}</Text>
+                  )}
                 </View>
                 <Text style={[
                   styles.historyAmount,
-                  { color: getSourceColor(item.type) }
+                  { color: getItemColor(item.type, item.status) }
                 ]}>
-                  {item.type === 'purchase' ? '-' : '+'}{item.amount} drps
+                  {formatAmount(item)}
                 </Text>
               </View>
             ))}
@@ -85,7 +137,7 @@ export default function HistoryScreen() {
         <View style={[styles.infoBox, isDark && styles.infoBoxDark]}>
           <MaterialCommunityIcons name="information-outline" size={18} color="#4dabf7" />
           <Text style={[styles.infoText, isDark && styles.infoTextDark]}>
-            Total earned drips are used for level progression. Themes cost 1,000 drips to unlock forever!
+            Redemption payouts are processed by CoinGate and typically take 1-3 business days. Transaction IDs are provided for tracking.
           </Text>
         </View>
       </ScrollView>
@@ -112,10 +164,33 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   cardDark: { backgroundColor: '#252542' },
-  statValue: { fontSize: 24, fontWeight: 'bold', color: '#1a1a1a', marginTop: 8 },
+  statValue: { fontSize: 24, fontWeight: 'bold', color: '#4dabf7', marginTop: 8 },
+  totalValue: { color: '#40c057' },
   statLabel: { fontSize: 12, color: '#868e96', marginTop: 4 },
   textDark: { color: '#fff' },
   textMuted: { color: '#a0a0a0' },
+  redemptionsSummary: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    padding: 15,
+    borderRadius: 12,
+    marginBottom: 20,
+  },
+  redemptionInfo: {
+    marginLeft: 12,
+    flex: 1,
+  },
+  redemptionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1a1a1a',
+  },
+  redemptionSubtitle: {
+    fontSize: 12,
+    color: '#868e96',
+    marginTop: 2,
+  },
   sectionTitle: { fontSize: 18, fontWeight: '600', color: '#1a1a1a', marginBottom: 15 },
   emptyCard: {
     backgroundColor: '#fff',
@@ -154,6 +229,17 @@ const styles = StyleSheet.create({
   historyInfo: { flex: 1, marginLeft: 12 },
   historySource: { fontSize: 14, fontWeight: '600', color: '#1a1a1a' },
   historyDate: { fontSize: 12, color: '#868e96', marginTop: 2 },
+  xrpAmount: {
+    fontSize: 11,
+    color: '#4dabf7',
+    marginTop: 2,
+  },
+  transactionId: {
+    fontSize: 10,
+    color: '#868e96',
+    marginTop: 2,
+    fontFamily: 'monospace',
+  },
   historyAmount: { fontSize: 16, fontWeight: 'bold' },
   infoBox: {
     flexDirection: 'row',

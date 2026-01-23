@@ -21,33 +21,38 @@ export default function LearnScreen() {
     {
       icon: 'water',
       title: "What is Drip'n?",
-      content: "Drip'n is a rewards app where you earn \"drips\" by completing simple tasks like watching short videos. Drips are an in-app reward currency used to track your progress and achievements within the app.",
+      content: "Drip'n is a rewards app where you earn \"drips\" by completing simple tasks like watching short videos. Once you accumulate enough drips, you can redeem them for XRP cryptocurrency through our third-party payment processor.",
       isDripn: true,
-      disclaimer: "Important: Drips earned on Drip'n have no monetary value, cash value, or real-world currency equivalent. They are virtual rewards for entertainment purposes only and cannot be exchanged for cash or transferred outside the app.",
+      disclaimer: "Important: When you redeem drips, CoinGate (our third-party payment processor) handles all cryptocurrency transactions. Drip'n does not hold funds, custody crypto, or sign transactions. All payouts are processed and sent by CoinGate directly to your wallet.",
     },
     {
       icon: 'wallet-outline',
       title: 'What is a Crypto Wallet?',
-      content: 'A crypto wallet is a tool that allows you to interact with blockchain networks. It stores your private keys (not actual coins) and lets you send, receive, and manage your cryptocurrency.',
+      content: 'A crypto wallet is a tool that allows you to interact with blockchain networks. It stores your private keys (not actual coins) and lets you send, receive, and manage your cryptocurrency. You will need an XRP wallet address to receive redemptions.',
     },
     {
       icon: 'shield-check',
-      title: 'What is Non-Custodial?',
-      content: "Non-custodial means you maintain complete control of your private keys and funds. Drip'n never holds your crypto - we only send rewards directly to your connected wallet.",
+      title: 'How Does Redemption Work?',
+      content: "When you redeem drips, your request is sent to CoinGate, a licensed payment processor. CoinGate converts your drips value to XRP at the current market rate and sends the XRP directly to your connected wallet. Drip'n never touches, holds, or transfers the funds.",
     },
     {
       icon: 'chart-line-variant',
       title: 'Understanding Volatility',
-      content: 'Cryptocurrency prices can change rapidly. The XRP you receive today might be worth more or less tomorrow. Always consider this when planning cashouts.',
+      content: 'Cryptocurrency prices can change rapidly. The XRP value at the time of redemption may differ from when you earned your drips. CoinGate uses real-time market rates for all conversions.',
+    },
+    {
+      icon: 'bank-transfer',
+      title: 'About CoinGate',
+      content: 'CoinGate is a licensed cryptocurrency payment processor that handles all redemption payouts. They provide secure, compliant crypto transactions and are responsible for executing XRP transfers to your wallet.',
     },
   ];
 
   return (
     <View style={[styles.container, isDark && styles.containerDark]}>
-      <AppHeader title="Learn Crypto" showBack />
+      <AppHeader title="Learn" showBack />
 
       <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
-        <Text style={[styles.subheader, isDark && styles.textMuted]}>Learn the fundamentals of cryptocurrency and XRP</Text>
+        <Text style={[styles.subheader, isDark && styles.textMuted]}>Learn about cryptocurrency and how redemptions work</Text>
 
         {topics.map((topic, index) => (
           <View key={index} style={[styles.card, topic.isDripn && styles.dripnCard, isDark && styles.cardDark]}>
@@ -72,7 +77,7 @@ export default function LearnScreen() {
         <View style={[styles.tipBox, isDark && styles.tipBoxDark]}>
           <MaterialCommunityIcons name="lightbulb-outline" size={24} color="#f59f00" />
           <Text style={[styles.tipText, isDark && styles.textMuted]}>
-            Pro Tip: Never share your wallet's secret key with anyone, including Drip'n. We will never ask for it.
+            Pro Tip: Never share your wallet's secret key with anyone. Drip'n and CoinGate will never ask for your private keys.
           </Text>
         </View>
       </ScrollView>
