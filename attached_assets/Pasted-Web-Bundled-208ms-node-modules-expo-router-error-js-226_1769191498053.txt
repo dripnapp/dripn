@@ -1,0 +1,40 @@
+Web Bundled 208ms node_modules/expo-router/_error.js (226 modules)
+ LOG  [web] Logs will appear in the browser console
+Web Bundling failed 2142ms node_modules/expo-router/entry.js (1009 modules)
+λ Bundling failed 2151ms node_modules/expo-router/node/render.js (951 modules)
+
+Metro error: Importing native-only module "react-native/Libraries/Utilities/codegenNativeComponent" on web from: node_modules/react-native-google-mobile-ads/lib/module/specs/components/GoogleMobileAdsBannerViewNativeComponent.ts
+
+Import stack:
+
+ node_modules/react-native-google-mobile-ads/lib/module/specs/components/GoogleMobileAdsBannerViewNativeComponent.ts
+ | import "react-native/Libraries/Utilities/codegenNativeComponent"
+           ^ Importing react-native internals is not supported on web.
+
+ node_modules/react-native-google-mobile-ads/lib/module/ads/BannerAd.js
+ | import "../specs/components/GoogleMobileAdsBannerViewNativeComponent"
+
+ node_modules/react-native-google-mobile-ads/lib/module/index.js
+ | import "./ads/BannerAd"
+
+ app/index.tsx
+ | import "react-native-google-mobile-ads"
+
+ app (require.context)
+
+
+
+Web Bundled 19ms node_modules/expo-router/_error.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+iOS Bundling failed 177ms node_modules/expo-router/entry.js (1 module)
+ ERROR  Error: Got unexpected undefined
+    at nullthrows (/home/runner/workspace/node_modules/nullthrows/nullthrows.js:7:15)
+    at Graph._recursivelyCommitModule (/home/runner/workspace/node_modules/metro/src/DeltaBundler/Graph.js:203:51)
+    at Graph.traverseDependencies (/home/runner/workspace/node_modules/metro/src/DeltaBundler/Graph.js:102:14)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at DeltaCalculator._getChangedDependencies (/home/runner/workspace/node_modules/metro/src/DeltaBundler/DeltaCalculator.js:191:42)
+    at DeltaCalculator.getDelta (/home/runner/workspace/node_modules/metro/src/DeltaBundler/DeltaCalculator.js:72:16)
+    at DeltaBundler.getDelta (/home/runner/workspace/node_modules/metro/src/DeltaBundler.js:55:12)
+    at IncrementalBundler.updateGraph (/home/runner/workspace/node_modules/metro/src/IncrementalBundler.js:243:19)
+    at build (/home/runner/workspace/node_modules/metro/src/Server.js:826:35)
+    at Server.requestProcessor [as _processBundleRequest] (/home/runner/workspace/node_modules/metro/src/Server.js:734:18)

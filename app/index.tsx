@@ -22,11 +22,13 @@ import UsernameSetup from "../src/components/UsernameSetup";
 import AppHeader from "../src/components/AppHeader";
 import RedeemDripsModal from "../src/components/RedeemDripsModal";
 
+// Mocks for web compatibility
 let mobileAds: any = () => ({ initialize: () => Promise.resolve() });
 let RewardedAd: any = { createForAdRequest: () => ({ load: () => {}, addAdEventListener: () => () => {} }) };
 let RewardedAdEventType: any = { EARNED_REWARD: 'earned_reward' };
 let AdEventType: any = { ERROR: 'error' };
 
+// Conditional require to prevent web bundling errors
 if (Platform.OS !== 'web') {
   try {
     const ads = require("react-native-google-mobile-ads");
@@ -43,7 +45,7 @@ const rewardedAdUnitId = __DEV__
   ? "ca-app-pub-3940256099942544/1712485313"
   : "YOUR_REAL_REWARDED_UNIT_ID_HERE";
 
-const rewarded = RewardedAd.createForAdRequest(rewardedAdUnitId);
+const rewarded = RewardedAd?.createForAdRequest ? RewardedAd.createForAdRequest(rewardedAdUnitId) : RewardedAd;
 
 const DRIPS_TO_USD_RATE = 0.001284;
 const MIN_REDEMPTION = 1000;
@@ -85,27 +87,33 @@ export default function Home() {
   const AD_REVENUE_CENTS = 5;
 
   useEffect(() => {
-    if (Platform.OS !== 'web') {
+    if (Platform.OS !== 'web' && mobileAds) {
       mobileAds()
         .initialize()
         .then(() => console.log("AdMob initialized successfully"))
         .catch((error: any) => console.error("AdMob init error:", error));
 
-      rewarded.load();
+      if (rewarded && rewarded.load) {
+        rewarded.load();
 
-      rewarded.addAdEventListener(AdEventType.ERROR, (error: any) => {
-        console.error("Ad error:", error);
-      });
+        rewarded.addAdEventListener(AdEventType.ERROR, (error: any) => {
+          console.error("Ad error:", error);
+        });
 
-      const rewardListener = rewarded.addAdEventListener(
-        RewardedAdEventType.EARNED_REWARD,
-        (reward: any) => {
-          addPoints(reward.amount);
-          Alert.alert("Reward Earned!", `You earned ${reward.amount} drips!`);
-        },
-      );
+        const rewardListener = rewarded.addAdEventListener(
+          RewardedAdEventType.EARNED_REWARD,
+          (reward: any) => {
+            addPoints(reward.amount);
+            Alert.alert("Reward Earned!", `You earned ${reward.amount} drips!`);
+          },
+        );
 
-      return () => rewardListener();
+        return () => {
+          if (rewardListener && typeof rewardListener === 'function') {
+            rewardListener();
+          }
+        };
+      }
     }
   }, []);
 
@@ -152,9 +160,9 @@ export default function Home() {
       return;
     }
 
-    if (rewarded.loaded) {
+    if (rewarded && rewarded.loaded) {
       rewarded.show();
-    } else {
+    } else if (rewarded && rewarded.load) {
       setLoading(true);
       rewarded.load();
       setTimeout(() => {
@@ -165,6 +173,8 @@ export default function Home() {
           setShowVideoPlayer(true);
         }
       }, 2000);
+    } else {
+      setShowVideoPlayer(true);
     }
   };
 
