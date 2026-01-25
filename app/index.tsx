@@ -75,27 +75,31 @@ export default function Home() {
     const setupAds = async () => {
       if (Platform.OS === 'web') return;
       
-      const result = await initializeAds();
-      if (result.success) {
-        const { RewardedAdEventType, AdEventType } = getAdEventTypes();
-        const ad = createRewardedAd(rewardedAdUnitId);
-        setRewardedAd(ad);
-        
-        if (ad && ad.load) {
-          ad.load();
+      try {
+        const result = await initializeAds();
+        if (result && result.success) {
+          const { RewardedAdEventType, AdEventType } = getAdEventTypes();
+          const ad = createRewardedAd(rewardedAdUnitId);
+          setRewardedAd(ad);
+          
+          if (ad && ad.load) {
+            ad.load();
 
-          ad.addAdEventListener(AdEventType.ERROR, (error: any) => {
-            console.error("Ad error:", error);
-          });
+            ad.addAdEventListener(AdEventType.ERROR, (error: any) => {
+              console.error("Ad error:", error);
+            });
 
-          ad.addAdEventListener(
-            RewardedAdEventType.EARNED_REWARD,
-            (reward: any) => {
-              addPoints(reward.amount);
-              Alert.alert("Reward Earned!", `You earned ${reward.amount} drips!`);
-            },
-          );
+            ad.addAdEventListener(
+              RewardedAdEventType.EARNED_REWARD,
+              (reward: any) => {
+                addPoints(reward.amount);
+                Alert.alert("Reward Earned!", `You earned ${reward.amount} drips!`);
+              },
+            );
+          }
         }
+      } catch (e) {
+        console.log("Ads initialization skipped or failed:", e);
       }
     };
     

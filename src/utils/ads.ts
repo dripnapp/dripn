@@ -8,9 +8,19 @@ let mobileAdsModule: any = null;
 const loadMobileAds = () => {
   if (mobileAdsModule !== null) return mobileAdsModule;
   
+  if (Platform.OS === 'web') {
+    mobileAdsModule = false;
+    return null;
+  }
+
   try {
+    // Metro will still try to resolve this, but we need to ensure it doesn't crash at runtime
+    // if the native module isn't linked (like in Expo Go)
     mobileAdsModule = require('react-native-google-mobile-ads');
-    return mobileAdsModule;
+    if (mobileAdsModule && (mobileAdsModule.default || mobileAdsModule.RewardedAd)) {
+      return mobileAdsModule;
+    }
+    throw new Error('Module found but appears empty (mocked or unlinked)');
   } catch (e) {
     console.log('Mobile ads module not available (likely Expo Go)');
     mobileAdsModule = false;
@@ -24,7 +34,7 @@ export const initializeAds = async (): Promise<{ success: boolean; reason?: stri
   }
   
   const ads = loadMobileAds();
-  if (!ads) {
+  if (!ads || !ads.default) {
     return { success: false, reason: 'module_not_available' };
   }
   
@@ -49,7 +59,7 @@ export const createRewardedAd = (adUnitId: string): any => {
   }
   
   const ads = loadMobileAds();
-  if (!ads) {
+  if (!ads || !ads.RewardedAd) {
     return {
       load: () => {},
       show: () => {},
@@ -81,7 +91,7 @@ export const getAdEventTypes = (): { RewardedAdEventType: any; AdEventType: any 
   }
   
   return {
-    RewardedAdEventType: ads.RewardedAdEventType,
-    AdEventType: ads.AdEventType,
+    RewardedAdEventType: ads.RewardedAdEventType || { EARNED_REWARD: 'earned_reward' },
+    AdEventType: ads.AdEventType || { ERROR: 'error' },
   };
 };
