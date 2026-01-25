@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, Dimensions, Animated } from "react-native";
-import { Image } from "expo-image";
+import React, { useEffect, useState, useCallback } from "react";
+import { View, Text, StyleSheet, Dimensions, Image, Platform } from "react-native";
 
 interface SplashScreenProps {
   onFinish: () => void;
@@ -11,42 +10,27 @@ const { width: screenWidth } = Dimensions.get("window");
 export default function SplashScreen({ onFinish }: SplashScreenProps) {
   const [visible, setVisible] = useState(true);
   const [dots, setDots] = useState("");
-  const fadeAnim = useState(new Animated.Value(0.5))[0];
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setVisible(false);
-      onFinish();
-    }, 2500);
-
-    return () => clearTimeout(timer);
+  const handleFinish = useCallback(() => {
+    setVisible(false);
+    onFinish();
   }, [onFinish]);
 
   useEffect(() => {
+    const timer = setTimeout(() => {
+      handleFinish();
+    }, 2500);
+
+    return () => clearTimeout(timer);
+  }, [handleFinish]);
+
+  useEffect(() => {
     const dotInterval = setInterval(() => {
-      setDots((prev) => {
-        if (prev === "...") return "";
-        return prev + ".";
-      });
+      setDots((prev) => (prev === "..." ? "" : prev + "."));
     }, 400);
 
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 600,
-          useNativeDriver: true,
-        }),
-        Animated.timing(fadeAnim, {
-          toValue: 0.5,
-          duration: 600,
-          useNativeDriver: true,
-        }),
-      ]),
-    ).start();
-
     return () => clearInterval(dotInterval);
-  }, [fadeAnim]);
+  }, []);
 
   if (!visible) return null;
 
@@ -59,13 +43,13 @@ export default function SplashScreen({ onFinish }: SplashScreenProps) {
         <Image
           source={require("../../assets/images/dripn-logo.jpg")}
           style={{ width: logoWidth, height: logoHeight }}
-          contentFit="contain"
+          resizeMode="contain"
         />
       </View>
       <View style={styles.loadingContainer}>
-        <Animated.Text style={[styles.loadingText, { opacity: fadeAnim }]}>
+        <Text style={styles.loadingText}>
           Loading{dots}
-        </Animated.Text>
+        </Text>
       </View>
     </View>
   );
@@ -74,7 +58,7 @@ export default function SplashScreen({ onFinish }: SplashScreenProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#000000", // Match exact background of drip'n logo image
+    backgroundColor: "#000000",
     justifyContent: "center",
     alignItems: "center",
   },

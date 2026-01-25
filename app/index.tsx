@@ -10,7 +10,9 @@ import {
   Linking,
   Modal,
   Platform,
+  Dimensions,
 } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 import { WebView } from "react-native-webview";
 import { useStore } from "../src/store/useStore";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -21,31 +23,13 @@ import VideoPlayer from "../src/components/VideoPlayer";
 import UsernameSetup from "../src/components/UsernameSetup";
 import AppHeader from "../src/components/AppHeader";
 import RedeemDripsModal from "../src/components/RedeemDripsModal";
+import { initializeAds, createRewardedAd, getAdEventTypes } from "../src/utils/ads";
 
-// Mocks for web compatibility
-let mobileAds: any = () => ({ initialize: () => Promise.resolve() });
-let RewardedAd: any = { createForAdRequest: () => ({ load: () => {}, addAdEventListener: () => () => {} }) };
-let RewardedAdEventType: any = { EARNED_REWARD: 'earned_reward' };
-let AdEventType: any = { ERROR: 'error' };
-
-// Conditional require to prevent web bundling errors
-if (Platform.OS !== 'web') {
-  try {
-    const ads = require("react-native-google-mobile-ads");
-    mobileAds = ads.default;
-    RewardedAd = ads.RewardedAd;
-    RewardedAdEventType = ads.RewardedAdEventType;
-    AdEventType = ads.AdEventType;
-  } catch (e) {
-    console.warn("Mobile ads failed to load:", e);
-  }
-}
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 const rewardedAdUnitId = __DEV__
   ? "ca-app-pub-3940256099942544/1712485313"
   : "YOUR_REAL_REWARDED_UNIT_ID_HERE";
-
-const rewarded = RewardedAd?.createForAdRequest ? RewardedAd.createForAdRequest(rewardedAdUnitId) : RewardedAd;
 
 const DRIPS_TO_USD_RATE = 0.001284;
 const MIN_REDEMPTION = 1000;
@@ -75,46 +59,47 @@ export default function Home() {
   const isDark = theme === "dark" || theme === "neon";
 
   const [loading, setLoading] = useState(false);
-  const [showSplash, setShowSplash] = useState(true);
+  const [showSplash, setShowSplash] = useState(Platform.OS !== 'web');
   const [showAcknowledgment, setShowAcknowledgment] = useState(false);
   const [showVideoPlayer, setShowVideoPlayer] = useState(false);
   const [showBitLabsModal, setShowBitLabsModal] = useState(false);
   const [showAdGemModal, setShowAdGemModal] = useState(false);
   const [showUsernameSetup, setShowUsernameSetup] = useState(false);
   const [showRedeemModal, setShowRedeemModal] = useState(false);
+  const [rewardedAd, setRewardedAd] = useState<any>(null);
 
   const DAILY_CAP = 500;
   const AD_REVENUE_CENTS = 5;
 
   useEffect(() => {
-    if (Platform.OS !== 'web' && mobileAds) {
-      mobileAds()
-        .initialize()
-        .then(() => console.log("AdMob initialized successfully"))
-        .catch((error: any) => console.error("AdMob init error:", error));
+    const setupAds = async () => {
+      if (Platform.OS === 'web') return;
+      
+      const result = await initializeAds();
+      if (result.success) {
+        const { RewardedAdEventType, AdEventType } = getAdEventTypes();
+        const ad = createRewardedAd(rewardedAdUnitId);
+        setRewardedAd(ad);
+        
+        if (ad && ad.load) {
+          ad.load();
 
-      if (rewarded && rewarded.load) {
-        rewarded.load();
+          ad.addAdEventListener(AdEventType.ERROR, (error: any) => {
+            console.error("Ad error:", error);
+          });
 
-        rewarded.addAdEventListener(AdEventType.ERROR, (error: any) => {
-          console.error("Ad error:", error);
-        });
-
-        const rewardListener = rewarded.addAdEventListener(
-          RewardedAdEventType.EARNED_REWARD,
-          (reward: any) => {
-            addPoints(reward.amount);
-            Alert.alert("Reward Earned!", `You earned ${reward.amount} drips!`);
-          },
-        );
-
-        return () => {
-          if (rewardListener && typeof rewardListener === 'function') {
-            rewardListener();
-          }
-        };
+          ad.addAdEventListener(
+            RewardedAdEventType.EARNED_REWARD,
+            (reward: any) => {
+              addPoints(reward.amount);
+              Alert.alert("Reward Earned!", `You earned ${reward.amount} drips!`);
+            },
+          );
+        }
       }
-    }
+    };
+    
+    setupAds();
   }, []);
 
   useEffect(() => {
@@ -160,15 +145,15 @@ export default function Home() {
       return;
     }
 
-    if (rewarded && rewarded.loaded) {
-      rewarded.show();
-    } else if (rewarded && rewarded.load) {
+    if (rewardedAd && rewardedAd.loaded) {
+      rewardedAd.show();
+    } else if (rewardedAd && rewardedAd.load) {
       setLoading(true);
-      rewarded.load();
+      rewardedAd.load();
       setTimeout(() => {
         setLoading(false);
-        if (rewarded.loaded) {
-          rewarded.show();
+        if (rewardedAd.loaded) {
+          rewardedAd.show();
         } else {
           setShowVideoPlayer(true);
         }
@@ -283,11 +268,13 @@ export default function Home() {
       />
       <VideoPlayer
         visible={showVideoPlayer}
-        onClose={() => setShowVideoPlayer(false)}
+        onCancel={() => setShowVideoPlayer(false)}
         onComplete={handleVideoComplete}
+        adRevenue={AD_REVENUE_CENTS}
       />
       <UsernameSetup
         visible={showUsernameSetup}
+        currentUsername={username}
         onSave={(name) => setUsername(name)}
         onClose={() => {
           if (username) setShowUsernameSetup(false);
@@ -309,72 +296,87 @@ export default function Home() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <View style={[styles.balanceSection, isDark && styles.cardDark]}>
-          <Text style={[styles.balanceLabel, isDark && styles.textMuted]}>
-            YOUR DRIPS
-          </Text>
-          <View style={styles.balanceRow}>
-            <MaterialCommunityIcons name="water" size={32} color="#4dabf7" />
-            <Text style={[styles.balanceValue, isDark && styles.textDark]}>
-              {points.toLocaleString()}
-            </Text>
-          </View>
-          <View style={styles.earningsRow}>
-            <Text style={[styles.earningsText, isDark && styles.textMuted]}>
-              Today: {dailyEarnings}/{DAILY_CAP}
-            </Text>
-            <View style={styles.progressBar}>
-              <View
-                style={[
-                  styles.progressFill,
-                  { width: `${(dailyEarnings / DAILY_CAP) * 100}%` },
-                ]}
-              />
+        <LinearGradient
+          colors={isDark ? ["#1e3a5f", "#0d1b2a"] : ["#667eea", "#764ba2"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.balanceCard}
+        >
+          <View style={styles.balanceHeader}>
+            <View style={styles.balanceLabelRow}>
+              <View style={styles.waterIconBg}>
+                <MaterialCommunityIcons name="water" size={20} color="#fff" />
+              </View>
+              <Text style={styles.balanceLabelText}>YOUR BALANCE</Text>
+            </View>
+            <View style={styles.levelBadge}>
+              <MaterialCommunityIcons name="shield-star" size={14} color="#ffd43b" />
+              <Text style={styles.levelText}>{userLevel}</Text>
             </View>
           </View>
-        </View>
+          <Text style={styles.balanceAmount}>{points.toLocaleString()}</Text>
+          <Text style={styles.balanceSubtext}>drips</Text>
+          <View style={styles.dailyProgressContainer}>
+            <View style={styles.dailyProgressHeader}>
+              <Text style={styles.dailyProgressLabel}>Daily Progress</Text>
+              <Text style={styles.dailyProgressValue}>{dailyEarnings}/{DAILY_CAP}</Text>
+            </View>
+            <View style={styles.progressTrack}>
+              <View style={[styles.progressFillGradient, { width: `${Math.min((dailyEarnings / DAILY_CAP) * 100, 100)}%` }]} />
+            </View>
+          </View>
+        </LinearGradient>
 
-        <View style={styles.actionRow}>
-          <TouchableOpacity
-            style={[styles.actionCard, isDark && styles.cardDark]}
-            onPress={handleRedeemDrips}
+        <TouchableOpacity
+          style={styles.redeemButton}
+          onPress={handleRedeemDrips}
+          activeOpacity={0.85}
+        >
+          <LinearGradient
+            colors={["#10b981", "#059669"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.redeemButtonGradient}
           >
-            <MaterialCommunityIcons
-              name="cash-multiple"
-              size={32}
-              color="#40c057"
-            />
-            <Text style={[styles.actionText, isDark && styles.textDark]}>
-              Redeem Drips
-            </Text>
-          </TouchableOpacity>
-        </View>
+            <MaterialCommunityIcons name="arrow-up-circle" size={24} color="#fff" />
+            <Text style={styles.redeemButtonText}>Redeem Drips</Text>
+            <MaterialCommunityIcons name="chevron-right" size={20} color="rgba(255,255,255,0.7)" />
+          </LinearGradient>
+        </TouchableOpacity>
 
-        <Text style={[styles.sectionTitle, isDark && styles.textDark]}>
-          Quick Tasks
-        </Text>
+        <View style={styles.sectionHeader}>
+          <Text style={[styles.sectionTitle, isDark && styles.textDark]}>Quick Tasks</Text>
+          <View style={styles.sectionBadge}>
+            <Text style={styles.sectionBadgeText}>EARN</Text>
+          </View>
+        </View>
 
         <TouchableOpacity
           style={[styles.taskCard, isDark && styles.cardDark]}
           onPress={handleWatchAd}
+          activeOpacity={0.7}
         >
-          <View style={styles.taskIconCircle}>
-            <MaterialCommunityIcons name="play-circle" size={28} color="#fff" />
-          </View>
+          <LinearGradient
+            colors={["#3b82f6", "#1d4ed8"]}
+            style={styles.taskIconGradient}
+          >
+            <MaterialCommunityIcons name="play-circle" size={24} color="#fff" />
+          </LinearGradient>
           <View style={styles.taskInfo}>
-            <Text style={[styles.taskTitle, isDark && styles.textDark]}>
-              Watch Video Ad
-            </Text>
-            <Text style={[styles.taskSubtitle, isDark && styles.textMuted]}>
-              Earn 1-5 drips per video
-            </Text>
+            <Text style={[styles.taskTitle, isDark && styles.textDark]}>Watch Video Ad</Text>
+            <Text style={[styles.taskSubtitle, isDark && styles.textMuted]}>Earn 1-5 drips per video</Text>
           </View>
-          <MaterialCommunityIcons name="chevron-right" size={24} color="#ccc" />
+          <View style={styles.taskArrow}>
+            <MaterialCommunityIcons name="chevron-right" size={22} color={isDark ? "#666" : "#d1d5db"} />
+          </View>
         </TouchableOpacity>
 
-        <Text style={[styles.sectionTitle, isDark && styles.textDark]}>
-          Offerwalls
-        </Text>
+        <View style={styles.sectionHeader}>
+          <Text style={[styles.sectionTitle, isDark && styles.textDark]}>Offerwalls</Text>
+          <View style={[styles.sectionBadge, { backgroundColor: "#fef3c7" }]}>
+            <Text style={[styles.sectionBadgeText, { color: "#d97706" }]}>HOT</Text>
+          </View>
+        </View>
 
         <TouchableOpacity
           style={[styles.taskCard, isDark && styles.cardDark]}
@@ -383,98 +385,120 @@ export default function Home() {
               Alert.alert("Development", "AdMob is not available on web preview. Points will be added for testing.");
               addPoints(50);
             } else {
-              // In a real app, you might show an AdMob rewarded ad or a specific offerwall component
               handleWatchAd();
             }
           }}
+          activeOpacity={0.7}
         >
-          <View
-            style={[styles.taskIconCircle, { backgroundColor: "#4dabf7" }]}
+          <LinearGradient
+            colors={["#06b6d4", "#0891b2"]}
+            style={styles.taskIconGradient}
           >
-            <MaterialCommunityIcons name="ads-lightbulb" size={24} color="#fff" />
-          </View>
+            <MaterialCommunityIcons name="star-four-points" size={22} color="#fff" />
+          </LinearGradient>
           <View style={styles.taskInfo}>
-            <Text style={[styles.taskTitle, isDark && styles.textDark]}>
-              AdMob Offers
-            </Text>
-            <Text style={[styles.taskSubtitle, isDark && styles.textMuted]}>
-              Premium video and interactive offers
-            </Text>
+            <Text style={[styles.taskTitle, isDark && styles.textDark]}>AdMob Offers</Text>
+            <Text style={[styles.taskSubtitle, isDark && styles.textMuted]}>Premium video and interactive offers</Text>
           </View>
-          <MaterialCommunityIcons name="chevron-right" size={24} color="#ccc" />
+          <View style={styles.taskArrow}>
+            <MaterialCommunityIcons name="chevron-right" size={22} color={isDark ? "#666" : "#d1d5db"} />
+          </View>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={[styles.taskCard, isDark && styles.cardDark]}
           onPress={() => setShowBitLabsModal(true)}
+          activeOpacity={0.7}
         >
-          <View
-            style={[styles.taskIconCircle, { backgroundColor: "#f59f00" }]}
+          <LinearGradient
+            colors={["#f59e0b", "#d97706"]}
+            style={styles.taskIconGradient}
           >
-            <MaterialCommunityIcons name="clipboard-text" size={24} color="#fff" />
-          </View>
+            <MaterialCommunityIcons name="clipboard-text-outline" size={22} color="#fff" />
+          </LinearGradient>
           <View style={styles.taskInfo}>
-            <Text style={[styles.taskTitle, isDark && styles.textDark]}>
-              BitLabs Surveys
-            </Text>
-            <Text style={[styles.taskSubtitle, isDark && styles.textMuted]}>
-              Share your opinion for drips
-            </Text>
+            <Text style={[styles.taskTitle, isDark && styles.textDark]}>BitLabs Surveys</Text>
+            <Text style={[styles.taskSubtitle, isDark && styles.textMuted]}>Share your opinion for drips</Text>
           </View>
-          <MaterialCommunityIcons name="chevron-right" size={24} color="#ccc" />
+          <View style={styles.taskArrow}>
+            <MaterialCommunityIcons name="chevron-right" size={22} color={isDark ? "#666" : "#d1d5db"} />
+          </View>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={[styles.taskCard, isDark && styles.cardDark]}
           onPress={() => setShowAdGemModal(true)}
+          activeOpacity={0.7}
         >
-          <View
-            style={[styles.taskIconCircle, { backgroundColor: "#7c3aed" }]}
+          <LinearGradient
+            colors={["#8b5cf6", "#7c3aed"]}
+            style={styles.taskIconGradient}
           >
-            <MaterialCommunityIcons name="gift" size={24} color="#fff" />
-          </View>
+            <MaterialCommunityIcons name="gift-outline" size={22} color="#fff" />
+          </LinearGradient>
           <View style={styles.taskInfo}>
-            <Text style={[styles.taskTitle, isDark && styles.textDark]}>
-              AdGem Offers
-            </Text>
-            <Text style={[styles.taskSubtitle, isDark && styles.textMuted]}>
-              High-paying apps and games
-            </Text>
+            <Text style={[styles.taskTitle, isDark && styles.textDark]}>AdGem Offers</Text>
+            <Text style={[styles.taskSubtitle, isDark && styles.textMuted]}>High-paying apps and games</Text>
           </View>
-          <MaterialCommunityIcons name="chevron-right" size={24} color="#ccc" />
+          <View style={styles.taskArrow}>
+            <MaterialCommunityIcons name="chevron-right" size={22} color={isDark ? "#666" : "#d1d5db"} />
+          </View>
         </TouchableOpacity>
 
-        <Text style={[styles.sectionTitle, isDark && styles.textDark]}>
-          Social Sharing
-        </Text>
+        <View style={styles.sectionHeader}>
+          <Text style={[styles.sectionTitle, isDark && styles.textDark]}>Social Sharing</Text>
+          <View style={[styles.sectionBadge, { backgroundColor: "#dbeafe" }]}>
+            <Text style={[styles.sectionBadgeText, { color: "#2563eb" }]}>100 DRIPS</Text>
+          </View>
+        </View>
         <Text style={[styles.shareInfoText, isDark && styles.textMuted]}>
-          Earn 100 drips per share. 1 share per platform daily.
+          1 share per platform daily
         </Text>
         <View style={styles.shareRow}>
           <TouchableOpacity
-            style={[styles.shareBtn, { backgroundColor: "#000000" }]}
+            style={styles.shareButton}
             onPress={() => handleShare("x")}
+            activeOpacity={0.8}
           >
-            <MaterialCommunityIcons name="close" size={20} color="#fff" />
+            <LinearGradient
+              colors={["#1f2937", "#111827"]}
+              style={styles.shareButtonGradient}
+            >
+              <MaterialCommunityIcons name="twitter" size={22} color="#fff" />
+            </LinearGradient>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.shareBtn, { backgroundColor: "#1877f2" }]}
+            style={styles.shareButton}
             onPress={() => handleShare("facebook")}
+            activeOpacity={0.8}
           >
-            <MaterialCommunityIcons name="facebook" size={24} color="#fff" />
+            <LinearGradient
+              colors={["#1877f2", "#1565d8"]}
+              style={styles.shareButtonGradient}
+            >
+              <MaterialCommunityIcons name="facebook" size={22} color="#fff" />
+            </LinearGradient>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.shareBtn, { backgroundColor: "#e4405f" }]}
+            style={styles.shareButton}
             onPress={() => handleShare("instagram")}
+            activeOpacity={0.8}
           >
-            <MaterialCommunityIcons name="instagram" size={24} color="#fff" />
+            <LinearGradient
+              colors={["#e4405f", "#c13584"]}
+              style={styles.shareButtonGradient}
+            >
+              <MaterialCommunityIcons name="instagram" size={22} color="#fff" />
+            </LinearGradient>
           </TouchableOpacity>
         </View>
 
-        <View style={[styles.infoBox, isDark && styles.cardDark]}>
-          <MaterialCommunityIcons name="information-outline" size={20} color="#4dabf7" />
-          <Text style={[styles.infoText, isDark && styles.textMuted]}>
-            Redemptions are processed by CoinGate. Final XRP amount depends on the market rate at the time of processing.
+        <View style={[styles.infoCard, isDark && styles.cardDark]}>
+          <View style={styles.infoIconContainer}>
+            <MaterialCommunityIcons name="shield-check" size={20} color="#10b981" />
+          </View>
+          <Text style={[styles.infoCardText, isDark && styles.textMuted]}>
+            Redemptions are processed securely by CoinGate. Final XRP amount depends on market rates at time of processing.
           </Text>
         </View>
       </ScrollView>
@@ -550,103 +574,260 @@ export default function Home() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f8f9fa" },
-  containerDark: { backgroundColor: "#1a1a2e" },
-  cardDark: { backgroundColor: "#252542" },
-  textDark: { color: "#fff" },
-  textMuted: { color: "#a0a0a0" },
+  container: { flex: 1, backgroundColor: "#f8fafc" },
+  containerDark: { backgroundColor: "#0f172a" },
+  cardDark: { backgroundColor: "#1e293b" },
+  textDark: { color: "#f1f5f9" },
+  textMuted: { color: "#94a3b8" },
   content: { flex: 1 },
-  scrollContent: { padding: 20, paddingTop: 60 },
-  balanceSection: {
-    backgroundColor: "#fff",
-    borderRadius: 20,
-    padding: 25,
-    alignItems: "center",
-    marginBottom: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 5,
+  scrollContent: { padding: 20, paddingTop: 70, paddingBottom: 40 },
+  
+  balanceCard: {
+    borderRadius: 24,
+    padding: 24,
+    marginBottom: 16,
+    shadowColor: "#667eea",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    elevation: 8,
   },
-  balanceLabel: { fontSize: 12, fontWeight: "bold", color: "#868e96", letterSpacing: 1 },
-  balanceRow: { flexDirection: "row", alignItems: "center", marginTop: 10 },
-  balanceValue: { fontSize: 42, fontWeight: "bold", color: "#1a1a1a", marginLeft: 10 },
-  earningsRow: { width: "100%", marginTop: 20 },
-  earningsText: { fontSize: 13, color: "#868e96", marginBottom: 8 },
-  progressBar: { height: 6, backgroundColor: "#f1f3f5", borderRadius: 3, overflow: "hidden" },
-  progressFill: { height: "100%", backgroundColor: "#4dabf7" },
-  actionRow: { flexDirection: "row", gap: 15, marginBottom: 25 },
-  actionCard: {
-    flex: 1,
-    backgroundColor: "#fff",
+  balanceHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  balanceLabelRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  waterIconBg: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 10,
+  },
+  balanceLabelText: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "rgba(255,255,255,0.8)",
+    letterSpacing: 1.5,
+  },
+  levelBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.15)",
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 12,
+  },
+  levelText: {
+    fontSize: 11,
+    fontWeight: "700",
+    color: "#ffd43b",
+    marginLeft: 4,
+    textTransform: "uppercase",
+  },
+  balanceAmount: {
+    fontSize: 56,
+    fontWeight: "800",
+    color: "#fff",
+    letterSpacing: -2,
+  },
+  balanceSubtext: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: "rgba(255,255,255,0.7)",
+    marginTop: -4,
+    marginBottom: 20,
+  },
+  dailyProgressContainer: {
+    backgroundColor: "rgba(255,255,255,0.1)",
+    borderRadius: 14,
+    padding: 14,
+  },
+  dailyProgressHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  dailyProgressLabel: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "rgba(255,255,255,0.8)",
+  },
+  dailyProgressValue: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#fff",
+  },
+  progressTrack: {
+    height: 8,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    borderRadius: 4,
+    overflow: "hidden",
+  },
+  progressFillGradient: {
+    height: "100%",
+    backgroundColor: "#ffd43b",
+    borderRadius: 4,
+  },
+  
+  redeemButton: {
+    marginBottom: 28,
     borderRadius: 16,
-    padding: 15,
+    shadowColor: "#10b981",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  redeemButtonGradient: {
+    flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 5,
-    elevation: 2,
+    paddingVertical: 18,
+    paddingHorizontal: 24,
+    borderRadius: 16,
   },
-  actionText: { fontSize: 13, fontWeight: "600", color: "#495057", marginTop: 10, textAlign: "center" },
-  sectionTitle: { fontSize: 18, fontWeight: "bold", color: "#1a1a1a", marginBottom: 15 },
+  redeemButtonText: {
+    fontSize: 17,
+    fontWeight: "700",
+    color: "#fff",
+    marginLeft: 10,
+    flex: 1,
+  },
+  
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 14,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: "800",
+    color: "#1e293b",
+    letterSpacing: -0.5,
+  },
+  sectionBadge: {
+    backgroundColor: "#dcfce7",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    marginLeft: 10,
+  },
+  sectionBadgeText: {
+    fontSize: 10,
+    fontWeight: "800",
+    color: "#16a34a",
+    letterSpacing: 0.5,
+  },
+  
   taskCard: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#fff",
-    borderRadius: 16,
+    borderRadius: 18,
     padding: 16,
     marginBottom: 12,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 5,
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
     elevation: 2,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.04)",
   },
-  taskIconCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: "#4dabf7",
+  taskIconGradient: {
+    width: 50,
+    height: 50,
+    borderRadius: 14,
     justifyContent: "center",
     alignItems: "center",
   },
-  taskInfo: { flex: 1, marginLeft: 16 },
-  taskTitle: { fontSize: 16, fontWeight: "600", color: "#1a1a1a" },
-  taskSubtitle: { fontSize: 13, color: "#868e96", marginTop: 2 },
+  taskInfo: {
+    flex: 1,
+    marginLeft: 14,
+  },
+  taskTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#1e293b",
+    marginBottom: 3,
+  },
+  taskSubtitle: {
+    fontSize: 13,
+    color: "#64748b",
+    fontWeight: "500",
+  },
+  taskArrow: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: "#f8fafc",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  
   shareInfoText: {
     fontSize: 13,
-    marginBottom: 10,
+    color: "#64748b",
+    marginBottom: 14,
+    fontWeight: "500",
   },
-  shareRow: { flexDirection: "row", gap: 12, marginBottom: 25 },
-  shareBtn: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+  shareRow: {
+    flexDirection: "row",
+    gap: 14,
+    marginBottom: 28,
+  },
+  shareButton: {
+    borderRadius: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  shareButtonGradient: {
+    width: 54,
+    height: 54,
+    borderRadius: 16,
     justifyContent: "center",
     alignItems: "center",
-    elevation: 2,
   },
-  infoBox: {
+  
+  infoCard: {
     flexDirection: "row",
-    backgroundColor: "rgba(77, 171, 247, 0.1)",
-    padding: 15,
-    borderRadius: 12,
-    alignItems: "center",
+    backgroundColor: "#f0fdf4",
+    padding: 16,
+    borderRadius: 16,
+    alignItems: "flex-start",
     marginBottom: 30,
+    borderWidth: 1,
+    borderColor: "#bbf7d0",
   },
-  infoText: { flex: 1, marginLeft: 12, fontSize: 12, color: "#495057", lineHeight: 18 },
-  modalHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+  infoIconContainer: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: "#dcfce7",
+    justifyContent: "center",
     alignItems: "center",
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
   },
-  modalTitle: { fontSize: 18, fontWeight: "bold" },
+  infoCardText: {
+    flex: 1,
+    marginLeft: 14,
+    fontSize: 13,
+    color: "#166534",
+    lineHeight: 20,
+    fontWeight: "500",
+  },
+  
   modalContent: {
     flex: 1,
     backgroundColor: '#fff',
@@ -657,23 +838,23 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 20,
     borderTopWidth: 1,
-    borderTopColor: "#eee",
+    borderTopColor: "#e2e8f0",
     backgroundColor: '#fff',
     paddingBottom: Platform.OS === 'ios' ? 40 : 20,
   },
   modalFooterTitle: {
     fontSize: 16,
-    fontWeight: "bold",
-    color: '#333',
+    fontWeight: "700",
+    color: '#1e293b',
   },
   closeFooterBtn: {
-    backgroundColor: '#f1f3f5',
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    borderRadius: 8,
+    backgroundColor: '#fef2f2',
+    paddingVertical: 12,
+    paddingHorizontal: 18,
+    borderRadius: 12,
   },
   closeFooterText: {
-    color: '#fa5252',
+    color: '#ef4444',
     fontWeight: '600',
     fontSize: 14,
   },

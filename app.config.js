@@ -1,3 +1,29 @@
+const isWeb = process.env.EXPO_PUBLIC_PLATFORM === 'web' || process.env.PLATFORM === 'web';
+
+const basePlugins = [
+  "expo-router",
+  [
+    "expo-splash-screen",
+    {
+      image: "./assets/images/splash-icon.png",
+      imageWidth: 200,
+      resizeMode: "contain",
+      backgroundColor: "#0d1117",
+    },
+  ],
+  "expo-dev-client",
+];
+
+const nativePlugins = [
+  [
+    "react-native-google-mobile-ads",
+    {
+      iosAppId: "ca-app-pub-3940256099942544~3347511713",
+      androidAppId: "ca-app-pub-3940256099942544~3347511713",
+    },
+  ],
+];
+
 export default {
   expo: {
     name: "Drip'n",
@@ -12,7 +38,7 @@ export default {
     ios: {
       supportsTablet: true,
       bundleIdentifier: "com.dripnapp.dripn",
-      buildNumber: "3", // ← Start with "1" (increase to "2", "3", etc. for each new build)
+      buildNumber: "3",
       infoPlist: {
         NSUserTrackingUsageDescription:
           "This allows personalized ads to support rewards and features in the app.",
@@ -35,26 +61,7 @@ export default {
       favicon: "./assets/images/favicon.png",
     },
 
-    plugins: [
-      "expo-router",
-      [
-        "expo-splash-screen",
-        {
-          image: "./assets/images/splash-icon.png",
-          imageWidth: 200,
-          resizeMode: "contain",
-          backgroundColor: "#0d1117",
-        },
-      ],
-      "expo-dev-client",
-      [
-        "react-native-google-mobile-ads",
-        {
-          iosAppId: "ca-app-pub-3940256099942544~3347511713",
-          androidAppId: "ca-app-pub-3940256099942544~3347511713", // ← ADD THIS LINE (test ID is fine for now)
-        },
-      ],
-    ],
+    plugins: [...basePlugins, ...nativePlugins],
 
     experiments: {
       typedRoutes: true,

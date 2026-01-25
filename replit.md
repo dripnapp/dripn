@@ -31,6 +31,11 @@ Preferred communication style: Simple, everyday language.
 - Clear disclaimers that Drip'n does not hold/custody/transfer funds
 - Updated Learn, Legal, Terms, and History pages with redemption information
 
+### Web Compatibility (January 2026)
+- **Platform-specific Ads**: Created `src/utils/ads.ts` (native) and `src/utils/ads.web.ts` (web) to handle react-native-google-mobile-ads incompatibility with web
+- **Splash Screen**: Splash screen now only shows on native platforms (iOS/Android), skipped on web for better compatibility
+- **UI Gradients**: Using expo-linear-gradient for premium visual effects across the app
+
 ### Previous Changes
 - **MAJOR REBRAND**: Changed app name from "droply.io" to "Drip'n"
 - Changed all "drops" references to "drips" throughout the app
