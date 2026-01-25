@@ -13,16 +13,28 @@ const loadMobileAds = () => {
     return null;
   }
 
+  // CRITICAL: We MUST avoid the 'require' call entirely if we suspect it will throw 
+  // an uncatchable Invariant Violation in the native layer (TurboModuleRegistry).
+  // In Expo Go, these modules are not present in the native binary.
   try {
-    // Metro will still try to resolve this, but we need to ensure it doesn't crash at runtime
-    // if the native module isn't linked (like in Expo Go)
+    // We check for a global property that often indicates if we're in a managed Expo environment
+    // where native modules might be missing.
+    const isExpoGo = (global as any).Expo || (global as any).__expo || (global as any).__EXPO_DEVICE_INFO__;
+    
+    if (isExpoGo) {
+      console.log('Detected Expo Go - skipping native ads module require');
+      mobileAdsModule = false;
+      return null;
+    }
+
     mobileAdsModule = require('react-native-google-mobile-ads');
     if (mobileAdsModule && (mobileAdsModule.default || mobileAdsModule.RewardedAd)) {
       return mobileAdsModule;
     }
-    throw new Error('Module found but appears empty (mocked or unlinked)');
+    mobileAdsModule = false;
+    return null;
   } catch (e) {
-    console.log('Mobile ads module not available (likely Expo Go)');
+    console.log('Caught error loading ads module:', e);
     mobileAdsModule = false;
     return null;
   }
