@@ -3,6 +3,7 @@ import { Platform } from 'react-native';
 export const RewardedAdEventType = { EARNED_REWARD: 'earned_reward' };
 export const AdEventType = { ERROR: 'error' };
 
+// We use a mock by default to avoid any 'require' issues in Expo Go
 let mobileAdsModule: any = null;
 
 const loadMobileAds = () => {
@@ -13,20 +14,21 @@ const loadMobileAds = () => {
     return null;
   }
 
-  // CRITICAL: We MUST avoid the 'require' call entirely if we suspect it will throw 
-  // an uncatchable Invariant Violation in the native layer (TurboModuleRegistry).
-  // In Expo Go, these modules are not present in the native binary.
+  // Metro still analyzes 'require' statements even if they are in a try-catch.
+  // In some Expo Go versions, the mere presence of the require can cause issues if not guarded well.
+  // We use a more aggressive approach to avoid the require.
   try {
-    // We check for a global property that often indicates if we're in a managed Expo environment
-    // where native modules might be missing.
-    const isExpoGo = (global as any).Expo || (global as any).__expo || (global as any).__EXPO_DEVICE_INFO__;
+    // Constants.appOwnership is 'expo' when running in Expo Go
+    const ExpoConstants = require('expo-constants').default;
+    const isExpoGo = ExpoConstants?.appOwnership === 'expo';
     
     if (isExpoGo) {
-      console.log('Detected Expo Go - skipping native ads module require');
+      console.log('Expo Go detected via Constants - disabling native ads');
       mobileAdsModule = false;
       return null;
     }
 
+    // Only attempt require if we are fairly sure we are NOT in Expo Go
     mobileAdsModule = require('react-native-google-mobile-ads');
     if (mobileAdsModule && (mobileAdsModule.default || mobileAdsModule.RewardedAd)) {
       return mobileAdsModule;
@@ -34,76 +36,60 @@ const loadMobileAds = () => {
     mobileAdsModule = false;
     return null;
   } catch (e) {
-    console.log('Caught error loading ads module:', e);
     mobileAdsModule = false;
     return null;
   }
 };
 
 export const initializeAds = async (): Promise<{ success: boolean; reason?: string }> => {
-  if (Platform.OS === 'web') {
-    return { success: false, reason: 'web' };
-  }
-  
-  const ads = loadMobileAds();
-  if (!ads || !ads.default) {
-    return { success: false, reason: 'module_not_available' };
-  }
+  if (Platform.OS === 'web') return { success: false, reason: 'web' };
   
   try {
+    const ads = loadMobileAds();
+    if (!ads || !ads.default) return { success: false, reason: 'module_not_available' };
     await ads.default().initialize();
-    console.log('AdMob initialized successfully');
     return { success: true };
   } catch (e) {
-    console.warn('Mobile ads failed to initialize:', e);
     return { success: false, reason: 'error' };
   }
 };
 
 export const createRewardedAd = (adUnitId: string): any => {
-  if (Platform.OS === 'web') {
-    return {
-      load: () => {},
-      show: () => {},
-      loaded: false,
-      addAdEventListener: () => () => {},
-    };
-  }
-  
-  const ads = loadMobileAds();
-  if (!ads || !ads.RewardedAd) {
-    return {
-      load: () => {},
-      show: () => {},
-      loaded: false,
-      addAdEventListener: () => () => {},
-    };
-  }
+  const mockAd = {
+    load: () => {},
+    show: () => {},
+    loaded: false,
+    addAdEventListener: () => () => {},
+  };
+
+  if (Platform.OS === 'web') return mockAd;
   
   try {
+    const ads = loadMobileAds();
+    if (!ads || !ads.RewardedAd) return mockAd;
     return ads.RewardedAd.createForAdRequest(adUnitId);
   } catch (e) {
-    console.warn('Failed to create rewarded ad:', e);
-    return {
-      load: () => {},
-      show: () => {},
-      loaded: false,
-      addAdEventListener: () => () => {},
-    };
+    return mockAd;
   }
 };
 
 export const getAdEventTypes = (): { RewardedAdEventType: any; AdEventType: any } => {
-  const ads = loadMobileAds();
-  if (!ads) {
+  try {
+    const ads = loadMobileAds();
+    if (!ads) {
+      return {
+        RewardedAdEventType: { EARNED_REWARD: 'earned_reward' },
+        AdEventType: { ERROR: 'error' },
+      };
+    }
+    return {
+      RewardedAdEventType: ads.RewardedAdEventType || { EARNED_REWARD: 'earned_reward' },
+      AdEventType: ads.AdEventType || { ERROR: 'error' },
+    };
+  } catch (e) {
     return {
       RewardedAdEventType: { EARNED_REWARD: 'earned_reward' },
       AdEventType: { ERROR: 'error' },
     };
   }
-  
-  return {
-    RewardedAdEventType: ads.RewardedAdEventType || { EARNED_REWARD: 'earned_reward' },
-    AdEventType: ads.AdEventType || { ERROR: 'error' },
-  };
 };
