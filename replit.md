@@ -14,7 +14,30 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (January 2026)
 
-### Redemption System (NEW)
+### Tokenomics Update (NEW)
+- **Minimum Redemption**: Increased from 1,000 to 5,000 drips
+- **Daily Earning Cap**: Increased from 500 to 5,000 drips/day
+- **Video Ad Rewards**: 100 drips (standard) or 200 drips (premium)
+- **Offerwall Rewards**: 100 drips per completed offer
+- **First Video Badge**: Automatically unlocks "First Steps" badge (+50 bonus drips) on first video completion
+- **Welcome Message**: Displays personalized "Welcome, [username]" below header after username setup
+
+### Badge Rewards (Updated)
+- First Steps: +50 drips (watch first video)
+- Bronze Member: +250 drips (earn 5,000 total drips)
+- Silver Member: +500 drips (earn 10,000 total drips)
+- Gold Member: +1,000 drips (earn 20,000 total drips)
+- First Cashout: +500 drips (complete first payout)
+- Referrer: +250 drips (refer first friend)
+- Week Warrior: +350 drips (7-day login streak)
+- Monthly Master: +1,500 drips (30-day login streak)
+
+### Level Thresholds (Updated)
+- Bronze: 5,000 total drips earned
+- Silver: 10,000 total drips earned
+- Gold: 20,000 total drips earned
+
+### Redemption System
 - **Multi-step Redemption Flow**: Users go through input → warnings → terms acceptance → final confirmation → processing → success
 - **Real-time XRP Pricing**: Fetches current XRP/USD price from CoinGecko/Binance APIs at time of redemption
 - **CoinGate Integration**: All payouts processed by CoinGate (third-party payment processor)
@@ -41,14 +64,14 @@ Preferred communication style: Simple, everyday language.
 - Changed all "drops" references to "drips" throughout the app
 - Updated logo with new Drip'n branding (assets/images/dripn-logo.jpg)
 - Premium theme store: 6 themes (Classic free, 5 premium at 1,000 drips each)
-- Daily earning reset at midnight user timezone with 500 drip cap
+- Daily earning reset at midnight user timezone with 5,000 drip cap
 - Share Task Features: 3x daily limit, 1-minute cooldown, progressive rewards
 
 ## Redemption Flow Architecture
 
 ### User Flow
 1. User taps "Redeem Drips" button on main dashboard
-2. Input screen: Enter drips amount (min 1,000), shows available balance
+2. Input screen: Enter drips amount (min 5,000), shows available balance
 3. Warning screen: Terms displayed (1-3 days processing, no cancellation, no transfer)
 4. User must check acceptance checkbox
 5. Confirmation screen: "You are submitting X Drips to be Redeemed?"
@@ -106,7 +129,7 @@ Preferred communication style: Simple, everyday language.
 - **Onboarding**: 4-step tutorial explaining how the app works
 - **Acknowledgment Popup**: Required checkboxes for age, risks, and terms
 - **Drips System**: Rewards currency that can be redeemed for XRP
-- **Levels & Badges**: Bronze (100 drips), Silver (500 drips), Gold (1000 drips)
+- **Levels & Badges**: Bronze (5,000 drips), Silver (10,000 drips), Gold (20,000 drips)
 - **Referral Program**: 10% of referee earnings for 30 days
 - **Redemption**: Multi-step flow to convert drips to XRP via CoinGate
 - **History Tracking**: All rewards and redemptions logged with timestamps
@@ -124,7 +147,7 @@ The app uses Zustand store (`src/store/useStore.ts`) with the following state:
 - Persistence to AsyncStorage for session continuity
 
 ### Security Considerations
-- Daily earning caps (500 drips/day) to prevent abuse
+- Daily earning caps (5,000 drips/day) to prevent abuse
 - Required acknowledgment checkboxes before accessing tasks
 - Age verification (18+)
 - Clear legal disclaimers throughout app

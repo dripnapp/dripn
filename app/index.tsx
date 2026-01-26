@@ -71,7 +71,7 @@ export default function Home() {
   const [showRedeemModal, setShowRedeemModal] = useState(false);
   const [rewardedAd, setRewardedAd] = useState<any>(null);
 
-  const DAILY_CAP = 500;
+  const DAILY_CAP = 5000;
   const AD_REVENUE_CENTS = 5;
 
   useEffect(() => {
@@ -94,9 +94,10 @@ export default function Home() {
 
             ad.addAdEventListener(
               RewardedAdEventType.EARNED_REWARD,
-              (reward: any) => {
-                addPoints(reward.amount);
-                Alert.alert("Reward Earned!", `You earned ${reward.amount} drips!`);
+              () => {
+                // Use our tokenomics: 60% chance standard (100 drips), 40% chance premium (200 drips)
+                const drips = Math.random() < 0.6 ? 100 : 200;
+                handleVideoComplete(drips, true);
               },
             );
           }
@@ -170,12 +171,17 @@ export default function Home() {
     }
   };
 
-  const handleVideoComplete = (drips: number) => {
+  const handleVideoComplete = (drips: number, fromAdMob: boolean = false) => {
     addPoints(drips);
-    setShowVideoPlayer(false);
+    if (!fromAdMob) {
+      setShowVideoPlayer(false);
+    }
+    
+    // Get the latest badges state directly from store to avoid stale closure issues
+    const currentBadges = useStore.getState().badges;
     
     // Check if this is the first video watched - unlock First Steps badge
-    if (!badges.includes('first_video')) {
+    if (!currentBadges.includes('first_video')) {
       addBadge('first_video');
       const badgeReward = claimBadgeReward('first_video');
       Alert.alert(
