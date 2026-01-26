@@ -616,7 +616,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 12,
     backgroundColor: "#e8f4fd",
-    marginTop: 60,
+    marginTop: 0,
   },
   welcomeBarDark: {
     backgroundColor: "#1e3a5f",
