@@ -12,15 +12,9 @@ interface VideoPlayerProps {
 const getValueTier = (): { tier: 'standard' | 'premium'; duration: number; estimatedCents: number; reward: number } => {
   const random = Math.random();
   if (random < 0.6) {
-    const estimatedCents = 4 + Math.random() * 4;
-    const maxRewardFromRevenue = Math.floor(estimatedCents * 0.25);
-    const reward = Math.max(1, Math.min(2, maxRewardFromRevenue));
-    return { tier: 'standard', duration: 10 + Math.floor(Math.random() * 6), estimatedCents, reward };
+    return { tier: 'standard', duration: 10 + Math.floor(Math.random() * 6), estimatedCents: 5, reward: 100 };
   } else {
-    const estimatedCents = 9 + Math.random() * 7;
-    const maxRewardFromRevenue = Math.floor(estimatedCents * 0.25);
-    const reward = Math.max(3, Math.min(4, maxRewardFromRevenue));
-    return { tier: 'premium', duration: 20 + Math.floor(Math.random() * 11), estimatedCents, reward };
+    return { tier: 'premium', duration: 20 + Math.floor(Math.random() * 11), estimatedCents: 12, reward: 200 };
   }
 };
 

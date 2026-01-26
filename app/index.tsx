@@ -54,6 +54,9 @@ export default function Home() {
     setWalletAddress,
     createRedemption,
     updateRedemptionStatus,
+    badges,
+    addBadge,
+    claimBadgeReward,
   } = useStore();
 
   const isDark = theme === "dark" || theme === "neon";
@@ -145,7 +148,7 @@ export default function Home() {
 
     if (Platform.OS === 'web') {
       Alert.alert("Development", "Ads are not available on web preview. Points will be added for testing.");
-      addPoints(10);
+      addPoints(100);
       return;
     }
 
@@ -170,7 +173,19 @@ export default function Home() {
   const handleVideoComplete = (drips: number) => {
     addPoints(drips);
     setShowVideoPlayer(false);
-    Alert.alert("Success!", `You earned ${drips} drips!`);
+    
+    // Check if this is the first video watched - unlock First Steps badge
+    if (!badges.includes('first_video')) {
+      addBadge('first_video');
+      const badgeReward = claimBadgeReward('first_video');
+      Alert.alert(
+        "Badge Unlocked!",
+        `You earned ${drips} drips + ${badgeReward} bonus drips for completing your first video!`,
+        [{ text: "Awesome!" }]
+      );
+    } else {
+      Alert.alert("Success!", `You earned ${drips} drips!`);
+    }
   };
 
   const handleShare = async (platform: string) => {
@@ -295,6 +310,14 @@ export default function Home() {
 
       <AppHeader showLogo />
 
+      {username && (
+        <View style={[styles.welcomeBar, isDark && styles.welcomeBarDark]}>
+          <Text style={[styles.welcomeText, isDark && styles.welcomeTextDark]}>
+            Welcome, {username}
+          </Text>
+        </View>
+      )}
+
       <ScrollView
         style={styles.content}
         contentContainerStyle={styles.scrollContent}
@@ -387,7 +410,7 @@ export default function Home() {
           onPress={() => {
             if (Platform.OS === 'web') {
               Alert.alert("Development", "AdMob is not available on web preview. Points will be added for testing.");
-              addPoints(50);
+              addPoints(100);
             } else {
               handleWatchAd();
             }
@@ -520,7 +543,7 @@ export default function Home() {
             }}
             onNavigationStateChange={(navState: any) => {
               if (navState.url.includes("success")) {
-                addPoints(50);
+                addPoints(100);
                 setShowAdGemModal(false);
               }
             }}
@@ -553,7 +576,7 @@ export default function Home() {
             }}
             onNavigationStateChange={(navState: any) => {
               if (navState.url.includes("complete")) {
-                addPoints(25);
+                addPoints(100);
                 setShowBitLabsModal(false);
               }
             }}
@@ -583,8 +606,26 @@ const styles = StyleSheet.create({
   cardDark: { backgroundColor: "#1e293b" },
   textDark: { color: "#f1f5f9" },
   textMuted: { color: "#94a3b8" },
+  welcomeBar: {
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    backgroundColor: "#e8f4fd",
+    marginTop: 60,
+  },
+  welcomeBarDark: {
+    backgroundColor: "#1e3a5f",
+  },
+  welcomeText: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#1e40af",
+    textAlign: "center",
+  },
+  welcomeTextDark: {
+    color: "#93c5fd",
+  },
   content: { flex: 1 },
-  scrollContent: { padding: 20, paddingTop: 70, paddingBottom: 40 },
+  scrollContent: { padding: 20, paddingTop: 10, paddingBottom: 40 },
   
   balanceCard: {
     borderRadius: 24,
