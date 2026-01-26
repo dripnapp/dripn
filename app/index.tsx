@@ -29,7 +29,7 @@ const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 const rewardedAdUnitId = __DEV__
   ? "ca-app-pub-3940256099942544/1712485313"
-  : "YOUR_REAL_REWARDED_UNIT_ID_HERE";
+  : "ca-app-pub-4501953262639636/8435825886";
 
 const DRIPS_TO_USD_RATE = 0.001284;
 const MIN_REDEMPTION = 1000;
@@ -516,7 +516,7 @@ export default function Home() {
         <View style={styles.modalContent}>
           <WebView
             source={{
-              uri: "https://api.adgem.com/v1/wall?appid=YOUR_ADGEM_APP_ID",
+              uri: "https://api.adgem.com/v1/wall?appid=31880",
             }}
             onNavigationStateChange={(navState: any) => {
               if (navState.url.includes("success")) {
