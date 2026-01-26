@@ -6,10 +6,10 @@ import AppHeader from '../src/components/AppHeader';
 
 const allBadges = [
   { id: 'first_video', name: 'First Steps', description: 'Watch your first video', icon: 'play', unlockPoints: 0 },
-  { id: 'bronze', name: 'Bronze Member', description: 'Earn 100 drips', icon: 'medal', unlockPoints: 100 },
-  { id: 'silver', name: 'Silver Member', description: 'Earn 500 drips', icon: 'medal-outline', unlockPoints: 500 },
-  { id: 'gold', name: 'Gold Member', description: 'Earn 1000 drips', icon: 'trophy', unlockPoints: 1000 },
-  { id: 'first_cashout', name: 'First Cashout', description: 'Complete your first payout', icon: 'cash-check', unlockPoints: 500 },
+  { id: 'bronze', name: 'Bronze Member', description: 'Earn 5,000 drips', icon: 'medal', unlockPoints: 5000 },
+  { id: 'silver', name: 'Silver Member', description: 'Earn 10,000 drips', icon: 'medal-outline', unlockPoints: 10000 },
+  { id: 'gold', name: 'Gold Member', description: 'Earn 20,000 drips', icon: 'trophy', unlockPoints: 20000 },
+  { id: 'first_cashout', name: 'First Cashout', description: 'Complete your first payout', icon: 'cash-check', unlockPoints: 0 },
   { id: 'referrer', name: 'Referrer', description: 'Refer your first friend', icon: 'account-group', unlockPoints: 0 },
   { id: 'streak_7', name: 'Week Warrior', description: 'Login 7 days in a row', icon: 'fire', unlockPoints: 0 },
   { id: 'streak_30', name: 'Monthly Master', description: 'Login 30 days in a row', icon: 'crown', unlockPoints: 0 },

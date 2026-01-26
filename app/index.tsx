@@ -32,7 +32,7 @@ const rewardedAdUnitId = __DEV__
   : "ca-app-pub-4501953262639636/8435825886";
 
 const DRIPS_TO_USD_RATE = 0.001284;
-const MIN_REDEMPTION = 1000;
+const MIN_REDEMPTION = 5000;
 
 export default function Home() {
   const {

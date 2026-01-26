@@ -88,13 +88,14 @@ const generateReferralCode = () => {
 };
 
 const BADGE_REWARDS: Record<string, number> = {
-  first_video: 5,
-  bronze: 25,
-  silver: 50,
-  gold: 100,
-  referrer: 25,
-  streak_7: 35,
-  streak_30: 150,
+  first_video: 50,
+  bronze: 250,
+  silver: 500,
+  gold: 1000,
+  first_cashout: 500,
+  referrer: 250,
+  streak_7: 350,
+  streak_30: 1500,
 };
 
 const THEME_COST = 1000;
@@ -131,9 +132,9 @@ export const useStore = create<AppState>()(
         const newPoints = updatedState.points + amount;
         const newTotalEarned = (updatedState.totalEarned || 0) + amount;
         let userLevel = updatedState.userLevel;
-        if (newTotalEarned >= 1000) userLevel = 'Gold';
-        else if (newTotalEarned >= 500) userLevel = 'Silver';
-        else if (newTotalEarned >= 100) userLevel = 'Bronze';
+        if (newTotalEarned >= 20000) userLevel = 'Gold';
+        else if (newTotalEarned >= 10000) userLevel = 'Silver';
+        else if (newTotalEarned >= 5000) userLevel = 'Bronze';
         
         const historyRecord: HistoryRecord = {
           id: Date.now().toString(),
@@ -186,9 +187,9 @@ export const useStore = create<AppState>()(
         const newPoints = state.points + badgeReward.reward;
         const newTotalEarned = (state.totalEarned || 0) + badgeReward.reward;
         let userLevel = state.userLevel;
-        if (newTotalEarned >= 1000) userLevel = 'Gold';
-        else if (newTotalEarned >= 500) userLevel = 'Silver';
-        else if (newTotalEarned >= 100) userLevel = 'Bronze';
+        if (newTotalEarned >= 20000) userLevel = 'Gold';
+        else if (newTotalEarned >= 10000) userLevel = 'Silver';
+        else if (newTotalEarned >= 5000) userLevel = 'Bronze';
         
         const historyRecord: HistoryRecord = {
           id: Date.now().toString(),
@@ -269,9 +270,9 @@ export const useStore = create<AppState>()(
         const newPoints = state.points + reward;
         const newTotalEarned = (state.totalEarned || 0) + reward;
         let userLevel = state.userLevel;
-        if (newTotalEarned >= 1000) userLevel = 'Gold';
-        else if (newTotalEarned >= 500) userLevel = 'Silver';
-        else if (newTotalEarned >= 100) userLevel = 'Bronze';
+        if (newTotalEarned >= 20000) userLevel = 'Gold';
+        else if (newTotalEarned >= 10000) userLevel = 'Silver';
+        else if (newTotalEarned >= 5000) userLevel = 'Bronze';
         
         const historyRecord: HistoryRecord = {
           id: Date.now().toString(),
