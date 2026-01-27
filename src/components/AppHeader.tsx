@@ -80,7 +80,7 @@ export default function AppHeader({ title, showBack = false, showLogo = false }:
         {showLogo ? (
           <View style={styles.logoContainer}>
             <Image 
-              source={require('../../assets/images/dripn-logo.jpg')}
+              source={require('../../assets/images/dripn-logo.png')}
               style={styles.logo}
               contentFit="contain"
             />

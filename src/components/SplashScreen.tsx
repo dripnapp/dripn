@@ -41,7 +41,7 @@ export default function SplashScreen({ onFinish }: SplashScreenProps) {
     <View style={styles.container}>
       <View style={styles.logoContainer}>
         <Image
-          source={require("../../assets/images/dripn-logo.jpg")}
+          source={require("../../assets/images/dripn-logo.png")}
           style={{ width: logoWidth, height: logoHeight }}
           resizeMode="contain"
         />

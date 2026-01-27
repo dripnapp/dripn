@@ -62,7 +62,7 @@ Preferred communication style: Simple, everyday language.
 ### Previous Changes
 - **MAJOR REBRAND**: Changed app name from "droply.io" to "Drip'n"
 - Changed all "drops" references to "drips" throughout the app
-- Updated logo with new Drip'n branding (assets/images/dripn-logo.jpg)
+- Updated logo with new Drip'n branding (assets/images/dripn-logo.png)
 - Premium theme store: 6 themes (Classic free, 5 premium at 1,000 drips each)
 - Daily earning reset at midnight user timezone with 5,000 drip cap
 - Share Task Features: 3x daily limit, 1-minute cooldown, progressive rewards
