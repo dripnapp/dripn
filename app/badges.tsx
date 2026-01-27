@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Modal } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useStore, BADGE_REWARDS } from '../src/store/useStore';
+import { useStore, BADGE_REWARDS, THEME_CONFIGS } from '../src/store/useStore';
 import AppHeader from '../src/components/AppHeader';
 
 const allBadges = [
@@ -17,7 +17,8 @@ const allBadges = [
 
 export default function BadgesScreen() {
   const { badges, badgeRewards, points, userLevel, claimBadgeReward, addBadge, theme } = useStore();
-  const isDark = theme === 'dark';
+  const themeConfig = THEME_CONFIGS[theme];
+  const isDark = themeConfig.isDark;
   const [showUnlockModal, setShowUnlockModal] = useState(false);
   const [unlockedBadge, setUnlockedBadge] = useState<typeof allBadges[0] | null>(null);
   const [previousPoints, setPreviousPoints] = useState(points);
@@ -97,21 +98,21 @@ export default function BadgesScreen() {
   };
 
   return (
-    <View style={[styles.container, isDark && styles.containerDark]}>
+    <View style={[styles.container, { backgroundColor: themeConfig.background }]}>
       <AppHeader title="Badges & Levels" showBack />
 
       <Modal visible={showUnlockModal} transparent animationType="fade">
         <View style={styles.modalOverlay}>
-          <View style={styles.unlockModal}>
+          <View style={[styles.unlockModal, { backgroundColor: themeConfig.card }]}>
             <MaterialCommunityIcons name="star-circle" size={80} color="#f59f00" />
-            <Text style={styles.unlockTitle}>Badge Unlocked!</Text>
-            <Text style={styles.unlockBadgeName}>{unlockedBadge?.name}</Text>
-            <Text style={styles.unlockDesc}>{unlockedBadge?.description}</Text>
+            <Text style={[styles.unlockTitle, { color: themeConfig.text }]}>Badge Unlocked!</Text>
+            <Text style={[styles.unlockBadgeName, { color: themeConfig.primary }]}>{unlockedBadge?.name}</Text>
+            <Text style={[styles.unlockDesc, { color: themeConfig.textMuted }]}>{unlockedBadge?.description}</Text>
             <View style={styles.rewardBox}>
               <Text style={styles.rewardText}>+{BADGE_REWARDS[unlockedBadge?.id || ''] || 0} Drips</Text>
             </View>
             <TouchableOpacity 
-              style={styles.claimButton} 
+              style={[styles.claimButton, { backgroundColor: themeConfig.primary }]} 
               onPress={() => {
                 if (unlockedBadge) handleClaimReward(unlockedBadge);
                 setShowUnlockModal(false);
@@ -124,24 +125,24 @@ export default function BadgesScreen() {
       </Modal>
 
       <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
-        <View style={[styles.levelCard, isDark && styles.cardDark]}>
+        <View style={[styles.levelCard, { backgroundColor: themeConfig.card }]}>
           <MaterialCommunityIcons 
             name={userLevel === 'Gold' ? 'trophy' : userLevel === 'Silver' ? 'medal-outline' : 'medal'} 
             size={50} 
             color={userLevel === 'Gold' ? '#f59f00' : userLevel === 'Silver' ? '#868e96' : '#cd7f32'} 
           />
           <View style={styles.levelInfo}>
-            <Text style={[styles.levelLabel, isDark && styles.textMuted]}>Current Level</Text>
-            <Text style={[styles.levelName, isDark && styles.textDark]}>{userLevel}</Text>
+            <Text style={[styles.levelLabel, { color: themeConfig.textMuted }]}>Current Level</Text>
+            <Text style={[styles.levelName, { color: themeConfig.text }]}>{userLevel}</Text>
           </View>
-          <View style={[styles.pointsBox, isDark && styles.pointsBoxDark]}>
-            <Text style={styles.pointsNumber}>{points}</Text>
-            <Text style={styles.pointsLabel}>Drips</Text>
+          <View style={[styles.pointsBox, { backgroundColor: themeConfig.background }]}>
+            <Text style={[styles.pointsNumber, { color: themeConfig.primary }]}>{points}</Text>
+            <Text style={[styles.pointsLabel, { color: themeConfig.textMuted }]}>Drips</Text>
           </View>
         </View>
 
-        <Text style={[styles.sectionTitle, isDark && styles.textDark]}>All Badges</Text>
-        <Text style={[styles.sectionSubtitle, isDark && styles.textMuted]}>Tap unlocked badges to claim rewards</Text>
+        <Text style={[styles.sectionTitle, { color: themeConfig.text }]}>All Badges</Text>
+        <Text style={[styles.sectionSubtitle, { color: themeConfig.textMuted }]}>Tap unlocked badges to claim rewards</Text>
         
         <View style={styles.badgesGrid}>
           {allBadges.map((badge) => {
@@ -153,9 +154,9 @@ export default function BadgesScreen() {
                 key={badge.id} 
                 style={[
                   styles.badgeCard, 
+                  { backgroundColor: themeConfig.card },
                   !unlocked && styles.badgeCardLocked,
                   claimable && styles.badgeCardClaimable,
-                  isDark && styles.cardDark
                 ]}
                 onPress={() => handleBadgePress(badge)}
               >
@@ -164,15 +165,15 @@ export default function BadgesScreen() {
                     <Text style={styles.claimBadgeText}>CLAIM</Text>
                   </View>
                 )}
-                <View style={[styles.badgeIcon, !unlocked && styles.badgeIconLocked]}>
+                <View style={[styles.badgeIcon, { backgroundColor: themeConfig.background }, !unlocked && styles.badgeIconLocked]}>
                   <MaterialCommunityIcons 
                     name={badge.icon as any} 
                     size={32} 
-                    color={unlocked ? '#4dabf7' : '#ced4da'} 
+                    color={unlocked ? themeConfig.primary : '#ced4da'} 
                   />
                 </View>
-                <Text style={[styles.badgeName, !unlocked && styles.badgeNameLocked, isDark && unlocked && styles.textDark]}>{badge.name}</Text>
-                <Text style={[styles.badgeDesc, isDark && styles.textMuted]}>{badge.description}</Text>
+                <Text style={[styles.badgeName, !unlocked && styles.badgeNameLocked, { color: unlocked ? themeConfig.text : '#adb5bd' }]}>{badge.name}</Text>
+                <Text style={[styles.badgeDesc, { color: themeConfig.textMuted }]}>{badge.description}</Text>
                 <View style={styles.rewardRow}>
                   <MaterialCommunityIcons name="gift" size={14} color={reward?.claimed ? '#40c057' : '#f59f00'} />
                   <Text style={[styles.rewardAmount, reward?.claimed && styles.rewardClaimed]}>
@@ -180,7 +181,7 @@ export default function BadgesScreen() {
                   </Text>
                 </View>
                 {!unlocked && badge.unlockPoints > 0 && (
-                  <Text style={styles.unlockText}>{badge.unlockPoints} drps to unlock</Text>
+                  <Text style={[styles.unlockText, { color: themeConfig.primary }]}>{badge.unlockPoints} drps to unlock</Text>
                 )}
               </TouchableOpacity>
             );

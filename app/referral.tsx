@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, TextInput } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useStore } from '../src/store/useStore';
+import { useStore, THEME_CONFIGS } from '../src/store/useStore';
 import AppHeader from '../src/components/AppHeader';
 
 export default function ReferralScreen() {
   const { referralCode, referralCount, enteredReferralCode, referralBonusEarned, enterReferralCode, theme } = useStore();
-  const isDark = theme === 'dark';
+  const themeConfig = THEME_CONFIGS[theme];
+  const isDark = themeConfig.isDark;
   const [inputCode, setInputCode] = useState('');
 
   const copyCode = () => {
@@ -32,25 +33,25 @@ export default function ReferralScreen() {
   };
 
   return (
-    <View style={[styles.container, isDark && styles.containerDark]}>
+    <View style={[styles.container, { backgroundColor: themeConfig.background }]}>
       <AppHeader title="Referral Program" showBack />
 
       <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
-        <Text style={[styles.subheader, isDark && styles.textMuted]}>Invite friends and earn together!</Text>
+        <Text style={[styles.subheader, { color: themeConfig.textMuted }]}>Invite friends and earn together!</Text>
 
         {!enteredReferralCode && (
-          <View style={[styles.enterCodeCard, isDark && styles.cardDark]}>
-            <Text style={[styles.enterCodeLabel, isDark && styles.textDark]}>Have a referral code?</Text>
+          <View style={[styles.enterCodeCard, { backgroundColor: themeConfig.card, borderColor: themeConfig.primary }]}>
+            <Text style={[styles.enterCodeLabel, { color: themeConfig.text }]}>Have a referral code?</Text>
             <View style={styles.inputRow}>
               <TextInput
-                style={styles.input}
+                style={[styles.input, { backgroundColor: themeConfig.background, color: themeConfig.text }]}
                 placeholder="Enter code (e.g. DRPN-ABC123)"
-                placeholderTextColor="#999"
+                placeholderTextColor={themeConfig.textMuted}
                 value={inputCode}
                 onChangeText={setInputCode}
                 autoCapitalize="characters"
               />
-              <TouchableOpacity style={styles.applyButton} onPress={handleEnterCode}>
+              <TouchableOpacity style={[styles.applyButton, { backgroundColor: themeConfig.primary }]} onPress={handleEnterCode}>
                 <Text style={styles.applyButtonText}>Apply</Text>
               </TouchableOpacity>
             </View>
@@ -67,8 +68,8 @@ export default function ReferralScreen() {
           </View>
         )}
 
-        <View style={[styles.codeCard, isDark && styles.cardDark]}>
-          <Text style={[styles.codeLabel, isDark && styles.textMuted]}>Your Referral Code</Text>
+        <View style={[styles.codeCard, { backgroundColor: themeConfig.primary }]}>
+          <Text style={[styles.codeLabel, { color: 'rgba(255,255,255,0.8)' }]}>Your Referral Code</Text>
           <View style={styles.codeBox}>
             <Text style={styles.code}>{referralCode || 'DRPN-XXXXXX'}</Text>
             <TouchableOpacity style={styles.copyButton} onPress={copyCode}>
@@ -78,49 +79,49 @@ export default function ReferralScreen() {
           <Text style={styles.codeHint}>Share this code with friends</Text>
         </View>
 
-        <View style={[styles.statsCard, isDark && styles.cardDark]}>
+        <View style={[styles.statsCard, { backgroundColor: themeConfig.card }]}>
           <View style={styles.statItem}>
-            <Text style={styles.statNumber}>{referralCount}</Text>
-            <Text style={[styles.statLabel, isDark && styles.textMuted]}>Friends Referred</Text>
+            <Text style={[styles.statNumber, { color: themeConfig.text }]}>{referralCount}</Text>
+            <Text style={[styles.statLabel, { color: themeConfig.textMuted }]}>Friends Referred</Text>
           </View>
-          <View style={styles.statDivider} />
+          <View style={[styles.statDivider, { backgroundColor: themeConfig.background }]} />
           <View style={styles.statItem}>
-            <Text style={styles.statNumber}>{referralBonusEarned}</Text>
-            <Text style={[styles.statLabel, isDark && styles.textMuted]}>Bonus drips</Text>
+            <Text style={[styles.statNumber, { color: themeConfig.text }]}>{referralBonusEarned}</Text>
+            <Text style={[styles.statLabel, { color: themeConfig.textMuted }]}>Bonus drips</Text>
           </View>
         </View>
 
-        <View style={[styles.howItWorks, isDark && styles.cardDark]}>
-          <Text style={[styles.sectionTitle, isDark && styles.textDark]}>How It Works</Text>
+        <View style={[styles.howItWorks, { backgroundColor: themeConfig.card }]}>
+          <Text style={[styles.sectionTitle, { color: themeConfig.text }]}>How It Works</Text>
           
           <View style={styles.step}>
-            <View style={styles.stepNumber}><Text style={styles.stepNumberText}>1</Text></View>
+            <View style={[styles.stepNumber, { backgroundColor: themeConfig.primary }]}><Text style={styles.stepNumberText}>1</Text></View>
             <View style={styles.stepContent}>
-              <Text style={[styles.stepTitle, isDark && styles.textDark]}>Share Your Code</Text>
-              <Text style={[styles.stepDesc, isDark && styles.textMuted]}>Send your unique referral code to friends and family</Text>
+              <Text style={[styles.stepTitle, { color: themeConfig.text }]}>Share Your Code</Text>
+              <Text style={[styles.stepDesc, { color: themeConfig.textMuted }]}>Send your unique referral code to friends and family</Text>
             </View>
           </View>
 
           <View style={styles.step}>
-            <View style={styles.stepNumber}><Text style={styles.stepNumberText}>2</Text></View>
+            <View style={[styles.stepNumber, { backgroundColor: themeConfig.primary }]}><Text style={styles.stepNumberText}>2</Text></View>
             <View style={styles.stepContent}>
-              <Text style={[styles.stepTitle, isDark && styles.textDark]}>They Sign Up</Text>
-              <Text style={[styles.stepDesc, isDark && styles.textMuted]}>Your friend downloads Drip'n and enters your code</Text>
+              <Text style={[styles.stepTitle, { color: themeConfig.text }]}>They Sign Up</Text>
+              <Text style={[styles.stepDesc, { color: themeConfig.textMuted }]}>Your friend downloads Drip'n and enters your code</Text>
             </View>
           </View>
 
           <View style={styles.step}>
-            <View style={styles.stepNumber}><Text style={styles.stepNumberText}>3</Text></View>
+            <View style={[styles.stepNumber, { backgroundColor: themeConfig.primary }]}><Text style={styles.stepNumberText}>3</Text></View>
             <View style={styles.stepContent}>
-              <Text style={[styles.stepTitle, isDark && styles.textDark]}>You Both Earn</Text>
-              <Text style={[styles.stepDesc, isDark && styles.textMuted]}>Get 10% of their earnings for 30 days</Text>
+              <Text style={[styles.stepTitle, { color: themeConfig.text }]}>You Both Earn</Text>
+              <Text style={[styles.stepDesc, { color: themeConfig.textMuted }]}>Get 10% of their earnings for 30 days</Text>
             </View>
           </View>
         </View>
 
-        <View style={[styles.infoBox, isDark && styles.infoBoxDark]}>
-          <MaterialCommunityIcons name="information-outline" size={20} color="#4dabf7" />
-          <Text style={[styles.infoText, isDark && styles.infoTextDark]}>
+        <View style={[styles.infoBox, { backgroundColor: isDark ? themeConfig.card : '#e7f5ff' }]}>
+          <MaterialCommunityIcons name="information-outline" size={20} color={themeConfig.primary} />
+          <Text style={[styles.infoText, { color: isDark ? themeConfig.textMuted : '#1971c2' }]}>
             Referral bonuses are paid in drips and can be cashed out once you reach the minimum threshold.
           </Text>
         </View>

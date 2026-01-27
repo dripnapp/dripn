@@ -1,65 +1,66 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Linking } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useStore } from '../src/store/useStore';
+import { useStore, THEME_CONFIGS } from '../src/store/useStore';
 import AppHeader from '../src/components/AppHeader';
 
 export default function ContactScreen() {
   const { theme } = useStore();
-  const isDark = theme === 'dark';
+  const themeConfig = THEME_CONFIGS[theme];
+  const isDark = themeConfig.isDark;
 
   const handleEmailPress = () => {
     Linking.openURL("mailto:dripnapp@proton.me?subject=Drip'n Support Request");
   };
 
   return (
-    <View style={[styles.container, isDark && styles.containerDark]}>
+    <View style={[styles.container, { backgroundColor: themeConfig.background }]}>
       <AppHeader title="Contact Us" showBack />
 
       <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
-        <View style={[styles.card, isDark && styles.cardDark]}>
-          <View style={styles.iconContainer}>
-            <MaterialCommunityIcons name="email-outline" size={48} color="#4dabf7" />
+        <View style={[styles.card, { backgroundColor: themeConfig.card }]}>
+          <View style={[styles.iconContainer, { backgroundColor: themeConfig.background }]}>
+            <MaterialCommunityIcons name="email-outline" size={48} color={themeConfig.primary} />
           </View>
-          <Text style={[styles.cardTitle, isDark && styles.textDark]}>Email Support</Text>
-          <Text style={[styles.cardDesc, isDark && styles.textMuted]}>
+          <Text style={[styles.cardTitle, { color: themeConfig.text }]}>Email Support</Text>
+          <Text style={[styles.cardDesc, { color: themeConfig.textMuted }]}>
             For questions, issues, or feedback, reach out to our support team via email.
           </Text>
-          <TouchableOpacity style={styles.emailButton} onPress={handleEmailPress}>
+          <TouchableOpacity style={[styles.emailButton, { backgroundColor: themeConfig.primary }]} onPress={handleEmailPress}>
             <MaterialCommunityIcons name="email-fast" size={20} color="#fff" />
             <Text style={styles.emailButtonText}>dripnapp@proton.me</Text>
           </TouchableOpacity>
         </View>
 
-        <View style={[styles.infoCard, isDark && styles.cardDark]}>
-          <Text style={[styles.infoTitle, isDark && styles.textDark]}>What to Include</Text>
+        <View style={[styles.infoCard, { backgroundColor: themeConfig.card }]}>
+          <Text style={[styles.infoTitle, { color: themeConfig.text }]}>What to Include</Text>
           <View style={styles.infoItem}>
             <MaterialCommunityIcons name="check-circle" size={18} color="#40c057" />
-            <Text style={[styles.infoText, isDark && styles.textMuted]}>Your username or email address attached to your account</Text>
+            <Text style={[styles.infoText, { color: themeConfig.textMuted }]}>Your username or email address attached to your account</Text>
           </View>
           <View style={styles.infoItem}>
             <MaterialCommunityIcons name="check-circle" size={18} color="#40c057" />
-            <Text style={[styles.infoText, isDark && styles.textMuted]}>A clear description of your issue or question</Text>
+            <Text style={[styles.infoText, { color: themeConfig.textMuted }]}>A clear description of your issue or question</Text>
           </View>
           <View style={styles.infoItem}>
             <MaterialCommunityIcons name="check-circle" size={18} color="#40c057" />
-            <Text style={[styles.infoText, isDark && styles.textMuted]}>Screenshots if applicable (optional)</Text>
+            <Text style={[styles.infoText, { color: themeConfig.textMuted }]}>Screenshots if applicable (optional)</Text>
           </View>
         </View>
 
-        <View style={[styles.responseCard, isDark && styles.cardDark]}>
+        <View style={[styles.responseCard, { backgroundColor: themeConfig.card }]}>
           <MaterialCommunityIcons name="clock-outline" size={24} color="#f59f00" />
           <View style={styles.responseContent}>
-            <Text style={[styles.responseTitle, isDark && styles.textDark]}>Response Time</Text>
-            <Text style={[styles.responseText, isDark && styles.textMuted]}>
+            <Text style={[styles.responseTitle, { color: themeConfig.text }]}>Response Time</Text>
+            <Text style={[styles.responseText, { color: themeConfig.textMuted }]}>
               We typically respond within 24-48 hours during business days.
             </Text>
           </View>
         </View>
 
-        <View style={[styles.tipBox, isDark && styles.cardDark]}>
-          <MaterialCommunityIcons name="lightbulb-outline" size={20} color="#4dabf7" />
-          <Text style={[styles.tipText, isDark && styles.textMuted]}>
+        <View style={[styles.tipBox, { backgroundColor: isDark ? themeConfig.card : '#e7f5ff' }]}>
+          <MaterialCommunityIcons name="lightbulb-outline" size={20} color={themeConfig.primary} />
+          <Text style={[styles.tipText, { color: isDark ? themeConfig.textMuted : '#1971c2' }]}>
             Before contacting support, check our Learn section and Terms of Use for common questions.
           </Text>
         </View>

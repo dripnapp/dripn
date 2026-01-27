@@ -1,12 +1,13 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useStore } from '../src/store/useStore';
+import { useStore, THEME_CONFIGS } from '../src/store/useStore';
 import AppHeader from '../src/components/AppHeader';
 
 export default function LearnScreen() {
   const { theme } = useStore();
-  const isDark = theme === 'dark';
+  const themeConfig = THEME_CONFIGS[theme];
+  const isDark = themeConfig.isDark;
   const topics = [
     {
       icon: 'bitcoin',
@@ -48,35 +49,35 @@ export default function LearnScreen() {
   ];
 
   return (
-    <View style={[styles.container, isDark && styles.containerDark]}>
+    <View style={[styles.container, { backgroundColor: themeConfig.background }]}>
       <AppHeader title="Learn" showBack />
 
       <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
-        <Text style={[styles.subheader, isDark && styles.textMuted]}>Learn about cryptocurrency and how redemptions work</Text>
+        <Text style={[styles.subheader, { color: themeConfig.textMuted }]}>Learn about cryptocurrency and how redemptions work</Text>
 
         {topics.map((topic, index) => (
-          <View key={index} style={[styles.card, topic.isDripn && styles.dripnCard, isDark && styles.cardDark]}>
+          <View key={index} style={[styles.card, topic.isDripn && { borderColor: themeConfig.primary }, { backgroundColor: themeConfig.card }]}>
             <View style={styles.cardHeader}>
               <MaterialCommunityIcons 
                 name={topic.icon as any} 
                 size={28} 
-                color={topic.isDripn ? '#22E6FF' : '#4dabf7'} 
+                color={topic.isDripn ? '#22E6FF' : themeConfig.primary} 
               />
-              <Text style={[styles.cardTitle, isDark && styles.textDark]}>{topic.title}</Text>
+              <Text style={[styles.cardTitle, { color: themeConfig.text }]}>{topic.title}</Text>
             </View>
-            <Text style={[styles.cardContent, isDark && styles.textMuted]}>{topic.content}</Text>
+            <Text style={[styles.cardContent, { color: themeConfig.textMuted }]}>{topic.content}</Text>
             {topic.disclaimer && (
-              <View style={styles.disclaimerBox}>
-                <MaterialCommunityIcons name="information-outline" size={16} color="#868e96" />
-                <Text style={styles.disclaimerText}>{topic.disclaimer}</Text>
+              <View style={[styles.disclaimerBox, { backgroundColor: themeConfig.background }]}>
+                <MaterialCommunityIcons name="information-outline" size={16} color={themeConfig.textMuted} />
+                <Text style={[styles.disclaimerText, { color: themeConfig.textMuted }]}>{topic.disclaimer}</Text>
               </View>
             )}
           </View>
         ))}
 
-        <View style={[styles.tipBox, isDark && styles.tipBoxDark]}>
+        <View style={[styles.tipBox, { backgroundColor: isDark ? themeConfig.card : '#fff9db' }]}>
           <MaterialCommunityIcons name="lightbulb-outline" size={24} color="#f59f00" />
-          <Text style={[styles.tipText, isDark && styles.textMuted]}>
+          <Text style={[styles.tipText, { color: isDark ? themeConfig.textMuted : '#5c5c5c' }]}>
             Pro Tip: Never share your wallet's secret key with anyone. Drip'n and CoinGate will never ask for your private keys.
           </Text>
         </View>

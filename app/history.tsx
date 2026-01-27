@@ -1,12 +1,13 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, FlatList } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useStore } from '../src/store/useStore';
+import { useStore, THEME_CONFIGS } from '../src/store/useStore';
 import AppHeader from '../src/components/AppHeader';
 
 export default function HistoryScreen() {
   const { theme, points, totalEarned, history, redemptions } = useStore();
-  const isDark = theme === 'dark' || theme === 'neon';
+  const themeConfig = THEME_CONFIGS[theme];
+  const isDark = themeConfig.isDark;
 
   const getItemIcon = (type: string, source: string, status?: string) => {
     if (type === 'redemption') {
@@ -54,54 +55,54 @@ export default function HistoryScreen() {
   };
 
   return (
-    <View style={[styles.container, isDark && styles.containerDark]}>
+    <View style={[styles.container, { backgroundColor: themeConfig.background }]}>
       <AppHeader title="History" showBack />
 
       <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
         <View style={styles.statsRow}>
-          <View style={[styles.statCard, isDark && styles.cardDark]}>
-            <MaterialCommunityIcons name="wallet" size={28} color="#4dabf7" />
-            <Text style={[styles.statValue, isDark && styles.textDark]}>{points.toLocaleString()}</Text>
-            <Text style={[styles.statLabel, isDark && styles.textMuted]}>Available Drips</Text>
+          <View style={[styles.statCard, { backgroundColor: themeConfig.card }]}>
+            <MaterialCommunityIcons name="wallet" size={28} color={themeConfig.primary} />
+            <Text style={[styles.statValue, { color: themeConfig.primary }]}>{points.toLocaleString()}</Text>
+            <Text style={[styles.statLabel, { color: themeConfig.textMuted }]}>Available Drips</Text>
           </View>
-          <View style={[styles.statCard, isDark && styles.cardDark]}>
+          <View style={[styles.statCard, { backgroundColor: themeConfig.card }]}>
             <MaterialCommunityIcons name="chart-line" size={28} color="#40c057" />
-            <Text style={[styles.statValue, styles.totalValue, isDark && styles.textDark]}>{(totalEarned || 0).toLocaleString()}</Text>
-            <Text style={[styles.statLabel, isDark && styles.textMuted]}>Total Earned</Text>
+            <Text style={[styles.statValue, styles.totalValue, { color: themeConfig.text }]}>{(totalEarned || 0).toLocaleString()}</Text>
+            <Text style={[styles.statLabel, { color: themeConfig.textMuted }]}>Total Earned</Text>
           </View>
         </View>
 
         {redemptions && redemptions.length > 0 && (
-          <View style={[styles.redemptionsSummary, isDark && styles.cardDark]}>
+          <View style={[styles.redemptionsSummary, { backgroundColor: themeConfig.card }]}>
             <MaterialCommunityIcons name="cash-multiple" size={24} color="#40c057" />
             <View style={styles.redemptionInfo}>
-              <Text style={[styles.redemptionTitle, isDark && styles.textDark]}>Redemptions</Text>
-              <Text style={[styles.redemptionSubtitle, isDark && styles.textMuted]}>
+              <Text style={[styles.redemptionTitle, { color: themeConfig.text }]}>Redemptions</Text>
+              <Text style={[styles.redemptionSubtitle, { color: themeConfig.textMuted }]}>
                 {redemptions.length} total • Processed by CoinGate
               </Text>
             </View>
           </View>
         )}
 
-        <Text style={[styles.sectionTitle, isDark && styles.textDark]}>Recent Activity</Text>
+        <Text style={[styles.sectionTitle, { color: themeConfig.text }]}>Recent Activity</Text>
 
         {history.length === 0 ? (
-          <View style={[styles.emptyCard, isDark && styles.cardDark]}>
-            <MaterialCommunityIcons name="history" size={48} color="#868e96" />
-            <Text style={[styles.emptyText, isDark && styles.textMuted]}>No activity yet</Text>
-            <Text style={[styles.emptySubtext, isDark && styles.textMuted]}>
+          <View style={[styles.emptyCard, { backgroundColor: themeConfig.card }]}>
+            <MaterialCommunityIcons name="history" size={48} color={themeConfig.textMuted} />
+            <Text style={[styles.emptyText, { color: themeConfig.textMuted }]}>No activity yet</Text>
+            <Text style={[styles.emptySubtext, { color: themeConfig.textMuted }]}>
               Complete tasks to start earning drips!
             </Text>
           </View>
         ) : (
-          <View style={[styles.historyCard, isDark && styles.cardDark]}>
+          <View style={[styles.historyCard, { backgroundColor: themeConfig.card }]}>
             {history.slice(0, 50).map((item, index) => (
               <View 
                 key={item.id} 
                 style={[
                   styles.historyRow,
                   index !== history.slice(0, 50).length - 1 && styles.historyRowBorder,
-                  isDark && styles.historyRowDark
+                  { borderBottomColor: themeConfig.background }
                 ]}
               >
                 <View style={[styles.iconCircle, { backgroundColor: getItemColor(item.type, item.status) + '20' }]}>
@@ -112,15 +113,15 @@ export default function HistoryScreen() {
                   />
                 </View>
                 <View style={styles.historyInfo}>
-                  <Text style={[styles.historySource, isDark && styles.textDark]}>
+                  <Text style={[styles.historySource, { color: themeConfig.text }]}>
                     {item.source}{getStatusText(item.status)}
                   </Text>
-                  <Text style={[styles.historyDate, isDark && styles.textMuted]}>{item.date}</Text>
+                  <Text style={[styles.historyDate, { color: themeConfig.textMuted }]}>{item.date}</Text>
                   {item.xrpAmount && (
-                    <Text style={styles.xrpAmount}>~{item.xrpAmount.toFixed(6)} XRP</Text>
+                    <Text style={[styles.xrpAmount, { color: themeConfig.primary }]}>~{item.xrpAmount.toFixed(6)} XRP</Text>
                   )}
                   {item.transactionId && (
-                    <Text style={styles.transactionId}>ID: {item.transactionId}</Text>
+                    <Text style={[styles.transactionId, { color: themeConfig.textMuted }]}>ID: {item.transactionId}</Text>
                   )}
                 </View>
                 <Text style={[
@@ -134,9 +135,9 @@ export default function HistoryScreen() {
           </View>
         )}
 
-        <View style={[styles.infoBox, isDark && styles.infoBoxDark]}>
-          <MaterialCommunityIcons name="information-outline" size={18} color="#4dabf7" />
-          <Text style={[styles.infoText, isDark && styles.infoTextDark]}>
+        <View style={[styles.infoBox, { backgroundColor: isDark ? themeConfig.card : '#e7f5ff' }]}>
+          <MaterialCommunityIcons name="information-outline" size={18} color={themeConfig.accent} />
+          <Text style={[styles.infoText, { color: isDark ? themeConfig.textMuted : '#1971c2' }]}>
             Redemption payouts are processed by CoinGate and typically take 1-3 business days. Transaction IDs are provided for tracking.
           </Text>
         </View>
