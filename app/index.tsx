@@ -204,10 +204,10 @@ export default function Home() {
           unityRewardedAd.show();
         } else {
           // If in Expo Go, provide a helpful message
-          if (Constants.appOwnership === 'expo') {
+          if (Constants.appOwnership === 'expo' || Constants.executionEnvironment === 'storeClient') {
             Alert.alert(
-              "Expo Go Limitation",
-              "Unity Ads (and other native mediation) require a Development Build and cannot be initialized in Expo Go. To test this, you'll need to create a development build with 'npx expo run:ios'.",
+              "Native Ads Limited",
+              "Native Ad SDKs (Unity/AdMob) are disabled in Expo Go. You'll need a Development Build to use these live features.",
               [{ text: "Test Reward (+100)", onPress: () => addPoints(100) }, { text: "OK" }]
             );
           } else {
@@ -216,9 +216,9 @@ export default function Home() {
         }
       }, 2000);
     } else {
-      if (Constants.appOwnership === 'expo') {
+      if (Constants.appOwnership === 'expo' || Constants.executionEnvironment === 'storeClient') {
         Alert.alert(
-          "Expo Go Limitation",
+          "Native Ads Limited",
           "Native Ad SDKs (Unity/AdMob) are disabled in Expo Go. You'll need a Development Build to use these live features.",
           [{ text: "Test Reward (+100)", onPress: () => addPoints(100) }, { text: "OK" }]
         );
