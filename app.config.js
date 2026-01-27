@@ -39,11 +39,17 @@ export default {
     ios: {
       supportsTablet: true,
       bundleIdentifier: "com.dripnapp.dripn",
-      buildNumber: "3",
+      buildNumber: "4",
       infoPlist: {
         NSUserTrackingUsageDescription:
           "This allows personalized ads to support rewards and features in the app.",
         ITSAppUsesNonExemptEncryption: false,
+        SKAdNetworkItems: [
+          { SKAdNetworkIdentifier: "cstr6suwn9.skadnetwork" },
+          { SKAdNetworkIdentifier: "4fzdc2evr5.skadnetwork" },
+          { SKAdNetworkIdentifier: "3rd42ekr43.skadnetwork" },
+          { SKAdNetworkIdentifier: "3qcr597p9d.skadnetwork" }
+        ],
       },
     },
 
