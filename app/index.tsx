@@ -12,6 +12,7 @@ import {
   Platform,
   Dimensions,
 } from "react-native";
+import Constants from "expo-constants";
 import { LinearGradient } from "expo-linear-gradient";
 import { WebView } from "react-native-webview";
 import { useStore, THEME_CONFIGS } from "../src/store/useStore";
@@ -202,11 +203,28 @@ export default function Home() {
         if (unityRewardedAd.loaded) {
           unityRewardedAd.show();
         } else {
-          Alert.alert("Ad not ready", "Unity Ad is still loading, please try again in a moment.");
+          // If in Expo Go, provide a helpful message
+          if (Constants.appOwnership === 'expo') {
+            Alert.alert(
+              "Expo Go Limitation",
+              "Unity Ads (and other native mediation) require a Development Build and cannot be initialized in Expo Go. To test this, you'll need to create a development build with 'npx expo run:ios'.",
+              [{ text: "Test Reward (+100)", onPress: () => addPoints(100) }, { text: "OK" }]
+            );
+          } else {
+            Alert.alert("Ad not ready", "Unity Ad is still loading, please try again in a moment.");
+          }
         }
       }, 2000);
     } else {
-      Alert.alert("Ad Error", "Unity Ads initialization failed.");
+      if (Constants.appOwnership === 'expo') {
+        Alert.alert(
+          "Expo Go Limitation",
+          "Native Ad SDKs (Unity/AdMob) are disabled in Expo Go. You'll need a Development Build to use these live features.",
+          [{ text: "Test Reward (+100)", onPress: () => addPoints(100) }, { text: "OK" }]
+        );
+      } else {
+        Alert.alert("Ad Error", "Unity Ads initialization failed.");
+      }
     }
   };
 
