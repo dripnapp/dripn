@@ -10,6 +10,94 @@ interface BadgeReward {
 
 export type ThemeMode = 'classic' | 'dark' | 'neon' | 'ocean' | 'sunset' | 'forest';
 
+export interface ThemeConfig {
+  primary: string;
+  secondary: string;
+  background: string;
+  card: string;
+  text: string;
+  textMuted: string;
+  accent: string;
+  isDark: boolean;
+  headerBg: string;
+  button: string;
+}
+
+export const THEME_CONFIGS: Record<ThemeMode, ThemeConfig> = {
+  classic: {
+    primary: '#667eea',
+    secondary: '#764ba2',
+    background: '#f8fafc',
+    card: '#ffffff',
+    text: '#1a1a1a',
+    textMuted: '#94a3b8',
+    accent: '#4dabf7',
+    isDark: false,
+    headerBg: '#1a1a1a',
+    button: '#667eea'
+  },
+  dark: {
+    primary: '#4dabf7',
+    secondary: '#339af0',
+    background: '#0f172a',
+    card: '#1e293b',
+    text: '#f1f5f9',
+    textMuted: '#94a3b8',
+    accent: '#38bdf8',
+    isDark: true,
+    headerBg: '#0f172a',
+    button: '#4dabf7'
+  },
+  neon: {
+    primary: '#00ff41',
+    secondary: '#003b00',
+    background: '#0d0d0d',
+    card: '#1a1a1a',
+    text: '#00ff41',
+    textMuted: '#008f11',
+    accent: '#00ff41',
+    isDark: true,
+    headerBg: '#000000',
+    button: '#00ff41'
+  },
+  ocean: {
+    primary: '#0077be',
+    secondary: '#00a8cc',
+    background: '#e0f2f1',
+    card: '#ffffff',
+    text: '#004d40',
+    textMuted: '#4db6ac',
+    accent: '#00acc1',
+    isDark: false,
+    headerBg: '#004d40',
+    button: '#0077be'
+  },
+  sunset: {
+    primary: '#ff4e50',
+    secondary: '#f9d423',
+    background: '#fff3e0',
+    card: '#ffffff',
+    text: '#e65100',
+    textMuted: '#ff9800',
+    accent: '#ff5722',
+    isDark: false,
+    headerBg: '#bf360c',
+    button: '#ff4e50'
+  },
+  forest: {
+    primary: '#2d5a27',
+    secondary: '#558b2f',
+    background: '#f1f8e9',
+    card: '#ffffff',
+    text: '#1b5e20',
+    textMuted: '#689f38',
+    accent: '#43a047',
+    isDark: false,
+    headerBg: '#1b5e20',
+    button: '#2d5a27'
+  }
+};
+
 interface ShareRecord {
   date: string;
   platform: string;

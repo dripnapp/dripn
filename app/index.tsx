@@ -14,7 +14,7 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { WebView } from "react-native-webview";
-import { useStore } from "../src/store/useStore";
+import { useStore, THEME_CONFIGS } from "../src/store/useStore";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import SplashScreen from "../src/components/SplashScreen";
 import OnboardingScreen from "../src/components/OnboardingScreen";
@@ -59,7 +59,8 @@ export default function Home() {
     claimBadgeReward,
   } = useStore();
 
-  const isDark = theme === "dark" || theme === "neon";
+  const themeConfig = THEME_CONFIGS[theme];
+  const isDark = themeConfig.isDark;
 
   const [loading, setLoading] = useState(false);
   const [showSplash, setShowSplash] = useState(Platform.OS !== 'web');
@@ -317,20 +318,20 @@ export default function Home() {
       <AppHeader showLogo />
 
       {username && (
-        <View style={[styles.welcomeBar, isDark && styles.welcomeBarDark]}>
-          <Text style={[styles.welcomeText, isDark && styles.welcomeTextDark]}>
+        <View style={[styles.welcomeBar, { backgroundColor: themeConfig.card }]}>
+          <Text style={[styles.welcomeText, { color: themeConfig.primary }]}>
             Welcome, {username}
           </Text>
         </View>
       )}
 
       <ScrollView
-        style={styles.content}
+        style={[styles.content, { backgroundColor: themeConfig.background }]}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
         <LinearGradient
-          colors={isDark ? ["#1e3a5f", "#0d1b2a"] : ["#667eea", "#764ba2"]}
+          colors={[themeConfig.primary, themeConfig.secondary]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.balanceCard}
@@ -366,7 +367,7 @@ export default function Home() {
           activeOpacity={0.85}
         >
           <LinearGradient
-            colors={["#10b981", "#059669"]}
+            colors={[themeConfig.primary, themeConfig.secondary]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
             style={styles.redeemButtonGradient}
@@ -385,22 +386,22 @@ export default function Home() {
         </View>
 
         <TouchableOpacity
-          style={[styles.taskCard, isDark && styles.cardDark]}
+          style={[styles.taskCard, { backgroundColor: themeConfig.card }]}
           onPress={handleWatchAd}
           activeOpacity={0.7}
         >
           <LinearGradient
-            colors={["#3b82f6", "#1d4ed8"]}
+            colors={[themeConfig.primary, themeConfig.secondary]}
             style={styles.taskIconGradient}
           >
             <MaterialCommunityIcons name="play-circle" size={24} color="#fff" />
           </LinearGradient>
           <View style={styles.taskInfo}>
-            <Text style={[styles.taskTitle, isDark && styles.textDark]}>Watch Video Ad</Text>
-            <Text style={[styles.taskSubtitle, isDark && styles.textMuted]}>Earn 1-5 drips per video</Text>
+            <Text style={[styles.taskTitle, { color: themeConfig.text }]}>Watch Video Ad</Text>
+            <Text style={[styles.taskSubtitle, { color: themeConfig.textMuted }]}>Earn 1-5 drips per video</Text>
           </View>
           <View style={styles.taskArrow}>
-            <MaterialCommunityIcons name="chevron-right" size={22} color={isDark ? "#666" : "#d1d5db"} />
+            <MaterialCommunityIcons name="chevron-right" size={22} color={themeConfig.textMuted} />
           </View>
         </TouchableOpacity>
 
@@ -412,7 +413,7 @@ export default function Home() {
         </View>
 
         <TouchableOpacity
-          style={[styles.taskCard, isDark && styles.cardDark]}
+          style={[styles.taskCard, { backgroundColor: themeConfig.card }]}
           onPress={() => {
             if (Platform.OS === 'web') {
               Alert.alert("Development", "AdMob is not available on web preview. Points will be added for testing.");
@@ -424,57 +425,57 @@ export default function Home() {
           activeOpacity={0.7}
         >
           <LinearGradient
-            colors={["#06b6d4", "#0891b2"]}
+            colors={[themeConfig.primary, themeConfig.secondary]}
             style={styles.taskIconGradient}
           >
             <MaterialCommunityIcons name="star-four-points" size={22} color="#fff" />
           </LinearGradient>
           <View style={styles.taskInfo}>
-            <Text style={[styles.taskTitle, isDark && styles.textDark]}>AdMob Offers</Text>
-            <Text style={[styles.taskSubtitle, isDark && styles.textMuted]}>Premium video and interactive offers</Text>
+            <Text style={[styles.taskTitle, { color: themeConfig.text }]}>AdMob Offers</Text>
+            <Text style={[styles.taskSubtitle, { color: themeConfig.textMuted }]}>Premium video and interactive offers</Text>
           </View>
           <View style={styles.taskArrow}>
-            <MaterialCommunityIcons name="chevron-right" size={22} color={isDark ? "#666" : "#d1d5db"} />
+            <MaterialCommunityIcons name="chevron-right" size={22} color={themeConfig.textMuted} />
           </View>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.taskCard, isDark && styles.cardDark]}
+          style={[styles.taskCard, { backgroundColor: themeConfig.card }]}
           onPress={() => setShowBitLabsModal(true)}
           activeOpacity={0.7}
         >
           <LinearGradient
-            colors={["#f59e0b", "#d97706"]}
+            colors={[themeConfig.primary, themeConfig.secondary]}
             style={styles.taskIconGradient}
           >
             <MaterialCommunityIcons name="clipboard-text-outline" size={22} color="#fff" />
           </LinearGradient>
           <View style={styles.taskInfo}>
-            <Text style={[styles.taskTitle, isDark && styles.textDark]}>BitLabs Surveys</Text>
-            <Text style={[styles.taskSubtitle, isDark && styles.textMuted]}>Share your opinion for drips</Text>
+            <Text style={[styles.taskTitle, { color: themeConfig.text }]}>BitLabs Surveys</Text>
+            <Text style={[styles.taskSubtitle, { color: themeConfig.textMuted }]}>Share your opinion for drips</Text>
           </View>
           <View style={styles.taskArrow}>
-            <MaterialCommunityIcons name="chevron-right" size={22} color={isDark ? "#666" : "#d1d5db"} />
+            <MaterialCommunityIcons name="chevron-right" size={22} color={themeConfig.textMuted} />
           </View>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.taskCard, isDark && styles.cardDark]}
+          style={[styles.taskCard, { backgroundColor: themeConfig.card }]}
           onPress={() => setShowAdGemModal(true)}
           activeOpacity={0.7}
         >
           <LinearGradient
-            colors={["#8b5cf6", "#7c3aed"]}
+            colors={[themeConfig.primary, themeConfig.secondary]}
             style={styles.taskIconGradient}
           >
             <MaterialCommunityIcons name="gift-outline" size={22} color="#fff" />
           </LinearGradient>
           <View style={styles.taskInfo}>
-            <Text style={[styles.taskTitle, isDark && styles.textDark]}>AdGem Offers</Text>
-            <Text style={[styles.taskSubtitle, isDark && styles.textMuted]}>High-paying apps and games</Text>
+            <Text style={[styles.taskTitle, { color: themeConfig.text }]}>AdGem Offers</Text>
+            <Text style={[styles.taskSubtitle, { color: themeConfig.textMuted }]}>High-paying apps and games</Text>
           </View>
           <View style={styles.taskArrow}>
-            <MaterialCommunityIcons name="chevron-right" size={22} color={isDark ? "#666" : "#d1d5db"} />
+            <MaterialCommunityIcons name="chevron-right" size={22} color={themeConfig.textMuted} />
           </View>
         </TouchableOpacity>
 
@@ -526,11 +527,11 @@ export default function Home() {
           </TouchableOpacity>
         </View>
 
-        <View style={[styles.infoCard, isDark && styles.cardDark]}>
+        <View style={[styles.infoCard, { backgroundColor: themeConfig.card }]}>
           <View style={styles.infoIconContainer}>
-            <MaterialCommunityIcons name="shield-check" size={20} color="#10b981" />
+            <MaterialCommunityIcons name="shield-check" size={20} color={themeConfig.primary} />
           </View>
-          <Text style={[styles.infoCardText, isDark && styles.textMuted]}>
+          <Text style={[styles.infoCardText, { color: themeConfig.textMuted }]}>
             Redemptions are processed securely by CoinGate. Final XRP amount depends on market rates at time of processing.
           </Text>
         </View>

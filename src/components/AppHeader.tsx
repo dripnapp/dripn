@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useStore, THEME_CONFIGS } from '../store/useStore';
 
 interface AppHeaderProps {
   title?: string;
@@ -13,59 +14,61 @@ interface AppHeaderProps {
 export default function AppHeader({ title, showBack = false, showLogo = false }: AppHeaderProps) {
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
+  const { theme } = useStore();
+  const themeConfig = THEME_CONFIGS[theme];
 
   return (
     <>
       {menuOpen && (
         <TouchableOpacity style={styles.menuOverlay} onPress={() => setMenuOpen(false)} activeOpacity={1}>
-          <View style={styles.menu}>
+          <View style={[styles.menu, { backgroundColor: themeConfig.card }]}>
             <TouchableOpacity style={styles.menuItem} onPress={() => { setMenuOpen(false); router.push('/'); }}>
-              <MaterialCommunityIcons name="home" size={22} color="#4dabf7" />
-              <Text style={styles.menuText}>Home</Text>
+              <MaterialCommunityIcons name="home" size={22} color={themeConfig.primary} />
+              <Text style={[styles.menuText, { color: themeConfig.text }]}>Home</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.menuItem} onPress={() => { setMenuOpen(false); router.push('/history'); }}>
-              <MaterialCommunityIcons name="history" size={22} color="#4dabf7" />
-              <Text style={styles.menuText}>History</Text>
+              <MaterialCommunityIcons name="history" size={22} color={themeConfig.primary} />
+              <Text style={[styles.menuText, { color: themeConfig.text }]}>History</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.menuItem} onPress={() => { setMenuOpen(false); router.push('/learn'); }}>
-              <MaterialCommunityIcons name="school" size={22} color="#4dabf7" />
-              <Text style={styles.menuText}>Learn Crypto</Text>
+              <MaterialCommunityIcons name="school" size={22} color={themeConfig.primary} />
+              <Text style={[styles.menuText, { color: themeConfig.text }]}>Learn Crypto</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.menuItem} onPress={() => { setMenuOpen(false); router.push('/referral'); }}>
-              <MaterialCommunityIcons name="account-group" size={22} color="#4dabf7" />
-              <Text style={styles.menuText}>Referral Program</Text>
+              <MaterialCommunityIcons name="account-group" size={22} color={themeConfig.primary} />
+              <Text style={[styles.menuText, { color: themeConfig.text }]}>Referral Program</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.menuItem} onPress={() => { setMenuOpen(false); router.push('/badges'); }}>
-              <MaterialCommunityIcons name="medal" size={22} color="#4dabf7" />
-              <Text style={styles.menuText}>Badges & Levels</Text>
+              <MaterialCommunityIcons name="medal" size={22} color={themeConfig.primary} />
+              <Text style={[styles.menuText, { color: themeConfig.text }]}>Badges & Levels</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.menuItem} onPress={() => { setMenuOpen(false); router.push('/leaderboard'); }}>
-              <MaterialCommunityIcons name="podium" size={22} color="#4dabf7" />
-              <Text style={styles.menuText}>Leaderboard</Text>
+              <MaterialCommunityIcons name="podium" size={22} color={themeConfig.primary} />
+              <Text style={[styles.menuText, { color: themeConfig.text }]}>Leaderboard</Text>
             </TouchableOpacity>
-            <View style={styles.menuDivider} />
+            <View style={[styles.menuDivider, { backgroundColor: themeConfig.background }]} />
             <TouchableOpacity style={styles.menuItem} onPress={() => { setMenuOpen(false); router.push('/legal'); }}>
-              <MaterialCommunityIcons name="shield-check" size={22} color="#868e96" />
-              <Text style={styles.menuText}>Legal Disclaimers</Text>
+              <MaterialCommunityIcons name="shield-check" size={22} color={themeConfig.textMuted} />
+              <Text style={[styles.menuText, { color: themeConfig.text }]}>Legal Disclaimers</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.menuItem} onPress={() => { setMenuOpen(false); router.push('/terms'); }}>
-              <MaterialCommunityIcons name="file-document" size={22} color="#868e96" />
-              <Text style={styles.menuText}>Terms of Use</Text>
+              <MaterialCommunityIcons name="file-document" size={22} color={themeConfig.textMuted} />
+              <Text style={[styles.menuText, { color: themeConfig.text }]}>Terms of Use</Text>
             </TouchableOpacity>
-            <View style={styles.menuDivider} />
+            <View style={[styles.menuDivider, { backgroundColor: themeConfig.background }]} />
             <TouchableOpacity style={styles.menuItem} onPress={() => { setMenuOpen(false); router.push('/settings'); }}>
-              <MaterialCommunityIcons name="cog" size={22} color="#4dabf7" />
-              <Text style={styles.menuText}>Settings</Text>
+              <MaterialCommunityIcons name="cog" size={22} color={themeConfig.primary} />
+              <Text style={[styles.menuText, { color: themeConfig.text }]}>Settings</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.menuItem} onPress={() => { setMenuOpen(false); router.push('/contact'); }}>
-              <MaterialCommunityIcons name="email-outline" size={22} color="#4dabf7" />
-              <Text style={styles.menuText}>Contact Us</Text>
+              <MaterialCommunityIcons name="email-outline" size={22} color={themeConfig.primary} />
+              <Text style={[styles.menuText, { color: themeConfig.text }]}>Contact Us</Text>
             </TouchableOpacity>
           </View>
         </TouchableOpacity>
       )}
 
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: themeConfig.headerBg }]}>
         {showBack ? (
           <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
             <MaterialCommunityIcons name="arrow-left" size={24} color="#FFFFFF" />

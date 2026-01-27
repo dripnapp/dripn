@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, Alert, Modal } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useStore, ThemeMode } from '../src/store/useStore';
+import { useStore, ThemeMode, THEME_CONFIGS } from '../src/store/useStore';
 import AppHeader from '../src/components/AppHeader';
 
 const RESERVED_USERNAMES = ['admin', 'dripn', 'system', 'support', 'moderator'];
@@ -10,44 +10,44 @@ const THEMES: { id: ThemeMode; name: string; color: string; bgColor: string; pre
   { 
     id: 'classic', 
     name: 'Classic', 
-    color: '#4dabf7', 
-    bgColor: '#f8f9fa',
-    preview: { header: '#12122a', card: '#fff', button: '#4dabf7' }
+    color: THEME_CONFIGS.classic.primary, 
+    bgColor: THEME_CONFIGS.classic.background,
+    preview: { header: THEME_CONFIGS.classic.headerBg, card: THEME_CONFIGS.classic.card, button: THEME_CONFIGS.classic.primary }
   },
   { 
     id: 'dark', 
     name: 'Dark', 
-    color: '#4dabf7', 
-    bgColor: '#1a1a2e',
-    preview: { header: '#12122a', card: '#252542', button: '#4dabf7' }
+    color: THEME_CONFIGS.dark.primary, 
+    bgColor: THEME_CONFIGS.dark.background,
+    preview: { header: THEME_CONFIGS.dark.headerBg, card: THEME_CONFIGS.dark.card, button: THEME_CONFIGS.dark.primary }
   },
   { 
     id: 'neon', 
     name: 'Neon', 
-    color: '#00ff41', 
-    bgColor: '#0d0d0d',
-    preview: { header: '#000', card: '#1a1a1a', button: '#00ff41' }
+    color: THEME_CONFIGS.neon.primary, 
+    bgColor: THEME_CONFIGS.neon.background,
+    preview: { header: THEME_CONFIGS.neon.headerBg, card: THEME_CONFIGS.neon.card, button: THEME_CONFIGS.neon.primary }
   },
   { 
     id: 'ocean', 
     name: 'Ocean', 
-    color: '#0077be', 
-    bgColor: '#e0f2f1',
-    preview: { header: '#004d40', card: '#fff', button: '#0077be' }
+    color: THEME_CONFIGS.ocean.primary, 
+    bgColor: THEME_CONFIGS.ocean.background,
+    preview: { header: THEME_CONFIGS.ocean.headerBg, card: THEME_CONFIGS.ocean.card, button: THEME_CONFIGS.ocean.primary }
   },
   { 
     id: 'sunset', 
     name: 'Sunset', 
-    color: '#ff4e50', 
-    bgColor: '#fff3e0',
-    preview: { header: '#e65100', card: '#fff', button: '#ff4e50' }
+    color: THEME_CONFIGS.sunset.primary, 
+    bgColor: THEME_CONFIGS.sunset.background,
+    preview: { header: THEME_CONFIGS.sunset.headerBg, card: THEME_CONFIGS.sunset.card, button: THEME_CONFIGS.sunset.primary }
   },
   { 
     id: 'forest', 
     name: 'Forest', 
-    color: '#2d5a27', 
-    bgColor: '#f1f8e9',
-    preview: { header: '#1b5e20', card: '#fff', button: '#2d5a27' }
+    color: THEME_CONFIGS.forest.primary, 
+    bgColor: THEME_CONFIGS.forest.background,
+    preview: { header: THEME_CONFIGS.forest.headerBg, card: THEME_CONFIGS.forest.card, button: THEME_CONFIGS.forest.primary }
   },
 ];
 
@@ -56,7 +56,8 @@ export default function Settings() {
   const [newUsername, setNewUsername] = useState(username || '');
   const [isEditingUsername, setIsEditingUsername] = useState(false);
 
-  const isDark = theme === 'dark' || theme === 'neon';
+  const themeConfig = THEME_CONFIGS[theme];
+  const isDark = themeConfig.isDark;
 
   const handleSaveUsername = () => {
     const trimmed = newUsername.trim();
@@ -114,17 +115,17 @@ export default function Settings() {
       <AppHeader title="Settings" showBack />
 
       <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
-        <View style={[styles.section, isDark && styles.sectionDark]}>
-          <Text style={[styles.sectionTitle, isDark && styles.textDark]}>Profile</Text>
+        <View style={[styles.section, { backgroundColor: themeConfig.card }]}>
+          <Text style={[styles.sectionTitle, { color: themeConfig.text }]}>Profile</Text>
           
-          <View style={[styles.settingRow, isDark && styles.settingRowDark]}>
+          <View style={[styles.settingRow]}>
             <View style={styles.settingInfo}>
-              <MaterialCommunityIcons name="account" size={24} color="#4dabf7" />
+              <MaterialCommunityIcons name="account" size={24} color={themeConfig.primary} />
               <View style={styles.settingText}>
-                <Text style={[styles.settingLabel, isDark && styles.textDark]}>Username</Text>
+                <Text style={[styles.settingLabel, { color: themeConfig.text }]}>Username</Text>
                 {isEditingUsername ? (
                   <TextInput
-                    style={[styles.usernameInput, isDark && styles.usernameInputDark]}
+                    style={[styles.usernameInput, { color: themeConfig.text, borderColor: themeConfig.primary, backgroundColor: themeConfig.background }]}
                     value={newUsername}
                     onChangeText={setNewUsername}
                     placeholder="Enter username"
@@ -133,7 +134,7 @@ export default function Settings() {
                     maxLength={20}
                   />
                 ) : (
-                  <Text style={[styles.settingValue, isDark && styles.textMutedDark]}>{displayName}</Text>
+                  <Text style={[styles.settingValue, { color: themeConfig.textMuted }]}>{displayName}</Text>
                 )}
               </View>
             </View>
@@ -148,15 +149,15 @@ export default function Settings() {
               </View>
             ) : (
               <TouchableOpacity style={styles.editButton} onPress={() => setIsEditingUsername(true)}>
-                <MaterialCommunityIcons name="pencil" size={20} color="#4dabf7" />
+                <MaterialCommunityIcons name="pencil" size={20} color={themeConfig.primary} />
               </TouchableOpacity>
             )}
           </View>
         </View>
 
-        <View style={[styles.section, isDark && styles.sectionDark]}>
-          <Text style={[styles.sectionTitle, isDark && styles.textDark]}>Appearance</Text>
-          <Text style={[styles.sectionSubtitle, isDark && styles.textMutedDark]}>Choose how Drip'n looks to you</Text>
+        <View style={[styles.section, { backgroundColor: themeConfig.card }]}>
+          <Text style={[styles.sectionTitle, { color: themeConfig.text }]}>Appearance</Text>
+          <Text style={[styles.sectionSubtitle, { color: themeConfig.textMuted }]}>Choose how Drip'n looks to you</Text>
 
           <View style={styles.themeGrid}>
             {THEMES.map((t) => {
@@ -168,7 +169,7 @@ export default function Settings() {
                   key={t.id}
                   style={[
                     styles.themeCard, 
-                    isSelected && styles.themeCardSelected,
+                    isSelected && { borderColor: themeConfig.primary },
                   ]} 
                   onPress={() => handleThemePress(t.id)}
                 >
@@ -187,11 +188,11 @@ export default function Settings() {
                       </View>
                     )}
                   </View>
-                  <View style={styles.themeInfo}>
-                    <View style={styles.themeRadio}>
-                      {isSelected && <View style={styles.themeRadioInner} />}
+                  <View style={[styles.themeInfo, { backgroundColor: themeConfig.card }]}>
+                    <View style={[styles.themeRadio, { borderColor: themeConfig.primary }]}>
+                      {isSelected && <View style={[styles.themeRadioInner, { backgroundColor: themeConfig.primary }]} />}
                     </View>
-                    <Text style={[styles.themeName, isSelected && styles.themeNameSelected]}>{t.name}</Text>
+                    <Text style={[styles.themeName, { color: isSelected ? themeConfig.primary : themeConfig.text }]}>{t.name}</Text>
                   </View>
                 </TouchableOpacity>
               );
