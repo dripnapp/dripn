@@ -15,6 +15,7 @@ const basePlugins = [
 ];
 
 const nativePlugins = [
+  "./plugins/withUnityAds",
   [
     "react-native-google-mobile-ads",
     {
