@@ -84,24 +84,31 @@ export default function Home() {
         const result = await initializeAds();
         if (result && result.success) {
           const { RewardedAdEventType, AdEventType } = getAdEventTypes();
+          
+          // AdMob standard ad
           const ad = createRewardedAd(rewardedAdUnitId);
           setRewardedAd(ad);
           
           if (ad && ad.load) {
             ad.load();
-
             ad.addAdEventListener(AdEventType.ERROR, (error: any) => {
-              console.error("Ad error:", error);
+              console.error("AdMob error:", error);
             });
+            ad.addAdEventListener(RewardedAdEventType.EARNED_REWARD, () => {
+              const drips = Math.random() < 0.6 ? 100 : 200;
+              handleVideoComplete(drips, true);
+            });
+          }
 
-            ad.addAdEventListener(
-              RewardedAdEventType.EARNED_REWARD,
-              () => {
-                // Use our tokenomics: 60% chance standard (100 drips), 40% chance premium (200 drips)
-                const drips = Math.random() < 0.6 ? 100 : 200;
-                handleVideoComplete(drips, true);
-              },
-            );
+          // Unity Ads via AdMob Mediation
+          const unityAd = createRewardedAd(rewardedAdUnitId);
+          setUnityRewardedAd(unityAd);
+          if (unityAd && unityAd.load) {
+            unityAd.load();
+            unityAd.addAdEventListener(RewardedAdEventType.EARNED_REWARD, () => {
+              const drips = Math.random() < 0.6 ? 100 : 200;
+              handleVideoComplete(drips, true);
+            });
           }
         }
       } catch (e) {
