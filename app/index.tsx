@@ -26,6 +26,8 @@ import AppHeader from "../src/components/AppHeader";
 import RedeemDripsModal from "../src/components/RedeemDripsModal";
 import { initializeAds, createRewardedAd, getAdEventTypes } from "../src/utils/ads";
 
+import { requestTrackingPermissionsAsync } from 'expo-tracking-transparency';
+
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 const rewardedAdUnitId = __DEV__
@@ -86,6 +88,11 @@ export default function Home() {
       if (Platform.OS === 'web') return;
       
       try {
+        const { status } = await requestTrackingPermissionsAsync();
+        if (status === 'granted') {
+          console.log('Tracking permission granted');
+        }
+
         const result = await initializeAds();
         if (result && result.success) {
           const { RewardedAdEventType, AdEventType } = getAdEventTypes();
@@ -474,7 +481,7 @@ export default function Home() {
           activeOpacity={0.7}
         >
           <LinearGradient
-            colors={["#5f5f5f", "#000000"]}
+            colors={[themeConfig.primary, themeConfig.secondary]}
             style={styles.taskIconGradient}
           >
             <MaterialCommunityIcons name="unity" size={24} color="#fff" />

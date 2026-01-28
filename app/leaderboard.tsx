@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, RefreshControl } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useStore } from '../src/store/useStore';
+import { useStore, THEME_CONFIGS } from '../src/store/useStore';
 import AppHeader from '../src/components/AppHeader';
 
 const baseLeaderboard = [
@@ -19,7 +19,8 @@ const baseLeaderboard = [
 
 export default function LeaderboardScreen() {
   const { points, userLevel, username, theme, totalEarned } = useStore();
-  const isDark = theme === 'dark';
+  const themeConfig = THEME_CONFIGS[theme];
+  const isDark = themeConfig.isDark;
   const [refreshing, setRefreshing] = useState(false);
 
   const displayName = username || 'You';
@@ -78,7 +79,7 @@ export default function LeaderboardScreen() {
   };
 
   return (
-    <View style={[styles.container, isDark && styles.containerDark]}>
+    <View style={[styles.container, { backgroundColor: themeConfig.background }]}>
       <AppHeader title="Leaderboard" showBack />
 
       <ScrollView 
@@ -86,9 +87,9 @@ export default function LeaderboardScreen() {
         contentContainerStyle={styles.contentContainer}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
-        <Text style={[styles.subheader, isDark && styles.textMuted]}>Top 10 earners this month</Text>
+        <Text style={[styles.subheader, { color: themeConfig.textMuted }]}>Top 10 earners this month</Text>
 
-        <View style={styles.yourRankCard}>
+        <View style={[styles.yourRankCard, { backgroundColor: themeConfig.primary }]}>
           <View style={styles.yourRankLeft}>
             <Text style={styles.yourRankLabel}>Your Rank</Text>
             <Text style={styles.yourRankNumber}>#{userRank}</Text>
@@ -99,14 +100,15 @@ export default function LeaderboardScreen() {
           </View>
         </View>
 
-        <View style={[styles.leaderboardCard, isDark && styles.cardDark]}>
+        <View style={[styles.leaderboardCard, { backgroundColor: themeConfig.card }]}>
           {leaderboardData.map((user, index) => (
             <View 
               key={index} 
               style={[
                 styles.leaderRow, 
-                index === 0 && styles.leaderRowFirst,
-                user.isCurrentUser && styles.leaderRowCurrentUser
+                { borderBottomColor: isDark ? 'rgba(255,255,255,0.05)' : '#f1f3f5' },
+                index === 0 && (isDark ? { backgroundColor: 'rgba(255,190,0,0.05)' } : styles.leaderRowFirst),
+                user.isCurrentUser && (isDark ? { backgroundColor: 'rgba(255,255,255,0.05)' } : styles.leaderRowCurrentUser)
               ]}
             >
               <View style={[styles.rankBadge, { backgroundColor: getRankColor(user.rank) + '20' }]}>
@@ -121,22 +123,22 @@ export default function LeaderboardScreen() {
                 )}
               </View>
               <View style={styles.userInfo}>
-                <Text style={[styles.username, user.isCurrentUser && styles.usernameCurrentUser, isDark && !user.isCurrentUser && styles.textDark]}>
+                <Text style={[styles.username, { color: user.isCurrentUser ? themeConfig.primary : themeConfig.text }]}>
                   {user.username}{user.isCurrentUser ? ' (You)' : ''}
                 </Text>
-                <Text style={[styles.userLevel, isDark && styles.textMuted]}>{user.level}</Text>
+                <Text style={[styles.userLevel, { color: themeConfig.textMuted }]}>{user.level}</Text>
               </View>
               <View style={styles.pointsSection}>
-                <Text style={[styles.userPoints, isDark && styles.textDark]}>{user.points.toLocaleString()}</Text>
-                <Text style={styles.pointsUnit}>drps</Text>
+                <Text style={[styles.userPoints, { color: themeConfig.text }]}>{user.points.toLocaleString()}</Text>
+                <Text style={[styles.pointsUnit, { color: themeConfig.textMuted }]}>drps</Text>
               </View>
             </View>
           ))}
         </View>
 
-        <View style={[styles.infoBox, isDark && styles.infoBoxDark]}>
+        <View style={[styles.infoBox, { backgroundColor: isDark ? 'rgba(77,171,247,0.1)' : '#e7f5ff' }]}>
           <MaterialCommunityIcons name="information-outline" size={18} color="#4dabf7" />
-          <Text style={[styles.infoText, isDark && styles.infoTextDark]}>
+          <Text style={[styles.infoText, { color: isDark ? '#4dabf7' : '#1971c2' }]}>
             Leaderboard uses total earned drips. Keep earning to climb the ranks!
           </Text>
         </View>

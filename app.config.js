@@ -43,7 +43,7 @@ export default {
       buildNumber: "5",
       infoPlist: {
         NSUserTrackingUsageDescription:
-          "This allows personalized ads to support rewards and features in the app.",
+          "We use this data to show relevant ads and support rewards for our users.",
         ITSAppUsesNonExemptEncryption: false,
         SKAdNetworkItems: [
           { SKAdNetworkIdentifier: "cstr6suwn9.skadnetwork" },
@@ -51,7 +51,7 @@ export default {
           { SKAdNetworkIdentifier: "3rd42ekr43.skadnetwork" },
           { SKAdNetworkIdentifier: "3qcr597p9d.skadnetwork" },
           { SKAdNetworkIdentifier: "v9wtta54v3.skadnetwork" },
-          { SKAdNetworkIdentifier: "n38lu8286q.skadnetwork" },
+          { SKAdNetworkIdentifier: "n38lu8286q.skadnetwork" }
         ],
       },
     },
