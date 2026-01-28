@@ -48,7 +48,9 @@ export default {
           { SKAdNetworkIdentifier: "cstr6suwn9.skadnetwork" },
           { SKAdNetworkIdentifier: "4fzdc2evr5.skadnetwork" },
           { SKAdNetworkIdentifier: "3rd42ekr43.skadnetwork" },
-          { SKAdNetworkIdentifier: "3qcr597p9d.skadnetwork" }
+          { SKAdNetworkIdentifier: "3qcr597p9d.skadnetwork" },
+          { SKAdNetworkIdentifier: "v9wtta54v3.skadnetwork" },
+          { SKAdNetworkIdentifier: "n38lu8286q.skadnetwork" }
         ],
       },
     },

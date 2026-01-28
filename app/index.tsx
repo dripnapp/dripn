@@ -32,6 +32,10 @@ const rewardedAdUnitId = __DEV__
   ? "ca-app-pub-3940256099942544/1712485313"
   : "ca-app-pub-4501953262639636/8435825886";
 
+const unityAdUnitId = __DEV__
+  ? "ca-app-pub-3940256099942544/1712485313"
+  : "ca-app-pub-4501953262639636/8435825886";
+
 const DRIPS_TO_USD_RATE = 0.001284;
 const MIN_REDEMPTION = 5000;
 
@@ -102,10 +106,13 @@ export default function Home() {
           }
 
           // Unity Ads via AdMob Mediation
-          const unityAd = createRewardedAd("ca-app-pub-4501953262639636/8435825886");
+          const unityAd = createRewardedAd(unityAdUnitId);
           setUnityRewardedAd(unityAd);
           if (unityAd && unityAd.load) {
             unityAd.load();
+            unityAd.addAdEventListener(AdEventType.ERROR, (error: any) => {
+              console.error("Unity Ad Error:", error);
+            });
             unityAd.addAdEventListener(RewardedAdEventType.EARNED_REWARD, () => {
               const drips = Math.random() < 0.6 ? 100 : 200;
               handleVideoComplete(drips, true);
