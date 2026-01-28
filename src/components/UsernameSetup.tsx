@@ -61,7 +61,6 @@ export default function UsernameSetup({ visible, currentUsername, onSave, onClos
     }
 
     onSave(trimmedUsername);
-    Alert.alert('Success', 'Your username has been saved!');
     onClose();
   };
 

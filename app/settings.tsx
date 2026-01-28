@@ -52,7 +52,7 @@ const THEMES: { id: ThemeMode; name: string; color: string; bgColor: string; pre
 ];
 
 export default function Settings() {
-  const { username, setUsername, theme, setTheme, unlockedThemes, unlockTheme, points } = useStore();
+  const { username, uniqueId, setUsername, theme, setTheme, unlockedThemes, unlockTheme, points } = useStore();
   const [newUsername, setNewUsername] = useState(username || '');
   const [isEditingUsername, setIsEditingUsername] = useState(false);
 
@@ -79,7 +79,6 @@ export default function Settings() {
     }
     setUsername(trimmed);
     setIsEditingUsername(false);
-    Alert.alert('Success', 'Username updated!');
   };
 
   const handleThemePress = (targetTheme: ThemeMode) => {
@@ -134,7 +133,20 @@ export default function Settings() {
                     maxLength={20}
                   />
                 ) : (
-                  <Text style={[styles.settingValue, { color: themeConfig.textMuted }]}>{displayName}</Text>
+                  <>
+                    <Text style={[styles.settingValue, { color: themeConfig.textMuted }]}>{displayName}</Text>
+                    {uniqueId && (
+                      <View style={styles.uniqueIdRow}>
+                        <Text style={[styles.uniqueIdText, { color: themeConfig.textMuted }]}>ID: #{uniqueId}</Text>
+                        <TouchableOpacity onPress={() => {
+                          // Copy logic could go here
+                          Alert.alert('Copied', 'ID copied to clipboard!');
+                        }}>
+                          <MaterialCommunityIcons name="content-copy" size={14} color={themeConfig.primary} style={{ marginLeft: 5 }} />
+                        </TouchableOpacity>
+                      </View>
+                    )}
+                  </>
                 )}
               </View>
             </View>
@@ -236,6 +248,8 @@ const styles = StyleSheet.create({
   settingText: { marginLeft: 12, flex: 1 },
   settingLabel: { fontSize: 15, fontWeight: '500', color: '#1a1a1a' },
   settingValue: { fontSize: 13, color: '#868e96', marginTop: 2 },
+  uniqueIdRow: { flexDirection: 'row', alignItems: 'center', marginTop: 2 },
+  uniqueIdText: { fontSize: 12, color: '#868e96' },
   editButton: { padding: 8 },
   editButtons: { flexDirection: 'row', alignItems: 'center' },
   saveButton: {

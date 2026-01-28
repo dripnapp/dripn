@@ -144,6 +144,7 @@ interface AppState {
   enteredReferralCode: string | null;
   referralBonusEarned: number;
   username: string | null;
+  uniqueId: string | null;
   theme: ThemeMode;
   unlockedThemes: ThemeMode[];
   dailyShares: ShareRecord[];
@@ -205,6 +206,7 @@ export const useStore = create<AppState>()(
       enteredReferralCode: null,
       referralBonusEarned: 0,
       username: null,
+      uniqueId: null,
       theme: 'classic',
       unlockedThemes: ['classic'],
       dailyShares: [],
@@ -314,7 +316,15 @@ export const useStore = create<AppState>()(
         set({ enteredReferralCode: code });
         return true;
       },
-      setUsername: (username) => set({ username }),
+      setUsername: (username) => {
+        const state = get();
+        if (!state.uniqueId) {
+          const newId = Math.floor(100000 + Math.random() * 900000).toString();
+          set({ username, uniqueId: newId });
+        } else {
+          set({ username });
+        }
+      },
       setTheme: (theme) => set({ theme }),
       unlockTheme: (theme) => {
         const state = get();

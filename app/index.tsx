@@ -98,7 +98,8 @@ export default function Home() {
           const { RewardedAdEventType, AdEventType } = getAdEventTypes();
           
           // AdMob standard ad
-          const ad = createRewardedAd(rewardedAdUnitId);
+          const adMobId = __DEV__ ? "ca-app-pub-3940256099942544/1712485313" : "ca-app-pub-4501953262639636/8435825886";
+          const ad = createRewardedAd(adMobId);
           setRewardedAd(ad);
           
           if (ad && ad.load) {
@@ -113,7 +114,8 @@ export default function Home() {
           }
 
           // Unity Ads via AdMob Mediation
-          const unityAd = createRewardedAd(unityAdUnitId);
+          const unityMediationId = __DEV__ ? "ca-app-pub-3940256099942544/1712485313" : "ca-app-pub-4501953262639636/8435825886";
+          const unityAd = createRewardedAd(unityMediationId);
           setUnityRewardedAd(unityAd);
           if (unityAd && unityAd.load) {
             unityAd.load();
@@ -177,6 +179,9 @@ export default function Home() {
       return;
     }
 
+    // Only use AdMob specific ID for standard ad
+    const adMobId = __DEV__ ? "ca-app-pub-3940256099942544/1712485313" : "ca-app-pub-4501953262639636/8435825886";
+    
     if (rewardedAd && rewardedAd.loaded) {
       rewardedAd.show();
     } else if (rewardedAd && rewardedAd.load) {
@@ -206,6 +211,9 @@ export default function Home() {
       addPoints(100);
       return;
     }
+
+    // Unity Ads uses its specific mediated ID
+    const unityMediationId = __DEV__ ? "ca-app-pub-3940256099942544/1712485313" : "ca-app-pub-4501953262639636/8435825886";
 
     if (unityRewardedAd && unityRewardedAd.loaded) {
       unityRewardedAd.show();
