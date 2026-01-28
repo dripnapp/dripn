@@ -3,8 +3,8 @@ import { Platform } from 'react-native';
 export const RewardedAdEventType = { EARNED_REWARD: 'earned_reward' };
 export const AdEventType = { ERROR: 'error' };
 
-// We use a mock by default to avoid any 'require' issues in Expo Go
-let mobileAdsModule: any = null;
+// Export current ads module for internal event type access
+export let adsModule: any = null;
 
 const loadMobileAds = () => {
   if (mobileAdsModule !== null) return mobileAdsModule;
@@ -30,6 +30,7 @@ const loadMobileAds = () => {
 
     // Only attempt require if we are fairly sure we are NOT in Expo Go
     mobileAdsModule = require('react-native-google-mobile-ads');
+    adsModule = mobileAdsModule;
     if (mobileAdsModule && (mobileAdsModule.default || mobileAdsModule.RewardedAd)) {
       return mobileAdsModule;
     }

@@ -24,7 +24,7 @@ import VideoPlayer from "../src/components/VideoPlayer";
 import UsernameSetup from "../src/components/UsernameSetup";
 import AppHeader from "../src/components/AppHeader";
 import RedeemDripsModal from "../src/components/RedeemDripsModal";
-import { initializeAds, createRewardedAd, getAdEventTypes } from "../src/utils/ads";
+import { initializeAds, createRewardedAd, getAdEventTypes, adsModule } from "../src/utils/ads";
 
 import { requestTrackingPermissionsAsync } from 'expo-tracking-transparency';
 
@@ -78,12 +78,14 @@ export default function Home() {
   const [showUsernameSetup, setShowUsernameSetup] = useState(false);
   const [showRedeemModal, setShowRedeemModal] = useState(false);
   const [rewardedAd, setRewardedAd] = useState<any>(null);
-  const [unityRewardedAd, setUnityRewardedAd] = useState<any>(null);
+  const [adLoaded, setAdLoaded] = useState(false);
 
   const DAILY_CAP = 5000;
   const AD_REVENUE_CENTS = 5;
 
   useEffect(() => {
+    let adInstance: any = null;
+
     const setupAds = async () => {
       if (Platform.OS === 'web') return;
       
@@ -97,35 +99,44 @@ export default function Home() {
         if (result && result.success) {
           const { RewardedAdEventType, AdEventType } = getAdEventTypes();
           
-          // AdMob standard ad
+          // Use ONE primary ad unit ID (AdMob + Mediated Unity)
           const adMobId = __DEV__ ? "ca-app-pub-3940256099942544/1712485313" : "ca-app-pub-4501953262639636/8435825886";
-          const ad = createRewardedAd(adMobId);
-          setRewardedAd(ad);
+          adInstance = createRewardedAd(adMobId);
+          setRewardedAd(adInstance);
           
-          if (ad && ad.load) {
-            ad.load();
-            ad.addAdEventListener(AdEventType.ERROR, (error: any) => {
-              console.error("AdMob error:", error);
-            });
-            ad.addAdEventListener(RewardedAdEventType.EARNED_REWARD, () => {
-              const drips = Math.random() < 0.6 ? 100 : 200;
-              handleVideoComplete(drips, true);
-            });
-          }
+          if (adInstance && adInstance.load) {
+            const loadAd = () => {
+              console.log("Loading rewarded ad...");
+              setAdLoaded(false);
+              adInstance.load();
+            };
 
-          // Unity Ads via AdMob Mediation
-          const unityMediationId = __DEV__ ? "ca-app-pub-3940256099942544/1712485313" : "ca-app-pub-4501953262639636/8435825886";
-          const unityAd = createRewardedAd(unityMediationId);
-          setUnityRewardedAd(unityAd);
-          if (unityAd && unityAd.load) {
-            unityAd.load();
-            unityAd.addAdEventListener(AdEventType.ERROR, (error: any) => {
-              console.error("Unity Ad Error:", error);
+            adInstance.addAdEventListener(RewardedAdEventType.LOADED, () => {
+              console.log("Rewarded ad loaded");
+              setAdLoaded(true);
             });
-            unityAd.addAdEventListener(RewardedAdEventType.EARNED_REWARD, () => {
+
+            adInstance.addAdEventListener(AdEventType.ERROR, (error: any) => {
+              console.error("Ad error:", error);
+              setAdLoaded(false);
+            });
+
+            adInstance.addAdEventListener(RewardedAdEventType.EARNED_REWARD, (reward: any) => {
+              console.log("Reward earned:", reward);
               const drips = Math.random() < 0.6 ? 100 : 200;
               handleVideoComplete(drips, true);
             });
+
+            // Reload ad after it's closed
+            const AdEventTypeExtended = (adsModule as any)?.AdEventType || {};
+            const dismissedEvent = AdEventTypeExtended.CLOSED || 'closed';
+            
+            adInstance.addAdEventListener(dismissedEvent, () => {
+              console.log("Ad dismissed, reloading...");
+              loadAd();
+            });
+
+            loadAd();
           }
         }
       } catch (e) {
@@ -167,7 +178,7 @@ export default function Home() {
     setShowAcknowledgment(false);
   };
 
-  const handleWatchAd = () => {
+  const handleWatchRewarded = () => {
     if (dailyEarnings >= DAILY_CAP) {
       Alert.alert("Daily Limit Reached", "Come back tomorrow for more drips!");
       return;
@@ -179,51 +190,17 @@ export default function Home() {
       return;
     }
 
-    // Only use AdMob specific ID for standard ad
-    const adMobId = __DEV__ ? "ca-app-pub-3940256099942544/1712485313" : "ca-app-pub-4501953262639636/8435825886";
-    
-    if (rewardedAd && rewardedAd.loaded) {
+    if (adLoaded && rewardedAd) {
       rewardedAd.show();
     } else if (rewardedAd && rewardedAd.load) {
       setLoading(true);
       rewardedAd.load();
+      
+      // Short timeout to wait for load before fallback
       setTimeout(() => {
         setLoading(false);
-        if (rewardedAd.loaded) {
+        if (adLoaded) {
           rewardedAd.show();
-        } else {
-          setShowVideoPlayer(true);
-        }
-      }, 2000);
-    } else {
-      setShowVideoPlayer(true);
-    }
-  };
-
-  const handleWatchUnityAd = () => {
-    if (dailyEarnings >= DAILY_CAP) {
-      Alert.alert("Daily Limit Reached", "Come back tomorrow for more drips!");
-      return;
-    }
-
-    if (Platform.OS === 'web') {
-      Alert.alert("Development", "Unity Ads are not available on web preview. Points will be added for testing.");
-      addPoints(100);
-      return;
-    }
-
-    // Unity Ads uses its specific mediated ID
-    const unityMediationId = __DEV__ ? "ca-app-pub-3940256099942544/1712485313" : "ca-app-pub-4501953262639636/8435825886";
-
-    if (unityRewardedAd && unityRewardedAd.loaded) {
-      unityRewardedAd.show();
-    } else if (unityRewardedAd && unityRewardedAd.load) {
-      setLoading(true);
-      unityRewardedAd.load();
-      setTimeout(() => {
-        setLoading(false);
-        if (unityRewardedAd.loaded) {
-          unityRewardedAd.show();
         } else {
           // If in Expo Go, provide a helpful message
           if (Constants.appOwnership === 'expo' || Constants.executionEnvironment === 'storeClient') {
@@ -233,19 +210,20 @@ export default function Home() {
               [{ text: "Test Reward (+100)", onPress: () => addPoints(100) }, { text: "OK" }]
             );
           } else {
-            Alert.alert("Ad not ready", "Unity Ad is still loading, please try again in a moment.");
+            // Fallback to internal video player if native ad fails to load
+            setShowVideoPlayer(true);
           }
         }
-      }, 2000);
+      }, 2500);
     } else {
       if (Constants.appOwnership === 'expo' || Constants.executionEnvironment === 'storeClient') {
         Alert.alert(
           "Native Ads Limited",
-          "Native Ad SDKs (Unity/AdMob) are disabled in Expo Go. You'll need a Development Build to use these live features.",
+          "Native Ad SDKs are disabled in Expo Go.",
           [{ text: "Test Reward (+100)", onPress: () => addPoints(100) }, { text: "OK" }]
         );
       } else {
-        Alert.alert("Ad Error", "Unity Ads initialization failed.");
+        setShowVideoPlayer(true);
       }
     }
   };
@@ -465,7 +443,7 @@ export default function Home() {
 
         <TouchableOpacity
           style={[styles.taskCard, { backgroundColor: themeConfig.card }]}
-          onPress={handleWatchAd}
+          onPress={handleWatchRewarded}
           activeOpacity={0.7}
         >
           <LinearGradient
@@ -475,28 +453,8 @@ export default function Home() {
             <MaterialCommunityIcons name="play-circle" size={24} color="#fff" />
           </LinearGradient>
           <View style={styles.taskInfo}>
-            <Text style={[styles.taskTitle, { color: themeConfig.text }]}>Watch Video Ad</Text>
-            <Text style={[styles.taskSubtitle, { color: themeConfig.textMuted }]}>Earn 1-5 drips per video</Text>
-          </View>
-          <View style={styles.taskArrow}>
-            <MaterialCommunityIcons name="chevron-right" size={22} color={themeConfig.textMuted} />
-          </View>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.taskCard, { backgroundColor: themeConfig.card }]}
-          onPress={handleWatchUnityAd}
-          activeOpacity={0.7}
-        >
-          <LinearGradient
-            colors={[themeConfig.primary, themeConfig.secondary]}
-            style={styles.taskIconGradient}
-          >
-            <MaterialCommunityIcons name="unity" size={24} color="#fff" />
-          </LinearGradient>
-          <View style={styles.taskInfo}>
-            <Text style={[styles.taskTitle, { color: themeConfig.text }]}>Unity Ads</Text>
-            <Text style={[styles.taskSubtitle, { color: themeConfig.textMuted }]}>Earn 100-200 drips via Unity</Text>
+            <Text style={[styles.taskTitle, { color: themeConfig.text }]}>Earn Drips Now</Text>
+            <Text style={[styles.taskSubtitle, { color: themeConfig.textMuted }]}>Earn 100–200 drips</Text>
           </View>
           <View style={styles.taskArrow}>
             <MaterialCommunityIcons name="chevron-right" size={22} color={themeConfig.textMuted} />
@@ -512,14 +470,7 @@ export default function Home() {
 
         <TouchableOpacity
           style={[styles.taskCard, { backgroundColor: themeConfig.card }]}
-          onPress={() => {
-            if (Platform.OS === 'web') {
-              Alert.alert("Development", "AdMob is not available on web preview. Points will be added for testing.");
-              addPoints(100);
-            } else {
-              handleWatchAd();
-            }
-          }}
+          onPress={handleWatchRewarded}
           activeOpacity={0.7}
         >
           <LinearGradient

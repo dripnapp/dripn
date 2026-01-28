@@ -1,0 +1,47 @@
+You are an expert Expo / React Native developer working on an earn-to-crypto app called "Drip'n" using Expo SDK 54, Expo Router, Zustand, react-native-google-mobile-ads v16, and Unity Ads mediated through AdMob.
+
+Current situation:
+- The home screen (app/index.tsx) has two separate rewarded ad buttons: "Watch Video Ad" (AdMob) and "Unity Ads".
+- Both use the exact same ad unit ID in production: ca-app-pub-4501953262639636/8435825886 (test ID in dev).
+- This causes potential conflicts because two RewardedAd instances are created for the same unit.
+- The goal is to simplify to ONE prominent "Watch Rewarded Video" button that maximizes fill rate and user momentum.
+- Assume Unity Ads is (or will be) properly set up as a mediation network in the AdMob dashboard for the rewarded ad unit above (waterfall or bidding).
+- If mediation is working, one ad unit + one RewardedAd instance should be enough — AdMob will automatically try Unity when direct fill is low.
+- For extra reliability (in case mediation fill from Unity is inconsistent), allow an optional second explicit instance with a different unit ID (but prefer mediation-first approach).
+- Keep the existing fallback: if no ad is ready/loaded, show the internal <VideoPlayer /> component after a short delay.
+- Keep the daily cap check (5000 drips), web mock (+100 points), Expo Go warnings, and the first_video badge logic in handleVideoComplete.
+- The EARNED_REWARD listener should award 100–200 drips randomly (keep for now), trigger badge if first time, and show success alert.
+
+Task:
+Refactor app/index.tsx to achieve this:
+1. Remove the separate "Unity Ads" task card / button entirely.
+2. Keep only one main rewarded video task card (rename label to something like "Watch Rewarded Video" or "Earn Drips Now" and update subtitle to "Earn 100–200 drips").
+3. In useEffect setupAds:
+   - Use ONE primary ad unit ID (the existing one).
+   - Create ONE primary RewardedAd instance (AdMob + mediated Unity).
+   - Load it once on init.
+   - Optionally: if I tell you later I have a separate Unity unit ID, add a fallback instance — but default to mediated-only for now.
+   - Add proper event listeners: EARNED_REWARD (award points + badge logic), ERROR (log), and ideally FULLSCREEN_CONTENT_DISMISSED or LOADED to reload the ad automatically after show/close.
+4. Create a new unified handler (e.g. handleWatchRewarded) that:
+   - Checks daily cap.
+   - Handles web mock.
+   - Tries to show the primary ad if loaded.
+   - If not loaded, attempts to load it and show (with timeout fallback).
+   - If still fails → shows the internal VideoPlayer as fallback.
+   - (Optional: if fallbackAd exists, try that second before internal video.)
+5. Update the onPress of the remaining video ad task card to call this new unified handler.
+6. Merge / clean up any duplicate calls (e.g. the "AdMob Offers" card currently also calls handleWatchAd — decide if it should be different or removed/merged).
+7. Keep all other parts of the file (balance card, redeem modal, share buttons, offerwall modals, onboarding flow, etc.) unchanged unless directly conflicting.
+8. For the unique user ID: When username is first set (in UsernameSetup onSave), generate a simple unique ID if not already present (e.g. using Date.now() + random string or expo-crypto randomUUID if imported), store it in Zustand as userId: string | null with a setUserId action, but do NOT change the existing store file unless necessary — just implement the generation logic in the component.
+
+Rules:
+- Do NOT break existing flows (splash, onboarding, terms, username setup, redemption modal, dark mode, etc.).
+- Use existing utilities: initializeAds, createRewardedAd, getAdEventTypes from src/utils/ads.ts.
+- Keep __DEV__ test IDs.
+- Add console logs where helpful for debugging ad load/show states.
+- Make sure the ad reloads after being shown/dismissed to be ready for next time.
+- Output ONLY the updated app/index.tsx file (full content) + any small required changes to other files (e.g. store if userId added, or components/UsernameSetup.tsx if needed).
+- If you need to add imports (e.g. expo-crypto for better UUID), do so.
+- Keep code clean, typed where possible, and follow existing style.
+
+Build this refactor now. Show me the updated files.
