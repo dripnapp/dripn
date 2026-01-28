@@ -19,8 +19,8 @@ const nativePlugins = [
   [
     "react-native-google-mobile-ads",
     {
-      iosAppId: "ca-app-pub-3940256099942544~3347511713",
-      androidAppId: "ca-app-pub-3940256099942544~3347511713",
+      iosAppId: "ca-app-pub-4501953262639636~1618683110",
+      androidAppId: "ca-app-pub-4501953262639636~1618683110",
     },
   ],
 ];

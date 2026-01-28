@@ -102,7 +102,7 @@ export default function Home() {
           }
 
           // Unity Ads via AdMob Mediation
-          const unityAd = createRewardedAd(rewardedAdUnitId);
+          const unityAd = createRewardedAd("ca-app-pub-4501953262639636/8435825886");
           setUnityRewardedAd(unityAd);
           if (unityAd && unityAd.load) {
             unityAd.load();
