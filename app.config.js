@@ -1,4 +1,5 @@
-const isWeb = process.env.EXPO_PUBLIC_PLATFORM === 'web' || process.env.PLATFORM === 'web';
+const isWeb =
+  process.env.EXPO_PUBLIC_PLATFORM === "web" || process.env.PLATFORM === "web";
 
 const basePlugins = [
   "expo-router",
@@ -39,7 +40,7 @@ export default {
     ios: {
       supportsTablet: true,
       bundleIdentifier: "com.dripnapp.dripn",
-      buildNumber: "4",
+      buildNumber: "5",
       infoPlist: {
         NSUserTrackingUsageDescription:
           "This allows personalized ads to support rewards and features in the app.",
@@ -50,7 +51,7 @@ export default {
           { SKAdNetworkIdentifier: "3rd42ekr43.skadnetwork" },
           { SKAdNetworkIdentifier: "3qcr597p9d.skadnetwork" },
           { SKAdNetworkIdentifier: "v9wtta54v3.skadnetwork" },
-          { SKAdNetworkIdentifier: "n38lu8286q.skadnetwork" }
+          { SKAdNetworkIdentifier: "n38lu8286q.skadnetwork" },
         ],
       },
     },
