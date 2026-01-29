@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { Stack } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useStore, THEME_CONFIGS } from '../src/store/useStore';
 import AppHeader from '../src/components/AppHeader';
@@ -19,7 +20,6 @@ export default function Privacy() {
   const [showUSPreferences, setShowUSPreferences] = useState(false);
 
   const themeConfig = THEME_CONFIGS[theme];
-  const isDark = themeConfig.isDark;
 
   const handleRevokeConsent = () => {
     Alert.alert(
@@ -101,6 +101,7 @@ export default function Privacy() {
 
   return (
     <View style={[styles.container, { backgroundColor: themeConfig.background }]}>
+      <Stack.Screen options={{ headerShown: false }} />
       <AppHeader title="Privacy Settings" showBack />
 
       <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>

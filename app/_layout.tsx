@@ -20,6 +20,7 @@ export default function RootLayout() {
         <Stack.Screen name="leaderboard" options={{ title: 'Leaderboard', headerShown: false }} />
         <Stack.Screen name="settings" options={{ title: 'Settings', headerShown: false }} />
         <Stack.Screen name="contact" options={{ title: 'Contact', headerShown: false }} />
+        <Stack.Screen name="privacy" options={{ title: 'Privacy', headerShown: false }} />
       </Stack>
     </>
   );
