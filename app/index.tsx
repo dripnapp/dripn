@@ -102,17 +102,7 @@ export default function Home() {
   const AD_REVENUE_CENTS = 5;
 
   useEffect(() => {
-    const initAuth = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) {
-          await supabase.auth.signInAnonymously();
-        }
-      } catch (e) {
-        console.error("Auth init failed:", e);
-      }
-    };
-    initAuth();
+    // Auth init removed to avoid error when anonymous sign-ins are disabled in Supabase
   }, []);
 
   useEffect(() => {

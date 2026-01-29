@@ -67,14 +67,8 @@ export const addPointsServer = async (
     } = await supabase.auth.getSession();
 
     if (!session) {
-      console.log("No session found, attempting anonymous sign-in...");
-      const { data: signInData, error: signInError } = await supabase.auth.signInAnonymously();
-      if (signInError) {
-        console.error("Anonymous sign-in failed:", signInError);
-      } else {
-        session = signInData.session;
-        console.log("Anonymous sign-in successful for user:", session?.user?.id);
-      }
+      console.log("No session found, reward tracked locally only.");
+      return { success: true, synced: false };
     }
 
     if (!session?.access_token) {
