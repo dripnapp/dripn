@@ -285,7 +285,7 @@ export default function Home() {
             Alert.alert(
               "Native Ads Limited",
               "Native Ad SDKs (Unity/AdMob) are disabled in Expo Go. You'll need a Development Build to use these live features.",
-              [{ text: "Test Reward (+100)", onPress: () => addPoints(100) }, { text: "OK" }]
+              [{ text: "Test Reward (+100)", onPress: () => addPointsServer(100, "Expo Go Test Reward") }, { text: "OK" }]
             );
           } else {
             // Fallback to internal video player if native ad fails to load
@@ -298,7 +298,7 @@ export default function Home() {
         Alert.alert(
           "Native Ads Limited",
           "Native Ad SDKs are disabled in Expo Go.",
-          [{ text: "Test Reward (+100)", onPress: () => addPoints(100) }, { text: "OK" }]
+          [{ text: "Test Reward (+100)", onPress: () => addPointsServer(100, "Expo Go Test Reward") }, { text: "OK" }]
         );
       } else {
         setShowVideoPlayer(true);
@@ -709,9 +709,9 @@ export default function Home() {
             source={{
               uri: `https://offers.cpx-research.com/index.php?app_id=31158&ext_user_id=${uniqueId || 'guest'}&secure_hash=${process.env.EXPO_PUBLIC_CPX_SECURE_HASH || ''}&username=${encodeURIComponent(username || 'User')}&subid_1=dripn&subid_2=mobile`,
             }}
-            onNavigationStateChange={(navState: any) => {
+            onNavigationStateChange={async (navState: any) => {
               if (navState.url.includes("complete") || navState.url.includes("success") || navState.url.includes("reward")) {
-                addPoints(100);
+                await addPointsServer(100, "CPX Survey");
                 setShowCPXModal(false);
                 Alert.alert("Survey Completed!", "You earned 100 drips!");
               }

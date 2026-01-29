@@ -1,0 +1,53 @@
+You are an expert Expo / React Native / Supabase / Zustand developer.
+
+My app is called Drip'n using Expo SDK 54, Zustand for state, Supabase for auth + database, and react-native-google-mobile-ads for rewarded ads.
+
+Current files:
+- src/utils/supabase.ts already exports:
+  - supabase client (initialized with URL/anon key + AsyncStorage persistence)
+  - async addPointsServer(amount: number, source: string) that:
+    - Does optimistic local addPoints(amount)
+    - Gets session → access_token
+    - POSTs to https://fxbyabofsejlhtbboynn.supabase.co/functions/v1/verify-reward
+      with Bearer token + body { amount, source }
+    - Falls back to local on error with Alert
+    - Returns { success: boolean, synced?: boolean, error?: any }
+
+- src/store/useStore.ts has:
+  addPoints: (amount: number) => void  // only 1 argument (TS error when passing 2)
+
+Goal: Implement Option 3 — switch to server-side only for all rewards.
+Replace every direct call to addPoints(...) in reward flows with addPointsServer(amount, source).
+This fixes the TS error "Expected 1 arguments, but got 2" and makes rewards secure.
+
+Specific places to update (in app/index.tsx):
+1. Rewarded ad listener (inside useEffect → adInstance.addAdEventListener(RewardedAdEventType.EARNED_REWARD)):
+   - Change any addPoints(drips) or addPoints(drips, true) to:
+     await addPointsServer(drips, "Rewarded Ad");
+   - Keep handleVideoComplete(drips, true) after the await
+
+2. Badge reward logic (claimBadgeReward or wherever points are added for badges):
+   - Replace addPoints(reward) with await addPointsServer(reward, `Badge: ${badgeId}`);
+
+3. Share reward logic (recordShare or handleShare):
+   - Replace addPoints(100) or similar with await addPointsServer(100, `Share: ${platform}`);
+
+4. Any other direct addPoints calls in reward paths (offerwalls, test buttons, etc.):
+   - Replace with addPointsServer(amount, descriptive_source)
+
+Rules:
+- Do NOT change the addPoints type in the store — keep it as (amount: number)
+- Make handlers/listeners async if they call addPointsServer (use async arrow functions)
+- Add try/catch only if missing (use existing Alert pattern)
+- Keep optimistic update (already in addPointsServer)
+- Do NOT break onboarding, privacy consent, splash, etc.
+- Keep existing local fallback behavior
+- Use existing imports (supabase from '../utils/supabase', Alert, useStore)
+
+Output exactly:
+- Full updated app/index.tsx (or clear diff showing changed lines)
+- Updated src/components/UsernameSetup.tsx if needed (for any reward calls)
+- Any other small changes (if any)
+- Brief list of what was replaced
+
+Make the changes automatically now. Fix the TypeScript error in the process.
