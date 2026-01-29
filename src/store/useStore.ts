@@ -129,6 +129,25 @@ interface RedemptionRecord {
   completedAt?: number;
 }
 
+export interface PrivacyConsent {
+  region: 'EU' | 'US' | 'OTHER' | null;
+  hasCompletedPrivacySetup: boolean;
+  euConsent: boolean | null;
+  euDataPreferences: {
+    personalizedAds: boolean;
+    contentMeasurement: boolean;
+    audienceResearch: boolean;
+    deviceStorage: boolean;
+  } | null;
+  euVendorConsents: {
+    admob: boolean;
+    adgem: boolean;
+    unityAds: boolean;
+  } | null;
+  usAllowDataSharing: boolean | null;
+  consentTimestamp: number | null;
+}
+
 interface AppState {
   points: number;
   totalEarned: number;
@@ -151,6 +170,7 @@ interface AppState {
   history: HistoryRecord[];
   walletAddress: string | null;
   redemptions: RedemptionRecord[];
+  privacyConsent: PrivacyConsent;
   setPoints: (points: number) => void;
   addPoints: (amount: number, source?: string) => void;
   deductPoints: (amount: number) => boolean;
@@ -170,6 +190,13 @@ interface AppState {
   setWalletAddress: (address: string | null) => void;
   createRedemption: (dripsAmount: number, usdAmount: number, xrpAmount: number, xrpPrice: number, walletAddress: string) => RedemptionRecord;
   updateRedemptionStatus: (id: string, status: RedemptionRecord['status'], transactionId?: string) => void;
+  setPrivacyRegion: (region: 'EU' | 'US' | 'OTHER') => void;
+  setEUConsent: (consent: boolean) => void;
+  setEUDataPreferences: (prefs: PrivacyConsent['euDataPreferences']) => void;
+  setEUVendorConsents: (consents: PrivacyConsent['euVendorConsents']) => void;
+  setUSDataSharing: (allow: boolean) => void;
+  completePrivacySetup: () => void;
+  revokePrivacyConsent: () => void;
 }
 
 const generateReferralCode = () => {
@@ -213,6 +240,15 @@ export const useStore = create<AppState>()(
       history: [],
       walletAddress: null,
       redemptions: [],
+      privacyConsent: {
+        region: null,
+        hasCompletedPrivacySetup: false,
+        euConsent: null,
+        euDataPreferences: null,
+        euVendorConsents: null,
+        usAllowDataSharing: null,
+        consentTimestamp: null,
+      },
       setPoints: (points) => set({ points }),
       addPoints: (amount, source = 'Task') => set((state) => {
         state.checkDailyReset();
@@ -442,6 +478,43 @@ export const useStore = create<AppState>()(
           ),
         });
       },
+      setPrivacyRegion: (region) => set((state) => ({
+        privacyConsent: { ...state.privacyConsent, region },
+      })),
+      setEUConsent: (consent) => set((state) => ({
+        privacyConsent: { 
+          ...state.privacyConsent, 
+          euConsent: consent,
+          consentTimestamp: Date.now(),
+        },
+      })),
+      setEUDataPreferences: (prefs) => set((state) => ({
+        privacyConsent: { ...state.privacyConsent, euDataPreferences: prefs },
+      })),
+      setEUVendorConsents: (consents) => set((state) => ({
+        privacyConsent: { ...state.privacyConsent, euVendorConsents: consents },
+      })),
+      setUSDataSharing: (allow) => set((state) => ({
+        privacyConsent: { 
+          ...state.privacyConsent, 
+          usAllowDataSharing: allow,
+          consentTimestamp: Date.now(),
+        },
+      })),
+      completePrivacySetup: () => set((state) => ({
+        privacyConsent: { ...state.privacyConsent, hasCompletedPrivacySetup: true },
+      })),
+      revokePrivacyConsent: () => set((state) => ({
+        privacyConsent: {
+          region: state.privacyConsent.region,
+          hasCompletedPrivacySetup: false,
+          euConsent: null,
+          euDataPreferences: null,
+          euVendorConsents: null,
+          usAllowDataSharing: null,
+          consentTimestamp: null,
+        },
+      })),
     }),
     {
       name: 'dripn-storage',

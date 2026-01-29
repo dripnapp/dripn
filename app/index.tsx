@@ -24,6 +24,10 @@ import VideoPlayer from "../src/components/VideoPlayer";
 import UsernameSetup from "../src/components/UsernameSetup";
 import AppHeader from "../src/components/AppHeader";
 import RedeemDripsModal from "../src/components/RedeemDripsModal";
+import { EUConsentPopup, ManageDataPopup, VendorPreferencesPopup, USDataPreferencesPopup } from "../src/components/PrivacyConsent";
+import type { DataPreferences } from "../src/components/PrivacyConsent/ManageDataPopup";
+import type { VendorConsents } from "../src/components/PrivacyConsent/VendorPreferencesPopup";
+import { detectUserRegion } from "../src/utils/regionDetection";
 import { initializeAds, createRewardedAd, getAdEventTypes, adsModule } from "../src/utils/ads";
 
 import { requestTrackingPermissionsAsync } from 'expo-tracking-transparency';
@@ -64,6 +68,13 @@ export default function Home() {
     badges,
     addBadge,
     claimBadgeReward,
+    privacyConsent,
+    setPrivacyRegion,
+    setEUConsent,
+    setEUDataPreferences,
+    setEUVendorConsents,
+    setUSDataSharing,
+    completePrivacySetup,
   } = useStore();
 
   const themeConfig = THEME_CONFIGS[theme];
@@ -79,6 +90,12 @@ export default function Home() {
   const [showRedeemModal, setShowRedeemModal] = useState(false);
   const [rewardedAd, setRewardedAd] = useState<any>(null);
   const [adLoaded, setAdLoaded] = useState(false);
+  
+  const [showPrivacyFlow, setShowPrivacyFlow] = useState(false);
+  const [showEUConsent, setShowEUConsent] = useState(false);
+  const [showManageData, setShowManageData] = useState(false);
+  const [showVendors, setShowVendors] = useState(false);
+  const [showUSPreferences, setShowUSPreferences] = useState(false);
 
   const DAILY_CAP = 5000;
   const AD_REVENUE_CENTS = 5;
@@ -150,6 +167,65 @@ export default function Home() {
   useEffect(() => {
     checkDailyReset();
   }, []);
+
+  useEffect(() => {
+    const initPrivacy = async () => {
+      if (!privacyConsent.region) {
+        const region = await detectUserRegion();
+        setPrivacyRegion(region);
+      }
+      
+      if (hasCompletedOnboarding && hasAcceptedTerms && !privacyConsent.hasCompletedPrivacySetup) {
+        const region = privacyConsent.region || await detectUserRegion();
+        if (!privacyConsent.region) {
+          setPrivacyRegion(region);
+        }
+        
+        if (region === 'EU') {
+          setShowEUConsent(true);
+        } else if (region === 'US') {
+          setShowUSPreferences(true);
+        } else {
+          completePrivacySetup();
+        }
+      }
+    };
+    
+    if (!showSplash && hasCompletedOnboarding && hasAcceptedTerms) {
+      initPrivacy();
+    }
+  }, [showSplash, hasCompletedOnboarding, hasAcceptedTerms, privacyConsent.hasCompletedPrivacySetup]);
+
+  const handleEUConsent = () => {
+    setEUConsent(true);
+    setShowEUConsent(false);
+    completePrivacySetup();
+  };
+
+  const handleEUDecline = () => {
+    setEUConsent(false);
+    setShowEUConsent(false);
+    completePrivacySetup();
+  };
+
+  const handleDataPreferencesSave = (prefs: DataPreferences) => {
+    setEUDataPreferences(prefs);
+    setShowManageData(false);
+    completePrivacySetup();
+  };
+
+  const handleVendorConsentsSave = (consents: VendorConsents) => {
+    setEUVendorConsents(consents);
+    setShowVendors(false);
+    setShowManageData(false);
+    completePrivacySetup();
+  };
+
+  const handleUSPreferencesSave = (allow: boolean) => {
+    setUSDataSharing(allow);
+    setShowUSPreferences(false);
+    completePrivacySetup();
+  };
 
   useEffect(() => {
     if (!showSplash && hasCompletedOnboarding && !hasAcceptedTerms) {
@@ -369,6 +445,54 @@ export default function Home() {
         walletAddress={walletAddress}
         onSubmit={handleRedemptionSubmit}
         onSetWalletAddress={setWalletAddress}
+      />
+
+      <EUConsentPopup
+        visible={showEUConsent}
+        onConsent={handleEUConsent}
+        onDecline={handleEUDecline}
+        onManageOptions={() => {
+          setShowEUConsent(false);
+          setShowManageData(true);
+        }}
+        themeConfig={themeConfig}
+      />
+
+      <ManageDataPopup
+        visible={showManageData}
+        onBack={() => {
+          setShowManageData(false);
+          setShowEUConsent(true);
+        }}
+        onViewVendors={() => {
+          setShowManageData(false);
+          setShowVendors(true);
+        }}
+        onSave={handleDataPreferencesSave}
+        themeConfig={themeConfig}
+        initialPreferences={privacyConsent.euDataPreferences || undefined}
+      />
+
+      <VendorPreferencesPopup
+        visible={showVendors}
+        onBack={() => {
+          setShowVendors(false);
+          setShowManageData(true);
+        }}
+        onSave={handleVendorConsentsSave}
+        themeConfig={themeConfig}
+        initialConsents={privacyConsent.euVendorConsents || undefined}
+      />
+
+      <USDataPreferencesPopup
+        visible={showUSPreferences}
+        onSave={handleUSPreferencesSave}
+        onClose={() => {
+          setShowUSPreferences(false);
+          completePrivacySetup();
+        }}
+        themeConfig={themeConfig}
+        initialPreference={privacyConsent.usAllowDataSharing !== null ? privacyConsent.usAllowDataSharing : undefined}
       />
 
       <AppHeader showLogo />
