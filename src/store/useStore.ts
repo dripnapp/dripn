@@ -102,7 +102,7 @@ export interface PrivacyConsent {
   } | null;
   euVendorConsents: {
     admob: boolean;
-    adgem: boolean;
+    cpx: boolean;
     unityAds: boolean;
   } | null;
   usAllowDataSharing: boolean | null;
