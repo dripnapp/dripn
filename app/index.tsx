@@ -102,6 +102,20 @@ export default function Home() {
   const AD_REVENUE_CENTS = 5;
 
   useEffect(() => {
+    const initAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          await supabase.auth.signInAnonymously();
+        }
+      } catch (e) {
+        console.error("Auth init failed:", e);
+      }
+    };
+    initAuth();
+  }, []);
+
+  useEffect(() => {
     let adInstance: any = null;
 
     const setupAds = async () => {

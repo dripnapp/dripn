@@ -60,21 +60,29 @@ export const addPointsServer = async (
   addPoints(amount);
 
   try {
-    // 2. Get current authenticated session
-    const {
+    // 2. Get current authenticated session or sign in anonymously
+    let {
       data: { session },
       error: sessionError,
     } = await supabase.auth.getSession();
 
-    if (sessionError || !session?.access_token) {
+    if (!session) {
+      console.log("No session found, attempting anonymous sign-in...");
+      const { data: signInData, error: signInError } = await supabase.auth.signInAnonymously();
+      if (signInError) {
+        console.error("Anonymous sign-in failed:", signInError);
+      } else {
+        session = signInData.session;
+        console.log("Anonymous sign-in successful for user:", session?.user?.id);
+      }
+    }
+
+    if (!session?.access_token) {
       console.warn(
         "No valid session - points added locally only",
         sessionError,
       );
-      Alert.alert(
-        "Offline Mode",
-        "Reward added locally. Will sync when online.",
-      );
+      // Removed offline alert for smoother user experience
       return { success: true, synced: false };
     }
 
@@ -115,6 +123,11 @@ export const addPointsServer = async (
         );
         return { success: true, synced: true };
       }
+    }
+
+    if (response.status === 404) {
+      console.error("Reward verification endpoint not found (404). Check Edge Function deployment.");
+      return { success: true, synced: false };
     }
 
     if (!response.ok) {
