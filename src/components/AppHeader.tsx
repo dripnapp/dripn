@@ -47,6 +47,10 @@ export default function AppHeader({ title, showBack = false, showLogo = false }:
               <Text style={[styles.menuText, { color: themeConfig.text }]}>Leaderboard</Text>
             </TouchableOpacity>
             <View style={[styles.menuDivider, { backgroundColor: themeConfig.background }]} />
+            <TouchableOpacity style={styles.menuItem} onPress={() => { setMenuOpen(false); router.push('/privacy'); }}>
+              <MaterialCommunityIcons name="shield-lock" size={22} color={themeConfig.textMuted} />
+              <Text style={[styles.menuText, { color: themeConfig.text }]}>Privacy Settings</Text>
+            </TouchableOpacity>
             <TouchableOpacity style={styles.menuItem} onPress={() => { setMenuOpen(false); router.push('/legal'); }}>
               <MaterialCommunityIcons name="shield-check" size={22} color={themeConfig.textMuted} />
               <Text style={[styles.menuText, { color: themeConfig.text }]}>Legal Disclaimers</Text>

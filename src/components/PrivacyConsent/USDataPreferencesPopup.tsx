@@ -56,6 +56,14 @@ export default function USDataPreferencesPopup({
             My data preferences
           </Text>
 
+          <View style={styles.earnBanner}>
+            <View style={styles.earnBadge}>
+              <MaterialCommunityIcons name="lightning-bolt" size={12} color="#fff" />
+              <Text style={styles.earnBadgeText}>EARN</Text>
+            </View>
+            <Text style={styles.earnBannerText}>Allow personalized ads to earn more drips!</Text>
+          </View>
+
           <TouchableOpacity
             style={[
               styles.optionCard,
@@ -157,7 +165,38 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '700',
     textAlign: 'center',
-    marginBottom: 24,
+    marginBottom: 16,
+  },
+  earnBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff3cd',
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#ffc107',
+  },
+  earnBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f59f00',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    marginRight: 10,
+  },
+  earnBadgeText: {
+    color: '#fff',
+    fontSize: 11,
+    fontWeight: '700',
+    marginLeft: 3,
+  },
+  earnBannerText: {
+    flex: 1,
+    color: '#856404',
+    fontSize: 13,
+    fontWeight: '600',
   },
   optionCard: {
     flexDirection: 'row',

@@ -1,11 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, Alert, Modal } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, Alert } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useStore, ThemeMode, THEME_CONFIGS } from '../src/store/useStore';
 import AppHeader from '../src/components/AppHeader';
-import { EUConsentPopup, ManageDataPopup, VendorPreferencesPopup, USDataPreferencesPopup } from '../src/components/PrivacyConsent';
-import { DataPreferences } from '../src/components/PrivacyConsent/ManageDataPopup';
-import { VendorConsents } from '../src/components/PrivacyConsent/VendorPreferencesPopup';
 
 const RESERVED_USERNAMES = ['admin', 'dripn', 'system', 'support', 'moderator'];
 
@@ -56,86 +53,13 @@ const THEMES: { id: ThemeMode; name: string; color: string; bgColor: string; pre
 
 export default function Settings() {
   const { 
-    username, uniqueId, setUsername, theme, setTheme, unlockedThemes, unlockTheme, points,
-    privacyConsent, revokePrivacyConsent, setEUConsent, setEUDataPreferences, setEUVendorConsents,
-    setUSDataSharing, completePrivacySetup
+    username, uniqueId, setUsername, theme, setTheme, unlockedThemes, unlockTheme, points
   } = useStore();
   const [newUsername, setNewUsername] = useState(username || '');
   const [isEditingUsername, setIsEditingUsername] = useState(false);
-  
-  const [showEUConsent, setShowEUConsent] = useState(false);
-  const [showManageData, setShowManageData] = useState(false);
-  const [showVendors, setShowVendors] = useState(false);
-  const [showUSPreferences, setShowUSPreferences] = useState(false);
 
   const themeConfig = THEME_CONFIGS[theme];
   const isDark = themeConfig.isDark;
-
-  const handleRevokeConsent = () => {
-    Alert.alert(
-      'Revoke Privacy Consent',
-      'This will reset your privacy preferences. You will need to set them up again. Continue?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Revoke', 
-          style: 'destructive',
-          onPress: () => {
-            revokePrivacyConsent();
-            Alert.alert('Done', 'Your privacy consent has been revoked. You will see the privacy setup again next time you open the app.');
-          }
-        }
-      ]
-    );
-  };
-
-  const handleManagePrivacy = async () => {
-    let region = privacyConsent.region;
-    
-    if (!region) {
-      const { detectUserRegion } = await import('../src/utils/regionDetection');
-      region = await detectUserRegion();
-    }
-    
-    if (region === 'EU') {
-      setShowEUConsent(true);
-    } else if (region === 'US') {
-      setShowUSPreferences(true);
-    } else {
-      Alert.alert('Privacy Settings', 'Privacy settings are available for EU and US users.');
-    }
-  };
-
-  const handleEUConsent = () => {
-    setEUConsent(true);
-    setShowEUConsent(false);
-    completePrivacySetup();
-  };
-
-  const handleEUDecline = () => {
-    setEUConsent(false);
-    setShowEUConsent(false);
-    completePrivacySetup();
-  };
-
-  const handleDataPreferencesSave = (prefs: DataPreferences) => {
-    setEUDataPreferences(prefs);
-    setShowManageData(false);
-    completePrivacySetup();
-  };
-
-  const handleVendorConsentsSave = (consents: VendorConsents) => {
-    setEUVendorConsents(consents);
-    setShowVendors(false);
-    setShowManageData(false);
-    completePrivacySetup();
-  };
-
-  const handleUSPreferencesSave = (allow: boolean) => {
-    setUSDataSharing(allow);
-    setShowUSPreferences(false);
-    completePrivacySetup();
-  };
 
   const handleSaveUsername = () => {
     const trimmed = newUsername.trim();
@@ -289,97 +213,7 @@ export default function Settings() {
             })}
           </View>
         </View>
-
-        <View style={[styles.section, { backgroundColor: themeConfig.card }]}>
-          <Text style={[styles.sectionTitle, { color: themeConfig.text }]}>Privacy</Text>
-          <Text style={[styles.sectionSubtitle, { color: themeConfig.textMuted }]}>Manage your data and privacy preferences</Text>
-          
-          <TouchableOpacity 
-            style={[styles.settingRow, { borderBottomWidth: 1, borderBottomColor: themeConfig.background }]}
-            onPress={handleManagePrivacy}
-          >
-            <View style={styles.settingInfo}>
-              <MaterialCommunityIcons name="shield-account" size={24} color={themeConfig.primary} />
-              <View style={styles.settingText}>
-                <Text style={[styles.settingLabel, { color: themeConfig.text }]}>Manage Privacy Settings</Text>
-                <Text style={[styles.settingValue, { color: themeConfig.textMuted }]}>
-                  {privacyConsent.hasCompletedPrivacySetup ? 'Update your preferences' : 'Set up privacy preferences'}
-                </Text>
-              </View>
-            </View>
-            <MaterialCommunityIcons name="chevron-right" size={24} color={themeConfig.textMuted} />
-          </TouchableOpacity>
-
-          {privacyConsent.hasCompletedPrivacySetup && (
-            <TouchableOpacity 
-              style={styles.settingRow}
-              onPress={handleRevokeConsent}
-            >
-              <View style={styles.settingInfo}>
-                <MaterialCommunityIcons name="shield-remove" size={24} color="#e74c3c" />
-                <View style={styles.settingText}>
-                  <Text style={[styles.settingLabel, { color: themeConfig.text }]}>Revoke Consent</Text>
-                  <Text style={[styles.settingValue, { color: themeConfig.textMuted }]}>
-                    Withdraw your privacy consent
-                  </Text>
-                </View>
-              </View>
-              <MaterialCommunityIcons name="chevron-right" size={24} color={themeConfig.textMuted} />
-            </TouchableOpacity>
-          )}
-
-          {privacyConsent.consentTimestamp && (
-            <Text style={[styles.consentDate, { color: themeConfig.textMuted }]}>
-              Last updated: {new Date(privacyConsent.consentTimestamp).toLocaleDateString()}
-            </Text>
-          )}
-        </View>
       </ScrollView>
-
-      <EUConsentPopup
-        visible={showEUConsent}
-        onConsent={handleEUConsent}
-        onDecline={handleEUDecline}
-        onManageOptions={() => {
-          setShowEUConsent(false);
-          setShowManageData(true);
-        }}
-        themeConfig={themeConfig}
-      />
-
-      <ManageDataPopup
-        visible={showManageData}
-        onBack={() => {
-          setShowManageData(false);
-          setShowEUConsent(true);
-        }}
-        onViewVendors={() => {
-          setShowManageData(false);
-          setShowVendors(true);
-        }}
-        onSave={handleDataPreferencesSave}
-        themeConfig={themeConfig}
-        initialPreferences={privacyConsent.euDataPreferences || undefined}
-      />
-
-      <VendorPreferencesPopup
-        visible={showVendors}
-        onBack={() => {
-          setShowVendors(false);
-          setShowManageData(true);
-        }}
-        onSave={handleVendorConsentsSave}
-        themeConfig={themeConfig}
-        initialConsents={privacyConsent.euVendorConsents || undefined}
-      />
-
-      <USDataPreferencesPopup
-        visible={showUSPreferences}
-        onSave={handleUSPreferencesSave}
-        onClose={() => setShowUSPreferences(false)}
-        themeConfig={themeConfig}
-        initialPreference={privacyConsent.usAllowDataSharing !== null ? privacyConsent.usAllowDataSharing : undefined}
-      />
     </View>
   );
 }
@@ -487,9 +321,4 @@ const styles = StyleSheet.create({
   },
   themeName: { marginLeft: 8, fontSize: 13, fontWeight: '500', color: '#1a1a1a' },
   themeNameSelected: { color: '#4dabf7' },
-  consentDate: {
-    fontSize: 12,
-    textAlign: 'center',
-    marginTop: 12,
-  },
 });
