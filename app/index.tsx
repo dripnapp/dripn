@@ -29,6 +29,7 @@ import type { DataPreferences } from "../src/components/PrivacyConsent/ManageDat
 import type { VendorConsents } from "../src/components/PrivacyConsent/VendorPreferencesPopup";
 import { detectUserRegion } from "../src/utils/regionDetection";
 import { initializeAds, createRewardedAd, getAdEventTypes, adsModule } from "../src/utils/ads";
+import { supabase, addPointsServer } from "../src/utils/supabase";
 
 import { requestTrackingPermissionsAsync } from 'expo-tracking-transparency';
 
@@ -141,6 +142,7 @@ export default function Home() {
             adInstance.addAdEventListener(RewardedAdEventType.EARNED_REWARD, (reward: any) => {
               console.log("Reward earned:", reward);
               const drips = Math.random() < 0.6 ? 100 : 200;
+              addPointsServer(drips, "Rewarded Ad");
               handleVideoComplete(drips, true);
             });
 
@@ -305,8 +307,9 @@ export default function Home() {
   };
 
   const handleVideoComplete = (drips: number, fromAdMob: boolean = false) => {
-    addPoints(drips);
+    // Points are now added via addPointsServer in the event listener for ads
     if (!fromAdMob) {
+      addPointsServer(drips, "Internal Video");
       setShowVideoPlayer(false);
     }
     
@@ -317,6 +320,7 @@ export default function Home() {
     if (!currentBadges.includes('first_video')) {
       addBadge('first_video');
       const badgeReward = claimBadgeReward('first_video');
+      addPointsServer(badgeReward, "Badge: First Steps");
       Alert.alert(
         "Badge Unlocked!",
         `You earned ${drips} drips + ${badgeReward} bonus drips for completing your first video!`,
@@ -333,6 +337,9 @@ export default function Home() {
       Alert.alert("Limit Reached", result.message);
       return;
     }
+
+    // Securely add points via Supabase Edge Function
+    addPointsServer(100, `Social Share (${platform})`);
 
     const shareMessage =
       "Check out Drip'n! I'm earning crypto rewards by completing simple tasks. Join me and start earning today! #Dripn #CryptoRewards #XRP";

@@ -1,0 +1,57 @@
+You are an expert Expo / React Native / Supabase developer.
+
+My app uses:
+- Expo SDK 54
+- Supabase for auth + database
+- Zustand store (src/store/useStore.ts) with addPoints action
+- react-native-google-mobile-ads for rewarded ads
+- Edge Function deployed at: https://fxbyabofsejlhtbboynn.supabase.co/functions/v1/verify-reward
+  (server-side verifies and adds points securely)
+
+Goal: Replace all client-side point awarding (especially from ads) with secure calls to the Edge Function.
+The function expects:
+- POST request
+- Authorization: Bearer <user JWT access_token>
+- JSON body: { "amount": number, "source": string }
+
+On success: returns { success: true, new_points: number }
+On error: { error: string }
+
+Tasks:
+1. Add Supabase client initialization (use env vars for SUPABASE_URL and SUPABASE_ANON_KEY).
+   Create a file like src/utils/supabase.ts if not already present.
+
+2. Create a new secure function (e.g. addPointsServer) that:
+   - Gets current session / access_token from supabase.auth.getSession()
+   - If no session or no token → fallback to local addPoints or show error
+   - Makes fetch POST to the Edge Function URL with Bearer token + body
+   - On success → call local Zustand addPoints with the returned amount (for UI sync)
+   - Log to history if possible (client-side fallback)
+   - Handle errors gracefully (e.g. Alert or console)
+
+3. Update the rewarded ad success handler in app/index.tsx:
+   - Instead of addPoints(drips) directly in EARNED_REWARD listener
+   - Call the new secure addPointsServer(drips, "Rewarded Ad")
+
+4. Do the same for other reward sources if possible (shares, badges, etc.) — but prioritize ad rewards first.
+
+5. Keep local Zustand state in sync (optimistic update or wait for server response).
+
+6. Handle loading/error states during server call (e.g. disable button, show spinner).
+
+7. Add temporary console.log of the JWT after login/signup for testing.
+
+Important:
+- Use supabase.auth.getSession() to get the token — do NOT store token manually.
+- Use fetch (not axios) unless axios is already imported.
+- Add try/catch and user-friendly error handling (Alert.alert).
+- Keep existing fallback to local addPoints if server call fails (for offline/resilience).
+
+Output:
+- Full code for src/utils/supabase.ts (if new)
+- Updated addPointsServer function (export it)
+- Exact changes needed in app/index.tsx (show diff or updated useEffect/listener)
+- Any Zustand store changes if required
+
+Do NOT break existing flows (splash, onboarding, privacy consent, etc.).
+Use existing theme/alert patterns.
