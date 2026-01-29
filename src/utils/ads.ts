@@ -1,10 +1,10 @@
 import { Platform } from 'react-native';
 
-export const RewardedAdEventType = { EARNED_REWARD: 'earned_reward' };
-export const AdEventType = { ERROR: 'error' };
+export const RewardedAdEventType = { EARNED_REWARD: 'earned_reward', LOADED: 'loaded' };
+export const AdEventType = { ERROR: 'error', CLOSED: 'closed' };
 
-// Export current ads module for internal event type access
 export let adsModule: any = null;
+let mobileAdsModule: any = null;
 
 const loadMobileAds = () => {
   if (mobileAdsModule !== null) return mobileAdsModule;
@@ -14,11 +14,7 @@ const loadMobileAds = () => {
     return null;
   }
 
-  // Metro still analyzes 'require' statements even if they are in a try-catch.
-  // In some Expo Go versions, the mere presence of the require can cause issues if not guarded well.
-  // We use a more aggressive approach to avoid the require.
   try {
-    // Constants.appOwnership is 'expo' when running in Expo Go
     const ExpoConstants = require('expo-constants').default;
     const isExpoGo = ExpoConstants?.appOwnership === 'expo';
     
@@ -28,7 +24,6 @@ const loadMobileAds = () => {
       return null;
     }
 
-    // Only attempt require if we are fairly sure we are NOT in Expo Go
     mobileAdsModule = require('react-native-google-mobile-ads');
     adsModule = mobileAdsModule;
     if (mobileAdsModule && (mobileAdsModule.default || mobileAdsModule.RewardedAd)) {
@@ -79,18 +74,18 @@ export const getAdEventTypes = (): { RewardedAdEventType: any; AdEventType: any 
     const ads = loadMobileAds();
     if (!ads) {
       return {
-        RewardedAdEventType: { EARNED_REWARD: 'earned_reward' },
-        AdEventType: { ERROR: 'error' },
+        RewardedAdEventType: { EARNED_REWARD: 'earned_reward', LOADED: 'loaded' },
+        AdEventType: { ERROR: 'error', CLOSED: 'closed' },
       };
     }
     return {
-      RewardedAdEventType: ads.RewardedAdEventType || { EARNED_REWARD: 'earned_reward' },
-      AdEventType: ads.AdEventType || { ERROR: 'error' },
+      RewardedAdEventType: ads.RewardedAdEventType || { EARNED_REWARD: 'earned_reward', LOADED: 'loaded' },
+      AdEventType: ads.AdEventType || { ERROR: 'error', CLOSED: 'closed' },
     };
   } catch (e) {
     return {
-      RewardedAdEventType: { EARNED_REWARD: 'earned_reward' },
-      AdEventType: { ERROR: 'error' },
+      RewardedAdEventType: { EARNED_REWARD: 'earned_reward', LOADED: 'loaded' },
+      AdEventType: { ERROR: 'error', CLOSED: 'closed' },
     };
   }
 };

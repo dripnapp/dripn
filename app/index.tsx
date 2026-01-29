@@ -56,6 +56,7 @@ export default function Home() {
     acceptTerms,
     userLevel,
     username,
+    uniqueId,
     setUsername,
     theme,
     recordShare,
@@ -84,8 +85,7 @@ export default function Home() {
   const [showSplash, setShowSplash] = useState(Platform.OS !== 'web');
   const [showAcknowledgment, setShowAcknowledgment] = useState(false);
   const [showVideoPlayer, setShowVideoPlayer] = useState(false);
-  const [showBitLabsModal, setShowBitLabsModal] = useState(false);
-  const [showAdGemModal, setShowAdGemModal] = useState(false);
+  const [showCPXModal, setShowCPXModal] = useState(false);
   const [showUsernameSetup, setShowUsernameSetup] = useState(false);
   const [showRedeemModal, setShowRedeemModal] = useState(false);
   const [rewardedAd, setRewardedAd] = useState<any>(null);
@@ -615,7 +615,7 @@ export default function Home() {
 
         <TouchableOpacity
           style={[styles.taskCard, { backgroundColor: themeConfig.card }]}
-          onPress={() => setShowBitLabsModal(true)}
+          onPress={() => setShowCPXModal(true)}
           activeOpacity={0.7}
         >
           <LinearGradient
@@ -625,28 +625,8 @@ export default function Home() {
             <MaterialCommunityIcons name="clipboard-text-outline" size={22} color="#fff" />
           </LinearGradient>
           <View style={styles.taskInfo}>
-            <Text style={[styles.taskTitle, { color: themeConfig.text }]}>BitLabs Surveys</Text>
+            <Text style={[styles.taskTitle, { color: themeConfig.text }]}>CPX Research Surveys</Text>
             <Text style={[styles.taskSubtitle, { color: themeConfig.textMuted }]}>Share your opinion for drips</Text>
-          </View>
-          <View style={styles.taskArrow}>
-            <MaterialCommunityIcons name="chevron-right" size={22} color={themeConfig.textMuted} />
-          </View>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.taskCard, { backgroundColor: themeConfig.card }]}
-          onPress={() => setShowAdGemModal(true)}
-          activeOpacity={0.7}
-        >
-          <LinearGradient
-            colors={[themeConfig.primary, themeConfig.secondary]}
-            style={styles.taskIconGradient}
-          >
-            <MaterialCommunityIcons name="gift-outline" size={22} color="#fff" />
-          </LinearGradient>
-          <View style={styles.taskInfo}>
-            <Text style={[styles.taskTitle, { color: themeConfig.text }]}>AdGem Offers</Text>
-            <Text style={[styles.taskSubtitle, { color: themeConfig.textMuted }]}>High-paying apps and games</Text>
           </View>
           <View style={styles.taskArrow}>
             <MaterialCommunityIcons name="chevron-right" size={22} color={themeConfig.textMuted} />
@@ -711,68 +691,39 @@ export default function Home() {
         </View>
       </ScrollView>
 
-      {/* Offerwall Modals */}
+      {/* CPX Research Surveys Modal */}
       <Modal
-        visible={showAdGemModal}
+        visible={showCPXModal}
         animationType="slide"
-        onRequestClose={() => setShowAdGemModal(false)}
+        onRequestClose={() => setShowCPXModal(false)}
       >
         <View style={styles.modalContent}>
           <WebView
             source={{
-              uri: "https://api.adgem.com/v1/wall?appid=31880",
+              uri: `https://offers.cpx-research.com/index.php?app_id=31158&ext_user_id=${uniqueId || 'guest'}&secure_hash=${process.env.EXPO_PUBLIC_CPX_SECURE_HASH || ''}&username=${encodeURIComponent(username || 'User')}&subid_1=dripn&subid_2=mobile`,
             }}
             onNavigationStateChange={(navState: any) => {
-              if (navState.url.includes("success")) {
+              if (navState.url.includes("complete") || navState.url.includes("success") || navState.url.includes("reward")) {
                 addPoints(100);
-                setShowAdGemModal(false);
+                setShowCPXModal(false);
+                Alert.alert("Survey Completed!", "You earned 100 drips!");
               }
             }}
             onError={(syntheticEvent: any) => {
               const { nativeEvent } = syntheticEvent;
               console.warn('WebView error: ', nativeEvent);
             }}
+            javaScriptEnabled={true}
+            domStorageEnabled={true}
+            startInLoadingState={true}
           />
           <View style={styles.modalFooter}>
-            <Text style={styles.modalFooterTitle}>AdGem Offerwall</Text>
+            <Text style={styles.modalFooterTitle}>CPX Research Surveys</Text>
             <TouchableOpacity 
               style={styles.closeFooterBtn}
-              onPress={() => setShowAdGemModal(false)}
+              onPress={() => setShowCPXModal(false)}
             >
-              <Text style={styles.closeFooterText}>Exit Offerwall</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-
-      <Modal
-        visible={showBitLabsModal}
-        animationType="slide"
-        onRequestClose={() => setShowBitLabsModal(false)}
-      >
-        <View style={styles.modalContent}>
-          <WebView
-            source={{
-              uri: "https://web.bitlabs.ai/?token=YOUR_BITLABS_TOKEN",
-            }}
-            onNavigationStateChange={(navState: any) => {
-              if (navState.url.includes("complete")) {
-                addPoints(100);
-                setShowBitLabsModal(false);
-              }
-            }}
-            onError={(syntheticEvent: any) => {
-              const { nativeEvent } = syntheticEvent;
-              console.warn('WebView error: ', nativeEvent);
-            }}
-          />
-          <View style={styles.modalFooter}>
-            <Text style={styles.modalFooterTitle}>BitLabs Surveys</Text>
-            <TouchableOpacity 
-              style={styles.closeFooterBtn}
-              onPress={() => setShowBitLabsModal(false)}
-            >
-              <Text style={styles.closeFooterText}>Exit Offerwall</Text>
+              <Text style={styles.closeFooterText}>Exit Surveys</Text>
             </TouchableOpacity>
           </View>
         </View>

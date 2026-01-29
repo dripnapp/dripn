@@ -86,3 +86,4 @@ expertMode = true
 [userenv]
 
 [userenv.shared]
+EXPO_PUBLIC_CPX_SECURE_HASH = "${CPX_SECURE_HASH}"

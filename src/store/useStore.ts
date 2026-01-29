@@ -109,6 +109,14 @@ export interface PrivacyConsent {
   consentTimestamp: number | null;
 }
 
+type UserLevel = 'Bronze' | 'Silver' | 'Gold';
+
+const getUserLevel = (totalEarned: number): UserLevel => {
+  if (totalEarned >= 20000) return 'Gold';
+  if (totalEarned >= 10000) return 'Silver';
+  return 'Bronze';
+};
+
 interface AppState {
   points: number;
   dailyEarnings: number;
@@ -123,6 +131,7 @@ interface AppState {
   redemptions: Redemption[];
   badges: string[];
   totalEarned: number;
+  userLevel: UserLevel;
   privacyConsent: PrivacyConsent;
   
   addPoints: (amount: number) => void;
@@ -165,6 +174,9 @@ export const useStore = create<AppState>()(
       redemptions: [],
       badges: [],
       totalEarned: 0,
+      get userLevel() {
+        return getUserLevel(get().totalEarned);
+      },
       privacyConsent: {
         region: null,
         hasCompletedPrivacySetup: false,

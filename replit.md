@@ -154,9 +154,16 @@ The app uses Zustand store (`src/store/useStore.ts`) with the following state:
 - No storage of private keys or sensitive wallet data
 - Transaction IDs for tracking all redemptions
 
+### CPX Research Integration (January 2026)
+- **Provider Change**: Replaced AdGem and BitLabs with CPX Research (App ID: 31158)
+- **Survey Wall**: CPX Research surveys accessible via WebView modal
+- **Secure Hash**: Uses EXPO_PUBLIC_CPX_SECURE_HASH environment variable for API authentication
+- **URL Format**: `https://offers.cpx-research.com/index.php?app_id=31158&ext_user_id={uniqueId}&secure_hash={hash}&username={username}&subid_1=dripn&subid_2=mobile`
+- **Rewards**: 100 drips per completed survey
+
 ### Privacy & GDPR Compliance (January 2026)
 - **Region Detection**: Uses expo-localization to detect EU vs US users
-- **EU Users**: See full GDPR consent flow (consent popup with Drip'n logo, manage data preferences, vendor list with AdMob/AdGem/Unity Ads)
+- **EU Users**: See full GDPR consent flow (consent popup with Drip'n logo, manage data preferences, vendor list with AdMob/CPX Research/Unity Ads)
 - **US Users**: See simplified CCPA-style data preferences popup
 - **Revocation**: Users can revoke consent anytime from Settings > Privacy > Revoke Consent
 - **Theme Integration**: All privacy popups respect the app's theme system
@@ -165,8 +172,9 @@ The app uses Zustand store (`src/store/useStore.ts`) with the following state:
 ## External Dependencies
 
 ### Reward Networks
-- **react-native-google-mobile-ads**: AdMob rewarded video ads
-- **react-native-webview**: Hosting offerwall providers like AdGem and BitLabs
+- **react-native-google-mobile-ads**: AdMob rewarded video ads (with Unity Ads mediation)
+- **react-native-webview**: Hosting CPX Research survey wall
+- **CPX Research**: Survey provider (App ID: 31158) - replaced AdGem and BitLabs
 
 ### Payment Processing
 - **CoinGate API**: Third-party payment processor for XRP payouts (to be integrated)

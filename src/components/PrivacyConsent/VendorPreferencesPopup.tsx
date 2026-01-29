@@ -25,7 +25,7 @@ interface VendorPreferencesPopupProps {
 
 export interface VendorConsents {
   admob: boolean;
-  adgem: boolean;
+  cpx: boolean;
   unityAds: boolean;
 }
 
@@ -46,11 +46,11 @@ const VENDORS: Vendor[] = [
     privacyPolicy: 'https://policies.google.com/privacy',
   },
   {
-    id: 'adgem',
-    name: 'AdGem',
+    id: 'cpx',
+    name: 'CPX Research',
     cookieDuration: '365 (days)',
-    dataCollected: 'IP addresses, Device identifiers, Usage data',
-    privacyPolicy: 'https://adgem.com/privacy-policy',
+    dataCollected: 'IP addresses, Device identifiers, Survey responses',
+    privacyPolicy: 'https://www.cpx-research.com/main/en/privacy.php',
   },
   {
     id: 'unityAds',
@@ -71,7 +71,7 @@ export default function VendorPreferencesPopup({
   const [consents, setConsents] = useState<VendorConsents>(
     initialConsents || {
       admob: false,
-      adgem: false,
+      cpx: false,
       unityAds: false,
     }
   );
@@ -85,7 +85,7 @@ export default function VendorPreferencesPopup({
   const acceptAll = () => {
     const allAccepted = {
       admob: true,
-      adgem: true,
+      cpx: true,
       unityAds: true,
     };
     setConsents(allAccepted);
