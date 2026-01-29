@@ -488,6 +488,7 @@ export default function Home() {
         visible={showUSPreferences}
         onSave={handleUSPreferencesSave}
         onClose={() => {
+          setUSDataSharing(false);
           setShowUSPreferences(false);
           completePrivacySetup();
         }}

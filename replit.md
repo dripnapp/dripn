@@ -154,6 +154,14 @@ The app uses Zustand store (`src/store/useStore.ts`) with the following state:
 - No storage of private keys or sensitive wallet data
 - Transaction IDs for tracking all redemptions
 
+### Privacy & GDPR Compliance (January 2026)
+- **Region Detection**: Uses expo-localization to detect EU vs US users
+- **EU Users**: See full GDPR consent flow (consent popup with Drip'n logo, manage data preferences, vendor list with AdMob/AdGem/Unity Ads)
+- **US Users**: See simplified CCPA-style data preferences popup
+- **Revocation**: Users can revoke consent anytime from Settings > Privacy > Revoke Consent
+- **Theme Integration**: All privacy popups respect the app's theme system
+- **Privacy Components**: Located in `src/components/PrivacyConsent/`
+
 ## External Dependencies
 
 ### Reward Networks

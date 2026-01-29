@@ -7,9 +7,6 @@ const EU_COUNTRIES = [
   'GB', 'IS', 'LI', 'NO', 'CH'
 ];
 
-const US_STATES_WITH_PRIVACY_LAWS = [
-  'CA', 'VA', 'CO', 'CT', 'UT'
-];
 
 export type UserRegion = 'EU' | 'US' | 'OTHER';
 

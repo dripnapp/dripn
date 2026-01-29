@@ -89,10 +89,17 @@ export default function Settings() {
     );
   };
 
-  const handleManagePrivacy = () => {
-    if (privacyConsent.region === 'EU') {
+  const handleManagePrivacy = async () => {
+    let region = privacyConsent.region;
+    
+    if (!region) {
+      const { detectUserRegion } = await import('../src/utils/regionDetection');
+      region = await detectUserRegion();
+    }
+    
+    if (region === 'EU') {
       setShowEUConsent(true);
-    } else if (privacyConsent.region === 'US') {
+    } else if (region === 'US') {
       setShowUSPreferences(true);
     } else {
       Alert.alert('Privacy Settings', 'Privacy settings are available for EU and US users.');
