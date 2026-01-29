@@ -13,7 +13,7 @@ const SUPABASE_URL =
   "https://fxbyabofsejlhtbboynn.supabase.co";
 const SUPABASE_ANON_KEY =
   process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ||
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ4YnlhYm9mc2VqbGh0YmJveW5uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkyOTgxOTksImV4cCI6MjA4NDg3NDE5OX0.HRSp-stvUFVBCTdD5mSz71v2K5Ee1WcuT6XbKmyfMUk";
+  "sb_publishable_33HgxcoB8fqDCE514PdkFw_PojUYBTL";
 const VERIFY_REWARD_URL =
   process.env.EXPO_PUBLIC_VERIFY_REWARD_URL ||
   "https://fxbyabofsejlhtbboynn.supabase.co/functions/v1/verify-reward";
