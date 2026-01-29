@@ -139,10 +139,10 @@ export default function Home() {
               setAdLoaded(false);
             });
 
-            adInstance.addAdEventListener(RewardedAdEventType.EARNED_REWARD, (reward: any) => {
+            adInstance.addAdEventListener(RewardedAdEventType.EARNED_REWARD, async (reward: any) => {
               console.log("Reward earned:", reward);
               const drips = Math.random() < 0.6 ? 100 : 200;
-              addPointsServer(drips, "Rewarded Ad");
+              await addPointsServer(drips, "Rewarded Ad");
               handleVideoComplete(drips, true);
             });
 
@@ -256,7 +256,7 @@ export default function Home() {
     setShowAcknowledgment(false);
   };
 
-  const handleWatchRewarded = () => {
+  const handleWatchRewarded = async () => {
     if (dailyEarnings >= DAILY_CAP) {
       Alert.alert("Daily Limit Reached", "Come back tomorrow for more drips!");
       return;
@@ -264,7 +264,7 @@ export default function Home() {
 
     if (Platform.OS === 'web') {
       Alert.alert("Development", "Ads are not available on web preview. Points will be added for testing.");
-      addPoints(100);
+      await addPointsServer(100, "Web Preview Test");
       return;
     }
 
@@ -306,10 +306,10 @@ export default function Home() {
     }
   };
 
-  const handleVideoComplete = (drips: number, fromAdMob: boolean = false) => {
+  const handleVideoComplete = async (drips: number, fromAdMob: boolean = false) => {
     // Points are now added via addPointsServer in the event listener for ads
     if (!fromAdMob) {
-      addPointsServer(drips, "Internal Video");
+      await addPointsServer(drips, "Internal Video");
       setShowVideoPlayer(false);
     }
     
@@ -320,7 +320,7 @@ export default function Home() {
     if (!currentBadges.includes('first_video')) {
       addBadge('first_video');
       const badgeReward = claimBadgeReward('first_video');
-      addPointsServer(badgeReward, "Badge: First Steps");
+      await addPointsServer(badgeReward, "Badge: First Steps");
       Alert.alert(
         "Badge Unlocked!",
         `You earned ${drips} drips + ${badgeReward} bonus drips for completing your first video!`,
@@ -339,7 +339,7 @@ export default function Home() {
     }
 
     // Securely add points via Supabase Edge Function
-    addPointsServer(100, `Social Share (${platform})`);
+    await addPointsServer(100, `Social Share (${platform})`);
 
     const shareMessage =
       "Check out Drip'n! I'm earning crypto rewards by completing simple tasks. Join me and start earning today! #Dripn #CryptoRewards #XRP";

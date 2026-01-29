@@ -289,13 +289,6 @@ export const useStore = create<AppState>()(
           monthly_master: 1500,
         };
         const reward = rewards[badgeId] || 0;
-        if (reward > 0) {
-          // Sync with local state
-          set((state) => ({ 
-            points: state.points + reward,
-            totalEarned: state.totalEarned + reward 
-          }));
-        }
         return reward;
       },
 

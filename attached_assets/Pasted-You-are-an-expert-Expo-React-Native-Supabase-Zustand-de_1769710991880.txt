@@ -1,0 +1,50 @@
+You are an expert Expo / React Native / Supabase / Zustand developer.
+
+My app is called Drip'n, using Expo SDK 54, Zustand for state, Supabase for auth/database, and react-native-google-mobile-ads for rewarded ads.
+
+Current situation:
+- src/utils/supabase.ts already exists and exports:
+  - supabase client (correctly initialized with URL/anon key and AsyncStorage)
+  - addPointsServer(amount: number, source: string) async function that:
+    - Optimistically calls local addPoints(amount)
+    - Gets session → access_token
+    - POSTs to https://fxbyabofsejlhtbboynn.supabase.co/functions/v1/verify-reward
+      with Authorization Bearer token + body { amount, source }
+    - Handles errors, falls back to local if server fails
+    - Returns { success: boolean, synced?: boolean }
+
+- src/store/useStore.ts has:
+  - addPoints: (amount: number) => void  // only 1 argument, no source
+
+Goal:
+Implement Option 3: Switch to server-side only for all reward granting.
+Replace every direct call to addPoints(...) in reward-related code with addPointsServer(amount, source).
+This eliminates the TypeScript error "Expected 1 arguments, but got 2" and makes rewards secure.
+
+Specific places to change (in app/index.tsx):
+1. Inside the rewarded ad setup (useEffect → adInstance.addAdEventListener):
+   - Change addPoints(drips) in EARNED_REWARD listener to:
+     await addPointsServer(drips, "Rewarded Ad");
+   - Keep handleVideoComplete(drips, true) after success
+
+2. Search for any other direct addPoints calls related to rewards:
+   - Badge rewards (claimBadgeReward)
+   - Share rewards (recordShare)
+   - Any other places where points are awarded (e.g. test buttons, offerwalls)
+   - Replace them with addPointsServer(amount, "Badge: first_video") or similar descriptive source
+
+Rules:
+- Do NOT change the addPoints type in the store — keep it as (amount: number)
+- Use async/await properly — make sure listeners/handlers that call it are async if needed
+- Add try/catch or error handling only if missing (use existing Alert pattern)
+- Keep optimistic update (already in addPointsServer)
+- Do NOT remove handleVideoComplete or badge logic — just wrap the point award
+- Keep existing local fallback in addPointsServer
+- Do NOT break onboarding, privacy consent, splash, etc.
+
+Output exactly:
+- Updated app/index.tsx (full file or clear diff showing changed lines)
+- Any other files changed (if any)
+- Brief explanation of changes made
+
+Make the changes automatically now.
