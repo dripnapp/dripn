@@ -3,8 +3,8 @@ import { createClient } from '@supabase/supabase-js';
 import { useStore } from '../store/useStore';
 import { Alert } from 'react-native';
 
-const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || '';
-const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || '';
+const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || 'https://fxbyabofsejlhtbboynn.supabase.co';
+const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ4YnlhYm9mc2VqbGh0YmJveW5uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkyOTgxOTksImV4cCI6MjA4NDg3NDE5OX0.HRSp-stvUFVBCTdD5mSz71v2K5Ee1WcuT6XbKmyfMUk';
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
