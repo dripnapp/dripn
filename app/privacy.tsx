@@ -5,8 +5,8 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useStore, THEME_CONFIGS } from '../src/store/useStore';
 import AppHeader from '../src/components/AppHeader';
 import { EUConsentPopup, ManageDataPopup, VendorPreferencesPopup, USDataPreferencesPopup } from '../src/components/PrivacyConsent';
-import { DataPreferences } from '../src/components/PrivacyConsent/ManageDataPopup';
-import { VendorConsents } from '../src/components/PrivacyConsent/VendorPreferencesPopup';
+import type { DataPreferences } from '../src/components/PrivacyConsent/ManageDataPopup';
+import type { VendorConsents } from '../src/components/PrivacyConsent/VendorPreferencesPopup';
 
 export default function Privacy() {
   const { 

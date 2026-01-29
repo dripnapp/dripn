@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useStore, THEME_CONFIGS } from '../store/useStore';
+import { useStore, THEME_CONFIGS, ThemeConfig } from '../store/useStore';
 
 interface AppHeaderProps {
   title?: string;

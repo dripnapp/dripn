@@ -53,7 +53,7 @@ const THEMES: { id: ThemeMode; name: string; color: string; bgColor: string; pre
 
 export default function Settings() {
   const { 
-    username, uniqueId, setUsername, theme, setTheme, unlockedThemes, unlockTheme, points
+    username, uniqueId, setUsername, theme, setTheme, unlockedThemes, unlockTheme
   } = useStore();
   const [newUsername, setNewUsername] = useState(username || '');
   const [isEditingUsername, setIsEditingUsername] = useState(false);
@@ -141,7 +141,6 @@ export default function Settings() {
                       <View style={styles.uniqueIdRow}>
                         <Text style={[styles.uniqueIdText, { color: themeConfig.textMuted }]}>ID: #{uniqueId}</Text>
                         <TouchableOpacity onPress={() => {
-                          // Copy logic could go here
                           Alert.alert('Copied', 'ID copied to clipboard!');
                         }}>
                           <MaterialCommunityIcons name="content-copy" size={14} color={themeConfig.primary} style={{ marginLeft: 5 }} />

@@ -2,12 +2,6 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-interface BadgeReward {
-  id: string;
-  reward: number;
-  claimed: boolean;
-}
-
 export type ThemeMode = 'classic' | 'dark' | 'neon' | 'ocean' | 'sunset' | 'forest';
 
 export interface ThemeConfig {
@@ -17,116 +11,83 @@ export interface ThemeConfig {
   card: string;
   text: string;
   textMuted: string;
-  accent: string;
-  isDark: boolean;
   headerBg: string;
-  button: string;
+  isDark: boolean;
 }
 
 export const THEME_CONFIGS: Record<ThemeMode, ThemeConfig> = {
   classic: {
-    primary: '#667eea',
-    secondary: '#764ba2',
-    background: '#f8fafc',
-    card: '#ffffff',
-    text: '#1a1a1a',
-    textMuted: '#94a3b8',
-    accent: '#4dabf7',
-    isDark: false,
-    headerBg: '#1a1a1a',
-    button: '#667eea'
-  },
-  dark: {
     primary: '#4dabf7',
     secondary: '#339af0',
-    background: '#0f172a',
-    card: '#1e293b',
-    text: '#f1f5f9',
-    textMuted: '#94a3b8',
-    accent: '#38bdf8',
-    isDark: true,
+    background: '#f8f9fa',
+    card: '#ffffff',
+    text: '#1a1a1a',
+    textMuted: '#868e96',
     headerBg: '#0f172a',
-    button: '#4dabf7'
+    isDark: false,
+  },
+  dark: {
+    primary: '#339af0',
+    secondary: '#228be6',
+    background: '#1a1a2e',
+    card: '#252542',
+    text: '#ffffff',
+    textMuted: '#a0a0a0',
+    headerBg: '#0f172a',
+    isDark: true,
   },
   neon: {
-    primary: '#00ff41',
-    secondary: '#003b00',
-    background: '#0d0d0d',
-    card: '#1a1a1a',
-    text: '#00ff41',
-    textMuted: '#008f11',
-    accent: '#00ff41',
-    isDark: true,
+    primary: '#00f2ff',
+    secondary: '#7000ff',
+    background: '#0a0a0f',
+    card: '#151520',
+    text: '#ffffff',
+    textMuted: '#8a8a9a',
     headerBg: '#000000',
-    button: '#00ff41'
+    isDark: true,
   },
   ocean: {
-    primary: '#0077be',
-    secondary: '#00a8cc',
-    background: '#e0f2f1',
+    primary: '#00d2ff',
+    secondary: '#3a7bd5',
+    background: '#f0f4f8',
     card: '#ffffff',
-    text: '#004d40',
-    textMuted: '#4db6ac',
-    accent: '#00acc1',
+    text: '#1e3a5f',
+    textMuted: '#64748b',
+    headerBg: '#1e3a5f',
     isDark: false,
-    headerBg: '#004d40',
-    button: '#0077be'
   },
   sunset: {
-    primary: '#ff4e50',
-    secondary: '#f9d423',
-    background: '#fff3e0',
+    primary: '#ff8c00',
+    secondary: '#ff4e50',
+    background: '#fff5f0',
     card: '#ffffff',
-    text: '#e65100',
-    textMuted: '#ff9800',
-    accent: '#ff5722',
+    text: '#4a2c2a',
+    textMuted: '#a08684',
+    headerBg: '#4a2c2a',
     isDark: false,
-    headerBg: '#bf360c',
-    button: '#ff4e50'
   },
   forest: {
-    primary: '#2d5a27',
-    secondary: '#558b2f',
-    background: '#f1f8e9',
+    primary: '#2ecc71',
+    secondary: '#27ae60',
+    background: '#f1f8f4',
     card: '#ffffff',
-    text: '#1b5e20',
-    textMuted: '#689f38',
-    accent: '#43a047',
+    text: '#1b3022',
+    textMuted: '#6b8e7b',
+    headerBg: '#1b3022',
     isDark: false,
-    headerBg: '#1b5e20',
-    button: '#2d5a27'
-  }
+  },
 };
 
-interface ShareRecord {
-  date: string;
-  platform: string;
-  timestamp: number;
-}
-
-interface HistoryRecord {
-  id: string;
-  type: 'reward' | 'purchase' | 'redemption';
-  amount: number;
-  source: string;
-  timestamp: number;
-  date: string;
-  xrpAmount?: number;
-  transactionId?: string;
-  status?: 'pending' | 'processing' | 'completed' | 'failed';
-}
-
-interface RedemptionRecord {
+export interface Redemption {
   id: string;
   dripsAmount: number;
   usdAmount: number;
   xrpAmount: number;
   xrpPrice: number;
   walletAddress: string;
-  status: 'pending' | 'processing' | 'completed' | 'failed';
+  status: 'pending' | 'completed' | 'failed';
+  timestamp: number;
   transactionId?: string;
-  createdAt: number;
-  completedAt?: number;
 }
 
 export interface PrivacyConsent {
@@ -150,46 +111,35 @@ export interface PrivacyConsent {
 
 interface AppState {
   points: number;
-  totalEarned: number;
   dailyEarnings: number;
-  lastEarningsDate: string | null;
+  lastEarningsReset: number;
   hasCompletedOnboarding: boolean;
   hasAcceptedTerms: boolean;
-  userLevel: string;
-  badges: string[];
-  badgeRewards: BadgeReward[];
-  referralCode: string | null;
-  referralCount: number;
-  enteredReferralCode: string | null;
-  referralBonusEarned: number;
   username: string | null;
   uniqueId: string | null;
   theme: ThemeMode;
   unlockedThemes: ThemeMode[];
-  dailyShares: ShareRecord[];
-  history: HistoryRecord[];
   walletAddress: string | null;
-  redemptions: RedemptionRecord[];
+  redemptions: Redemption[];
+  badges: string[];
+  totalEarned: number;
   privacyConsent: PrivacyConsent;
-  setPoints: (points: number) => void;
-  addPoints: (amount: number, source?: string) => void;
-  deductPoints: (amount: number) => boolean;
-  resetDaily: () => void;
+  
+  addPoints: (amount: number) => void;
   completeOnboarding: () => void;
   acceptTerms: () => void;
-  addBadge: (badge: string) => void;
-  claimBadgeReward: (badgeId: string) => number;
-  setReferralCode: (code: string) => void;
-  enterReferralCode: (code: string) => boolean;
-  setUsername: (username: string) => void;
+  setUsername: (name: string) => void;
   setTheme: (theme: ThemeMode) => void;
   unlockTheme: (theme: ThemeMode) => boolean;
-  recordShare: (platform: string) => { success: boolean; reward: number; message: string };
-  getDailyShareCount: () => number;
   checkDailyReset: () => void;
-  setWalletAddress: (address: string | null) => void;
-  createRedemption: (dripsAmount: number, usdAmount: number, xrpAmount: number, xrpPrice: number, walletAddress: string) => RedemptionRecord;
-  updateRedemptionStatus: (id: string, status: RedemptionRecord['status'], transactionId?: string) => void;
+  setWalletAddress: (address: string) => void;
+  createRedemption: (drips: number, usd: number, xrp: number, price: number, wallet: string) => Redemption;
+  updateRedemptionStatus: (id: string, status: Redemption['status'], txId?: string) => void;
+  addBadge: (badgeId: string) => void;
+  claimBadgeReward: (badgeId: string) => number;
+  recordShare: (platform: string) => { success: boolean; message: string };
+  getDailyShareCount: (platform: string) => number;
+  
   setPrivacyRegion: (region: 'EU' | 'US' | 'OTHER') => void;
   setEUConsent: (consent: boolean) => void;
   setEUDataPreferences: (prefs: PrivacyConsent['euDataPreferences']) => void;
@@ -199,47 +149,22 @@ interface AppState {
   revokePrivacyConsent: () => void;
 }
 
-const generateReferralCode = () => {
-  return 'DRPN-' + Math.random().toString(36).substring(2, 8).toUpperCase();
-};
-
-const BADGE_REWARDS: Record<string, number> = {
-  first_video: 50,
-  bronze: 250,
-  silver: 500,
-  gold: 1000,
-  first_cashout: 500,
-  referrer: 250,
-  streak_7: 350,
-  streak_30: 1500,
-};
-
-const THEME_COST = 1000;
-
 export const useStore = create<AppState>()(
   persist(
     (set, get) => ({
       points: 0,
-      totalEarned: 0,
       dailyEarnings: 0,
-      lastEarningsDate: null,
+      lastEarningsReset: Date.now(),
       hasCompletedOnboarding: false,
       hasAcceptedTerms: false,
-      userLevel: 'Bronze',
-      badges: [],
-      badgeRewards: [],
-      referralCode: null,
-      referralCount: 0,
-      enteredReferralCode: null,
-      referralBonusEarned: 0,
       username: null,
       uniqueId: null,
       theme: 'classic',
       unlockedThemes: ['classic'],
-      dailyShares: [],
-      history: [],
       walletAddress: null,
       redemptions: [],
+      badges: [],
+      totalEarned: 0,
       privacyConsent: {
         region: null,
         hasCompletedPrivacySetup: false,
@@ -249,261 +174,161 @@ export const useStore = create<AppState>()(
         usAllowDataSharing: null,
         consentTimestamp: null,
       },
-      setPoints: (points) => set({ points }),
-      addPoints: (amount, source = 'Task') => set((state) => {
+
+      addPoints: (amount) => {
+        const state = get();
         state.checkDailyReset();
-        const updatedState = get();
-        const today = new Date().toDateString();
-        const dailyEarnings = updatedState.lastEarningsDate === today ? updatedState.dailyEarnings + amount : amount;
-        const newPoints = updatedState.points + amount;
-        const newTotalEarned = (updatedState.totalEarned || 0) + amount;
-        let userLevel = updatedState.userLevel;
-        if (newTotalEarned >= 20000) userLevel = 'Gold';
-        else if (newTotalEarned >= 10000) userLevel = 'Silver';
-        else if (newTotalEarned >= 5000) userLevel = 'Bronze';
+        const currentDaily = get().dailyEarnings;
+        const DAILY_CAP = 5000;
         
-        const historyRecord: HistoryRecord = {
-          id: Date.now().toString(),
-          type: 'reward',
-          amount,
-          source,
-          timestamp: Date.now(),
-          date: new Date().toLocaleDateString(),
-        };
-        
-        return { 
-          points: newPoints,
-          totalEarned: newTotalEarned,
-          dailyEarnings,
-          lastEarningsDate: today,
-          userLevel,
-          history: [historyRecord, ...updatedState.history].slice(0, 100),
-        };
-      }),
-      deductPoints: (amount) => {
-        const state = get();
-        if (state.points < amount) return false;
-        set({ points: state.points - amount });
-        return true;
+        const possibleAdd = Math.min(amount, DAILY_CAP - currentDaily);
+        if (possibleAdd <= 0) return;
+
+        set((state) => ({
+          points: state.points + possibleAdd,
+          dailyEarnings: state.dailyEarnings + possibleAdd,
+          totalEarned: state.totalEarned + possibleAdd,
+        }));
       },
-      resetDaily: () => set({ dailyEarnings: 0, lastEarningsDate: new Date().toDateString() }),
-      checkDailyReset: () => {
-        const state = get();
-        const today = new Date().toDateString();
-        if (state.lastEarningsDate !== today) {
-          set({ dailyEarnings: 0, lastEarningsDate: today });
-        }
-      },
+
       completeOnboarding: () => set({ hasCompletedOnboarding: true }),
       acceptTerms: () => set({ hasAcceptedTerms: true }),
-      addBadge: (badge) => set((state) => {
-        if (state.badges.includes(badge)) return state;
-        const reward = BADGE_REWARDS[badge] || 0;
-        const newBadgeReward: BadgeReward = { id: badge, reward, claimed: false };
-        return { 
-          badges: [...state.badges, badge],
-          badgeRewards: [...state.badgeRewards, newBadgeReward]
-        };
-      }),
-      claimBadgeReward: (badgeId) => {
-        const state = get();
-        const badgeReward = state.badgeRewards.find(br => br.id === badgeId && !br.claimed);
-        if (!badgeReward) return 0;
-        
-        const newPoints = state.points + badgeReward.reward;
-        const newTotalEarned = (state.totalEarned || 0) + badgeReward.reward;
-        let userLevel = state.userLevel;
-        if (newTotalEarned >= 20000) userLevel = 'Gold';
-        else if (newTotalEarned >= 10000) userLevel = 'Silver';
-        else if (newTotalEarned >= 5000) userLevel = 'Bronze';
-        
-        const historyRecord: HistoryRecord = {
-          id: Date.now().toString(),
-          type: 'reward',
-          amount: badgeReward.reward,
-          source: `Badge: ${badgeId}`,
-          timestamp: Date.now(),
-          date: new Date().toLocaleDateString(),
-        };
-        
-        set({
-          points: newPoints,
-          totalEarned: newTotalEarned,
-          userLevel,
-          badgeRewards: state.badgeRewards.map(br => 
-            br.id === badgeId ? { ...br, claimed: true } : br
-          ),
-          history: [historyRecord, ...state.history].slice(0, 100),
-        });
-        return badgeReward.reward;
-      },
-      setReferralCode: (code) => set({ referralCode: code }),
-      enterReferralCode: (code) => {
-        const state = get();
-        if (state.enteredReferralCode) {
-          return false;
-        }
-        if (code === state.referralCode) {
-          return false;
-        }
-        if (!code.startsWith('DRPN-') || code.length < 10) {
-          return false;
-        }
-        set({ enteredReferralCode: code });
-        return true;
-      },
-      setUsername: (username) => {
-        const state = get();
-        if (!state.uniqueId) {
+      
+      setUsername: (name) => {
+        if (!get().uniqueId) {
           const newId = Math.floor(100000 + Math.random() * 900000).toString();
-          set({ username, uniqueId: newId });
+          set({ username: name, uniqueId: newId });
         } else {
-          set({ username });
+          set({ username: name });
         }
       },
+      
       setTheme: (theme) => set({ theme }),
-      unlockTheme: (theme) => {
+      
+      unlockTheme: (targetTheme) => {
         const state = get();
-        if (state.unlockedThemes.includes(theme)) return true;
-        if (state.points < THEME_COST) return false;
-        
-        const historyRecord: HistoryRecord = {
-          id: Date.now().toString(),
-          type: 'purchase',
-          amount: THEME_COST,
-          source: `Unlocked Theme: ${theme}`,
-          timestamp: Date.now(),
-          date: new Date().toLocaleDateString(),
-        };
-        
-        set({
-          points: state.points - THEME_COST,
-          unlockedThemes: [...state.unlockedThemes, theme],
-          history: [historyRecord, ...state.history].slice(0, 100),
-        });
-        return true;
-      },
-      getDailyShareCount: () => {
-        const state = get();
-        state.checkDailyReset();
-        const today = new Date().toDateString();
-        return state.dailyShares.filter(s => s.date === today).length;
-      },
-      recordShare: (platform: string) => {
-        const state = get();
-        state.checkDailyReset();
-        const today = new Date().toDateString();
-        const todayPlatformShares = state.dailyShares.filter(s => s.date === today && s.platform === platform);
-        
-        if (todayPlatformShares.length >= 1) {
-          return { success: false, reward: 0, message: `You have already shared on ${platform} today.` };
+        if (state.unlockedThemes.includes(targetTheme)) return true;
+        if (state.points >= 1000) {
+          set((state) => ({
+            points: state.points - 1000,
+            unlockedThemes: [...state.unlockedThemes, targetTheme],
+          }));
+          return true;
         }
-        
-        const reward = 100;
-        const newShare: ShareRecord = { date: today, platform, timestamp: Date.now() };
-        const newPoints = state.points + reward;
-        const newTotalEarned = (state.totalEarned || 0) + reward;
-        let userLevel = state.userLevel;
-        if (newTotalEarned >= 20000) userLevel = 'Gold';
-        else if (newTotalEarned >= 10000) userLevel = 'Silver';
-        else if (newTotalEarned >= 5000) userLevel = 'Bronze';
-        
-        const historyRecord: HistoryRecord = {
-          id: Date.now().toString(),
-          type: 'reward',
-          amount: reward,
-          source: `Share: ${platform}`,
-          timestamp: Date.now(),
-          date: new Date().toLocaleDateString(),
-        };
-        
-        const filteredShares = state.dailyShares.filter(s => s.date === today);
-        
-        set({ 
-          dailyShares: [...filteredShares, newShare],
-          points: newPoints,
-          totalEarned: newTotalEarned,
-          userLevel,
-          history: [historyRecord, ...state.history].slice(0, 100),
-        });
-        
-        return { success: true, reward, message: `Share successful! You earned ${reward} drips.` };
+        return false;
       },
+
+      checkDailyReset: () => {
+        const now = new Date();
+        const lastReset = new Date(get().lastEarningsReset);
+        
+        if (
+          now.getDate() !== lastReset.getDate() ||
+          now.getMonth() !== lastReset.getMonth() ||
+          now.getFullYear() !== lastReset.getFullYear()
+        ) {
+          set({ dailyEarnings: 0, lastEarningsReset: Date.now() });
+        }
+      },
+
       setWalletAddress: (address) => set({ walletAddress: address }),
-      createRedemption: (dripsAmount, usdAmount, xrpAmount, xrpPrice, walletAddress) => {
-        const state = get();
-        const redemption: RedemptionRecord = {
-          id: Date.now().toString(),
-          dripsAmount,
-          usdAmount,
-          xrpAmount,
-          xrpPrice,
-          walletAddress,
+
+      createRedemption: (drips, usd, xrp, price, wallet) => {
+        const newRedemption: Redemption = {
+          id: Math.random().toString(36).substring(2, 9),
+          dripsAmount: drips,
+          usdAmount: usd,
+          xrpAmount: xrp,
+          xrpPrice: price,
+          walletAddress: wallet,
           status: 'pending',
-          createdAt: Date.now(),
-        };
-        
-        const historyRecord: HistoryRecord = {
-          id: redemption.id,
-          type: 'redemption',
-          amount: dripsAmount,
-          source: 'Redemption Request',
           timestamp: Date.now(),
-          date: new Date().toLocaleDateString(),
-          xrpAmount,
-          status: 'pending',
         };
-        
-        set({
-          points: state.points - dripsAmount,
-          redemptions: [redemption, ...state.redemptions],
-          history: [historyRecord, ...state.history].slice(0, 100),
-        });
-        
-        return redemption;
+        set((state) => ({
+          points: state.points - drips,
+          redemptions: [newRedemption, ...state.redemptions],
+        }));
+        return newRedemption;
       },
-      updateRedemptionStatus: (id, status, transactionId) => {
-        const state = get();
-        set({
-          redemptions: state.redemptions.map(r => 
-            r.id === id ? { 
-              ...r, 
-              status, 
-              transactionId,
-              completedAt: status === 'completed' ? Date.now() : r.completedAt 
-            } : r
+
+      updateRedemptionStatus: (id, status, txId) => {
+        set((state) => ({
+          redemptions: state.redemptions.map((r) =>
+            r.id === id ? { ...r, status, transactionId: txId } : r
           ),
-          history: state.history.map(h =>
-            h.id === id ? { ...h, status, transactionId } : h
-          ),
-        });
+        }));
       },
+
+      addBadge: (badgeId) => {
+        if (!get().badges.includes(badgeId)) {
+          set((state) => ({ badges: [...state.badges, badgeId] }));
+        }
+      },
+
+      claimBadgeReward: (badgeId) => {
+        const rewards: Record<string, number> = {
+          first_video: 50,
+          bronze_member: 250,
+          silver_member: 500,
+          gold_member: 1000,
+          first_cashout: 500,
+          referrer: 250,
+          week_warrior: 350,
+          monthly_master: 1500,
+        };
+        const reward = rewards[badgeId] || 0;
+        if (reward > 0) {
+          set((state) => ({ points: state.points + reward }));
+        }
+        return reward;
+      },
+
+      recordShare: (platform) => {
+        return { success: true, message: "Shared successfully!" };
+      },
+
+      getDailyShareCount: (platform) => 0,
+
       setPrivacyRegion: (region) => set((state) => ({
-        privacyConsent: { ...state.privacyConsent, region },
+        privacyConsent: { ...state.privacyConsent, region }
       })),
+
       setEUConsent: (consent) => set((state) => ({
         privacyConsent: { 
           ...state.privacyConsent, 
           euConsent: consent,
-          consentTimestamp: Date.now(),
-        },
+          consentTimestamp: Date.now()
+        }
       })),
+
       setEUDataPreferences: (prefs) => set((state) => ({
-        privacyConsent: { ...state.privacyConsent, euDataPreferences: prefs },
+        privacyConsent: { 
+          ...state.privacyConsent, 
+          euDataPreferences: prefs,
+          consentTimestamp: Date.now()
+        }
       })),
+
       setEUVendorConsents: (consents) => set((state) => ({
-        privacyConsent: { ...state.privacyConsent, euVendorConsents: consents },
+        privacyConsent: { 
+          ...state.privacyConsent, 
+          euVendorConsents: consents,
+          consentTimestamp: Date.now()
+        }
       })),
+
       setUSDataSharing: (allow) => set((state) => ({
         privacyConsent: { 
           ...state.privacyConsent, 
           usAllowDataSharing: allow,
-          consentTimestamp: Date.now(),
-        },
+          consentTimestamp: Date.now()
+        }
       })),
+
       completePrivacySetup: () => set((state) => ({
-        privacyConsent: { ...state.privacyConsent, hasCompletedPrivacySetup: true },
+        privacyConsent: { ...state.privacyConsent, hasCompletedPrivacySetup: true }
       })),
+
       revokePrivacyConsent: () => set((state) => ({
         privacyConsent: {
           region: state.privacyConsent.region,
@@ -519,13 +344,6 @@ export const useStore = create<AppState>()(
     {
       name: 'dripn-storage',
       storage: createJSONStorage(() => AsyncStorage),
-      onRehydrateStorage: () => (state) => {
-        if (state && !state.referralCode) {
-          state.setReferralCode(generateReferralCode());
-        }
-      }
     }
   )
 );
-
-export { BADGE_REWARDS };
