@@ -148,7 +148,7 @@ interface AppState {
   addPoints: (amount: number, source?: string) => Promise<void>;
   completeOnboarding: () => void;
   acceptTerms: () => void;
-  setUsername: (name: string) => Promise<void>;
+  setUsername: (name: string, referralCode?: string) => Promise<{ success: boolean; message?: string }>;
   setTheme: (theme: ThemeMode) => void;
   unlockTheme: (theme: ThemeMode) => boolean;
   checkDailyReset: () => Promise<void>;
@@ -206,7 +206,7 @@ export const useStore = create<AppState>()(
 
       addPoints: async (amount, source = 'reward') => {
         const state = get();
-        state.checkDailyReset();
+        await state.checkDailyReset();
         const currentDaily = get().dailyEarnings;
         const DAILY_CAP = 5000;
         
@@ -255,18 +255,34 @@ export const useStore = create<AppState>()(
       completeOnboarding: () => set({ hasCompletedOnboarding: true }),
       acceptTerms: () => set({ hasAcceptedTerms: true }),
       
-      setUsername: async (name) => {
+      setUsername: async (name, code) => {
         const state = get();
         let newId = state.uniqueId;
         if (!newId) {
           newId = Math.floor(100000 + Math.random() * 900000).toString();
         }
 
-        set({ username: name, uniqueId: newId });
-
         // Sync to Supabase if session exists
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user) {
+          // If referral code provided, validate and link first
+          if (code) {
+            const { data: referrer, error: findError } = await supabase
+              .from('users')
+              .select('id')
+              .eq('referral_code', code.toUpperCase())
+              .single();
+
+            if (!findError && referrer && referrer.id !== session.user.id) {
+              await supabase.from('referrals').insert({
+                referrer_id: referrer.id,
+                referee_id: session.user.id,
+                referral_code: code.toUpperCase()
+              });
+              set({ referrerId: referrer.id });
+            }
+          }
+
           const { data: user } = await supabase.from('users').update({ 
             username: name,
             unique_id: newId
@@ -276,6 +292,9 @@ export const useStore = create<AppState>()(
             set({ referralCode: user.referral_code });
           }
         }
+
+        set({ username: name, uniqueId: newId });
+        return { success: true };
       },
 
       setReferralCode: async (code) => {

@@ -51,25 +51,11 @@ export default function ReferralScreen() {
         <Text style={[styles.subheader, { color: themeConfig.textMuted }]}>Invite friends and earn together!</Text>
 
         {!referrerId && (
-          <View style={[styles.enterCodeCard, { backgroundColor: themeConfig.card, borderColor: themeConfig.primary }]}>
-            <Text style={[styles.enterCodeLabel, { color: themeConfig.text }]}>Have a referral code?</Text>
-            <View style={styles.inputRow}>
-              <TextInput
-                style={[styles.input, { backgroundColor: themeConfig.background, color: themeConfig.text }]}
-                placeholder="Enter code (e.g. ABC123XY)"
-                placeholderTextColor={themeConfig.textMuted}
-                value={inputCode}
-                onChangeText={setInputCode}
-                autoCapitalize="characters"
-              />
-              <TouchableOpacity 
-                style={[styles.applyButton, { backgroundColor: themeConfig.primary, opacity: loading ? 0.7 : 1 }]} 
-                onPress={handleEnterCode}
-                disabled={loading}
-              >
-                <Text style={styles.applyButtonText}>{loading ? '...' : 'Apply'}</Text>
-              </TouchableOpacity>
-            </View>
+          <View style={[styles.infoBox, { backgroundColor: isDark ? themeConfig.card : '#fff9db', borderColor: '#fcc419', borderWidth: 1 }]}>
+            <MaterialCommunityIcons name="alert-circle-outline" size={20} color="#f08c00" />
+            <Text style={[styles.infoText, { color: isDark ? themeConfig.textMuted : '#862e00' }]}>
+              Referral codes can only be entered during sign-up. You currently don't have an active referral connection.
+            </Text>
           </View>
         )}
 

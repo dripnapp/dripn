@@ -50,6 +50,7 @@ export default function UsernameSetup({
   onClose,
 }: UsernameSetupProps) {
   const [username, setUsername] = useState(currentUsername || "");
+  const [referralCode, setReferralCode] = useState("");
   const [error, setError] = useState("");
   const [checking, setChecking] = useState(false);
 
@@ -71,6 +72,7 @@ export default function UsernameSetup({
 
   const handleSave = async () => {
     const trimmedUsername = username.trim();
+    const trimmedCode = referralCode.trim();
     const validationError = validateUsername(trimmedUsername);
 
     if (validationError) {
@@ -82,31 +84,18 @@ export default function UsernameSetup({
     setError("");
 
     try {
-      // 1. Check for existing session
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+      const { data: { session } } = await supabase.auth.getSession();
 
       if (session?.user) {
-        // User already signed in → update username in DB
-        const { error: updateError } = await supabase
-          .from("users")
-          .update({ username: trimmedUsername })
-          .eq("id", session.user.id);
-
-        if (updateError) throw updateError;
-
-        useStore.getState().setUsername(trimmedUsername);
-        Alert.alert("Success", "Username updated!");
+        await useStore.getState().setUsername(trimmedUsername, trimmedCode);
+        Alert.alert("Success", "Profile updated!");
         onSave(trimmedUsername);
         onClose();
         return;
       }
 
-      // 2. New user → sign up with Supabase
-      // Temp email (replace with real email input field later)
       const tempEmail = `${trimmedUsername.toLowerCase().replace(/\s+/g, "")}@dripn.local`;
-      const tempPassword = "tempSecurePass123!"; // Replace with real password prompt later
+      const tempPassword = "tempSecurePass123!";
 
       const { data, error: signUpError } = await supabase.auth.signUp({
         email: tempEmail,
@@ -121,29 +110,21 @@ export default function UsernameSetup({
       if (signUpError) throw signUpError;
 
       if (data.user) {
-        // Explicitly create the user row if the trigger didn't handle it or to be safe
-        const { error: insertError } = await supabase
-          .from("users")
-          .upsert({ 
-            id: data.user.id,
-            username: trimmedUsername,
-            total_earned: 0,
-            points: 0
-          }, { onConflict: 'id' });
+        await supabase.from("users").upsert({ 
+          id: data.user.id,
+          username: trimmedUsername,
+          total_earned: 0,
+          points: 0
+        }, { onConflict: 'id' });
 
-        if (insertError) {
-          console.warn("Manual user row insertion error (might already exist):", insertError);
-        }
-
-        useStore.getState().setUsername(trimmedUsername);
+        await useStore.getState().setUsername(trimmedUsername, trimmedCode);
         Alert.alert("Welcome!", "Account created successfully.");
         onSave(trimmedUsername);
         onClose();
       }
     } catch (err: any) {
-      console.error("Username save failed:", err);
-      setError(err.message || "Failed to save username. Please try again.");
-      Alert.alert("Error", err.message || "Failed to create/update account.");
+      console.error("Signup failed:", err);
+      setError(err.message || "Failed to save profile.");
     } finally {
       setChecking(false);
     }
@@ -201,6 +182,21 @@ export default function UsernameSetup({
             <Text style={styles.charCount}>{username.length}/20</Text>
           </View>
 
+          {!currentUsername && (
+            <View style={[styles.inputContainer, { marginTop: 10 }]}>
+              <TextInput
+                style={styles.input}
+                value={referralCode}
+                onChangeText={setReferralCode}
+                placeholder="Referral Code (Optional)"
+                placeholderTextColor="#adb5bd"
+                autoCapitalize="characters"
+                autoCorrect={false}
+              />
+              <MaterialCommunityIcons name="ticket-percent" size={20} color="#adb5bd" style={styles.inputIcon} />
+            </View>
+          )}
+
           {error ? (
             <View style={styles.errorContainer}>
               <MaterialCommunityIcons
@@ -238,7 +234,6 @@ export default function UsernameSetup({
   );
 }
 
-// Styles remain exactly the same as your original
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
@@ -334,12 +329,16 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: "center",
   },
-  saveButtonDisabled: {
-    backgroundColor: "#adb5bd",
-  },
   saveButtonText: {
     color: "#fff",
     fontSize: 16,
     fontWeight: "600",
+  },
+  saveButtonDisabled: {
+    backgroundColor: "#adb5bd",
+  },
+  inputIcon: {
+    position: "absolute",
+    right: 15,
   },
 });
