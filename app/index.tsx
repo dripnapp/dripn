@@ -325,6 +325,13 @@ export default function Home() {
       addBadge('first_video');
       const badgeReward = claimBadgeReward('first_video');
       await addPointsServer(badgeReward, "Badge: First Steps");
+      Alert.alert(
+        "Badge Unlocked!",
+        `You earned ${drips} drips + ${badgeReward} bonus drips for completing your first video!`,
+        [{ text: "Awesome!" }]
+      );
+    } else {
+      Alert.alert("Success!", `You earned ${drips} drips!`);
     }
   };
 
@@ -358,7 +365,7 @@ export default function Home() {
         );
       }
 
-      // Removed alert as per user preference for silent background updates
+      Alert.alert("Shared!", result.message);
     } catch (error) {
       console.error("Error sharing:", error);
     }
