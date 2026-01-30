@@ -156,13 +156,13 @@ interface AppState {
   recordShare: (platform: string) => { success: boolean; message: string };
   getDailyShareCount: (platform: string) => number;
   
-  setPrivacyRegion: (region: 'EU' | 'US' | 'OTHER') => void;
-  setEUConsent: (consent: boolean) => void;
-  setEUDataPreferences: (prefs: PrivacyConsent['euDataPreferences']) => void;
-  setEUVendorConsents: (consents: PrivacyConsent['euVendorConsents']) => void;
-  setUSDataSharing: (allow: boolean) => void;
-  completePrivacySetup: () => void;
-  revokePrivacyConsent: () => void;
+  setPrivacyRegion: (region: 'EU' | 'US' | 'OTHER') => Promise<void>;
+  setEUConsent: (consent: boolean) => Promise<void>;
+  setEUDataPreferences: (prefs: PrivacyConsent['euDataPreferences']) => Promise<void>;
+  setEUVendorConsents: (consents: PrivacyConsent['euVendorConsents']) => Promise<void>;
+  setUSDataSharing: (allow: boolean) => Promise<void>;
+  completePrivacySetup: () => Promise<void>;
+  revokePrivacyConsent: () => Promise<void>;
 }
 
 export const useStore = create<AppState>()(
@@ -408,57 +408,125 @@ export const useStore = create<AppState>()(
 
       getDailyShareCount: (platform) => 0,
 
-      setPrivacyRegion: (region) => set((state) => ({
-        privacyConsent: { ...state.privacyConsent, region }
-      })),
-
-      setEUConsent: (consent) => set((state) => ({
-        privacyConsent: { 
-          ...state.privacyConsent, 
-          euConsent: consent,
-          consentTimestamp: Date.now()
+      setPrivacyRegion: async (region) => {
+        set((state) => ({
+          privacyConsent: { ...state.privacyConsent, region }
+        }));
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          await supabase.from('privacy_consent').upsert({
+            user_id: session.user.id,
+            region: region,
+            updated_at: new Date().toISOString()
+          }, { onConflict: 'user_id' });
         }
-      })),
+      },
 
-      setEUDataPreferences: (prefs) => set((state) => ({
-        privacyConsent: { 
-          ...state.privacyConsent, 
-          euDataPreferences: prefs,
-          consentTimestamp: Date.now()
+      setEUConsent: async (consent) => {
+        const timestamp = Date.now();
+        set((state) => ({
+          privacyConsent: { 
+            ...state.privacyConsent, 
+            euConsent: consent,
+            consentTimestamp: timestamp
+          }
+        }));
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          await supabase.from('privacy_consent').upsert({
+            user_id: session.user.id,
+            eu_consent: consent,
+            consent_timestamp: new Date(timestamp).toISOString(),
+            updated_at: new Date().toISOString()
+          }, { onConflict: 'user_id' });
         }
-      })),
+      },
 
-      setEUVendorConsents: (consents) => set((state) => ({
-        privacyConsent: { 
-          ...state.privacyConsent, 
-          euVendorConsents: consents,
-          consentTimestamp: Date.now()
+      setEUDataPreferences: async (prefs) => {
+        const timestamp = Date.now();
+        set((state) => ({
+          privacyConsent: { 
+            ...state.privacyConsent, 
+            euDataPreferences: prefs,
+            consentTimestamp: timestamp
+          }
+        }));
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          await supabase.from('privacy_consent').upsert({
+            user_id: session.user.id,
+            eu_data_preferences: prefs,
+            consent_timestamp: new Date(timestamp).toISOString(),
+            updated_at: new Date().toISOString()
+          }, { onConflict: 'user_id' });
         }
-      })),
+      },
 
-      setUSDataSharing: (allow) => set((state) => ({
-        privacyConsent: { 
-          ...state.privacyConsent, 
-          usAllowDataSharing: allow,
-          consentTimestamp: Date.now()
+      setEUVendorConsents: async (consents) => {
+        const timestamp = Date.now();
+        set((state) => ({
+          privacyConsent: { 
+            ...state.privacyConsent, 
+            euVendorConsents: consents,
+            consentTimestamp: timestamp
+          }
+        }));
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          await supabase.from('privacy_consent').upsert({
+            user_id: session.user.id,
+            eu_vendor_consents: consents,
+            consent_timestamp: new Date(timestamp).toISOString(),
+            updated_at: new Date().toISOString()
+          }, { onConflict: 'user_id' });
         }
-      })),
+      },
 
-      completePrivacySetup: () => set((state) => ({
-        privacyConsent: { ...state.privacyConsent, hasCompletedPrivacySetup: true }
-      })),
+      setUSDataSharing: async (allow) => {
+        const timestamp = Date.now();
+        set((state) => ({
+          privacyConsent: { 
+            ...state.privacyConsent, 
+            usAllowDataSharing: allow,
+            consentTimestamp: timestamp
+          }
+        }));
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          await supabase.from('privacy_consent').upsert({
+            user_id: session.user.id,
+            us_allow_data_sharing: allow,
+            consent_timestamp: new Date(timestamp).toISOString(),
+            updated_at: new Date().toISOString()
+          }, { onConflict: 'user_id' });
+        }
+      },
 
-      revokePrivacyConsent: () => set((state) => ({
-        privacyConsent: {
-          region: state.privacyConsent.region,
-          hasCompletedPrivacySetup: false,
-          euConsent: null,
-          euDataPreferences: null,
-          euVendorConsents: null,
-          usAllowDataSharing: null,
-          consentTimestamp: null,
-        },
-      })),
+      completePrivacySetup: async () => {
+        set((state) => ({
+          privacyConsent: { ...state.privacyConsent, hasCompletedPrivacySetup: true }
+        }));
+        // Optional: you could mark a flag in users table if needed, 
+        // but privacy_consent table existence usually suffices.
+      },
+
+      revokePrivacyConsent: async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          await supabase.from('privacy_consent').delete().eq('user_id', session.user.id);
+        }
+        set((state) => ({
+          privacyConsent: {
+            region: state.privacyConsent.region,
+            hasCompletedPrivacySetup: false,
+            euConsent: null,
+            euDataPreferences: null,
+            euVendorConsents: null,
+            usAllowDataSharing: null,
+            consentTimestamp: null,
+          },
+        }));
+      },
     }),
     {
       name: 'dripn-storage',
