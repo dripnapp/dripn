@@ -128,7 +128,7 @@ export default function UsernameSetup({
             id: data.user.id,
             username: trimmedUsername,
             total_earned: 0,
-            current_points: 0
+            points: 0
           }, { onConflict: 'id' });
 
         if (insertError) {
