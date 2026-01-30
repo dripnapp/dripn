@@ -149,8 +149,8 @@ interface AppState {
   unlockTheme: (theme: ThemeMode) => boolean;
   checkDailyReset: () => void;
   setWalletAddress: (address: string) => void;
-  createRedemption: (drips: number, usd: number, xrp: number, price: number, wallet: string) => Redemption;
-  updateRedemptionStatus: (id: string, status: Redemption['status'], txId?: string) => void;
+  createRedemption: (drips: number, usd: number, xrp: number, price: number, wallet: string) => Promise<Redemption>;
+  updateRedemptionStatus: (id: string, status: Redemption['status'], txId?: string) => Promise<void>;
   addBadge: (badgeId: string) => Promise<void>;
   claimBadgeReward: (badgeId: string) => number;
   recordShare: (platform: string) => { success: boolean; message: string };
@@ -232,6 +232,15 @@ export const useStore = create<AppState>()(
             date: dateStr,
             earnings: state.dailyEarnings + possibleAdd
           }, { onConflict: 'user_id,date' });
+
+          // Sync history table
+          await supabase.from('history').insert({
+            user_id: session.user.id,
+            type: 'reward',
+            amount: possibleAdd,
+            source: 'reward', // Fallback if source is not defined
+            status: 'completed'
+          });
         }
       },
 
@@ -298,7 +307,7 @@ export const useStore = create<AppState>()(
 
       setWalletAddress: (address) => set({ walletAddress: address }),
 
-      createRedemption: (drips, usd, xrp, price, wallet) => {
+      createRedemption: async (drips, usd, xrp, price, wallet) => {
         const newRedemption: Redemption = {
           id: Math.random().toString(36).substring(2, 9),
           dripsAmount: drips,
@@ -313,15 +322,53 @@ export const useStore = create<AppState>()(
           points: state.points - drips,
           redemptions: [newRedemption, ...state.redemptions],
         }));
+
+        // Sync to Supabase
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          await supabase.from('history').insert({
+            user_id: session.user.id,
+            type: 'redemption',
+            amount: drips,
+            source: 'CoinGate',
+            xrp_amount: xrp,
+            status: 'pending',
+            details: { 
+              usd_amount: usd, 
+              xrp_price: price, 
+              wallet_address: wallet,
+              local_id: newRedemption.id 
+            }
+          });
+
+          // Also update users table points
+          await supabase.from('users').update({
+            points: get().points
+          }).eq('id', session.user.id);
+        }
+
         return newRedemption;
       },
 
-      updateRedemptionStatus: (id, status, txId) => {
+      updateRedemptionStatus: async (id, status, txId) => {
         set((state) => ({
           redemptions: state.redemptions.map((r) =>
             r.id === id ? { ...r, status, transactionId: txId } : r
           ),
         }));
+
+        // Sync to Supabase history
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          await supabase.from('history')
+            .update({ 
+              status: status,
+              transaction_id: txId
+            })
+            .eq('user_id', session.user.id)
+            .eq('type', 'redemption')
+            .filter('details->>local_id', 'eq', id);
+        }
       },
 
       addBadge: async (badgeId) => {

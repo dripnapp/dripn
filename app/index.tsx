@@ -395,7 +395,7 @@ export default function Home() {
       const usdAmount = dripsAmount * DRIPS_TO_USD_RATE;
       const xrpAmount = usdAmount / xrpPrice;
 
-      const redemption = createRedemption(
+      const redemption = await createRedemption(
         dripsAmount,
         usdAmount,
         xrpAmount,
@@ -403,9 +403,9 @@ export default function Home() {
         walletAddress || ""
       );
 
-      setTimeout(() => {
+      setTimeout(async () => {
         const mockTransactionId = `TXN-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
-        updateRedemptionStatus(redemption.id, "completed", mockTransactionId);
+        await updateRedemptionStatus(redemption.id, "completed", mockTransactionId);
       }, 2000);
 
       return {
