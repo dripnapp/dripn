@@ -4,6 +4,24 @@ import { createClient } from "@supabase/supabase-js";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useStore } from "../store/useStore";
 import { Alert } from "react-native";
+import Constants from "expo-constants";
+import { Platform } from "react-native";
+
+// ────────────────────────────────────────────────
+// Environment detection (critical fix for Expo Go / web crashes)
+// ────────────────────────────────────────────────
+const isProblematicEnv = () => {
+  // Expo Go detection
+  if (Constants.appOwnership === "expo") return true;
+
+  // Web / bundler / preview detection
+  if (Platform.OS === "web") return true;
+
+  // Extra safety: if window is defined (browser-like env)
+  if (typeof window !== "undefined") return true;
+
+  return false;
+};
 
 // ────────────────────────────────────────────────
 // Environment variables
@@ -11,9 +29,11 @@ import { Alert } from "react-native";
 const SUPABASE_URL =
   process.env.EXPO_PUBLIC_SUPABASE_URL ||
   "https://fxbyabofsejlhtbboynn.supabase.co";
+
 const SUPABASE_ANON_KEY =
   process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ||
   "sb_publishable_33HgxcoB8fqDCE514PdkFw_PojUYBTL";
+
 const VERIFY_REWARD_URL =
   process.env.EXPO_PUBLIC_VERIFY_REWARD_URL ||
   "https://fxbyabofsejlhtbboynn.supabase.co/functions/v1/verify-reward";
@@ -24,13 +44,14 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
 }
 
 // ────────────────────────────────────────────────
-// Supabase client with proper auth persistence
+// Supabase client with safe auth persistence
 // ────────────────────────────────────────────────
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
-    storage: AsyncStorage,
-    autoRefreshToken: true,
-    persistSession: true,
+    // Disable storage in Expo Go / web to prevent "window is not defined" crash
+    storage: isProblematicEnv() ? undefined : AsyncStorage,
+    autoRefreshToken: !isProblematicEnv(),
+    persistSession: !isProblematicEnv(),
     detectSessionInUrl: false,
   },
 });
@@ -60,23 +81,18 @@ export const addPointsServer = async (
   addPoints(amount);
 
   try {
-    // 2. Get current authenticated session or sign in anonymously
+    // 2. Get current authenticated session
     let {
       data: { session },
       error: sessionError,
     } = await supabase.auth.getSession();
-
-    if (!session) {
-      console.log("No session found, reward tracked locally only.");
-      return { success: true, synced: false };
-    }
 
     if (!session?.access_token) {
       console.warn(
         "No valid session - points added locally only",
         sessionError,
       );
-      // Removed offline alert for smoother user experience
+      // Removed offline alert for smoother UX
       return { success: true, synced: false };
     }
 
@@ -120,7 +136,9 @@ export const addPointsServer = async (
     }
 
     if (response.status === 404) {
-      console.error("Reward verification endpoint not found (404). Check Edge Function deployment.");
+      console.error(
+        "Reward verification endpoint not found (404). Check Edge Function deployment.",
+      );
       return { success: true, synced: false };
     }
 
