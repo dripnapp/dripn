@@ -1,67 +1,58 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, RefreshControl } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useStore, THEME_CONFIGS } from '../src/store/useStore';
 import AppHeader from '../src/components/AppHeader';
-
-const baseLeaderboard = [
-  { username: 'CryptoKing', points: 12450, level: 'Gold' },
-  { username: 'XRPHunter', points: 9820, level: 'Gold' },
-  { username: 'RewardChaser', points: 7650, level: 'Gold' },
-  { username: 'TokenMaster', points: 5430, level: 'Gold' },
-  { username: 'BlockExplorer', points: 4210, level: 'Gold' },
-  { username: 'CoinCollector', points: 3890, level: 'Gold' },
-  { username: 'DigiEarner', points: 2750, level: 'Silver' },
-  { username: 'CashFlowPro', points: 1980, level: 'Silver' },
-  { username: 'DripsPilot', points: 1540, level: 'Silver' },
-  { username: 'RewardRookie', points: 890, level: 'Bronze' },
-];
+import { supabase } from '../src/utils/supabase';
 
 export default function LeaderboardScreen() {
   const { points, userLevel, username, theme, totalEarned } = useStore();
   const themeConfig = THEME_CONFIGS[theme];
   const isDark = themeConfig.isDark;
   const [refreshing, setRefreshing] = useState(false);
+  const [leaderboardData, setLeaderboardData] = useState<any[]>([]);
+  const [userRank, setUserRank] = useState<number>(0);
 
   const displayName = username || 'You';
 
-  const leaderboardData = useMemo(() => {
-    const currentUser = {
-      username: displayName,
-      points: totalEarned || points,
-      level: userLevel,
-      isCurrentUser: true,
-    };
+  const fetchLeaderboard = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('leaderboard_points')
+        .select('*')
+        .limit(10);
+      
+      if (error) throw error;
 
-    const allUsers = [
-      ...baseLeaderboard.map(u => ({ ...u, isCurrentUser: false })),
-      currentUser,
-    ];
+      if (data) {
+        setLeaderboardData(data.map(u => ({
+          ...u,
+          level: u.user_level, // Match the view's column name to our internal name
+          isCurrentUser: u.username === displayName
+        })));
 
-    const sorted = allUsers.sort((a, b) => b.points - a.points);
-    const ranked = sorted.map((user, index) => ({
-      ...user,
-      rank: index + 1,
-    }));
+        // Find current user's rank
+        const currentUser = data.find(u => u.username === displayName);
+        if (currentUser) {
+          setUserRank(currentUser.rank);
+        } else {
+          // If not in top 100, we'd need a separate query or just show >100
+          setUserRank(0); 
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching leaderboard:', err);
+    }
+  };
 
-    return ranked.slice(0, 10);
-  }, [totalEarned, points, userLevel, displayName]);
+  useEffect(() => {
+    fetchLeaderboard();
+  }, [displayName]);
 
-  const userRank = useMemo(() => {
-    const allUsers = [
-      ...baseLeaderboard.map(u => ({ ...u, isCurrentUser: false })),
-      { username: displayName, points: totalEarned || points, level: userLevel, isCurrentUser: true },
-    ];
-    const sorted = allUsers.sort((a, b) => b.points - a.points);
-    const userIndex = sorted.findIndex(u => u.isCurrentUser);
-    return userIndex + 1;
-  }, [totalEarned, points, userLevel, displayName]);
-
-  const onRefresh = () => {
+  const onRefresh = async () => {
     setRefreshing(true);
-    setTimeout(() => {
-      setRefreshing(false);
-    }, 500);
+    await fetchLeaderboard();
+    setRefreshing(false);
   };
 
   const getRankColor = (rank: number) => {
@@ -92,7 +83,7 @@ export default function LeaderboardScreen() {
         <View style={[styles.yourRankCard, { backgroundColor: themeConfig.primary }]}>
           <View style={styles.yourRankLeft}>
             <Text style={styles.yourRankLabel}>Your Rank</Text>
-            <Text style={styles.yourRankNumber}>#{userRank}</Text>
+            <Text style={styles.yourRankNumber}>{userRank > 0 ? `#${userRank}` : 'N/A'}</Text>
           </View>
           <View style={styles.yourRankRight}>
             <Text style={styles.yourPoints}>{(totalEarned || points).toLocaleString()} drps</Text>
@@ -139,7 +130,7 @@ export default function LeaderboardScreen() {
         <View style={[styles.infoBox, { backgroundColor: isDark ? 'rgba(77,171,247,0.1)' : '#e7f5ff' }]}>
           <MaterialCommunityIcons name="information-outline" size={18} color="#4dabf7" />
           <Text style={[styles.infoText, { color: isDark ? '#4dabf7' : '#1971c2' }]}>
-            Leaderboard uses total earned drips. Keep earning to climb the ranks!
+            Leaderboard uses current drips. Keep earning to climb the ranks!
           </Text>
         </View>
       </ScrollView>
