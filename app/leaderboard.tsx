@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { View, Text, StyleSheet, ScrollView, RefreshControl } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, RefreshControl, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useStore, THEME_CONFIGS } from '../src/store/useStore';
 import AppHeader from '../src/components/AppHeader';
@@ -10,33 +10,34 @@ export default function LeaderboardScreen() {
   const themeConfig = THEME_CONFIGS[theme];
   const isDark = themeConfig.isDark;
   const [refreshing, setRefreshing] = useState(false);
-  const [leaderboardData, setLeaderboardData] = useState<any[]>([]);
+  const [leaderboardType, setLeaderboardType] = useState<'points' | 'total_earned'>('points');
+  const [leaderboardData, setLeaderboardDataState] = useState<any[]>([]);
   const [userRank, setUserRank] = useState<number>(0);
 
   const displayName = username || 'You';
 
   const fetchLeaderboard = async () => {
     try {
+      const tableName = leaderboardType === 'points' ? 'leaderboard_points' : 'leaderboard_total_earned';
       const { data, error } = await supabase
-        .from('leaderboard_points')
+        .from(tableName)
         .select('*')
         .limit(10);
       
       if (error) throw error;
 
       if (data) {
-        setLeaderboardData(data.map(u => ({
+        setLeaderboardDataState(data.map(u => ({
           ...u,
-          level: u.user_level, // Match the view's column name to our internal name
+          points: leaderboardType === 'points' ? u.points : u.total_earned,
+          level: u.user_level,
           isCurrentUser: u.username === displayName
         })));
 
-        // Find current user's rank
         const currentUser = data.find(u => u.username === displayName);
         if (currentUser) {
           setUserRank(currentUser.rank);
         } else {
-          // If not in top 100, we'd need a separate query or just show >100
           setUserRank(0); 
         }
       }
@@ -47,7 +48,7 @@ export default function LeaderboardScreen() {
 
   useEffect(() => {
     fetchLeaderboard();
-  }, [displayName]);
+  }, [displayName, leaderboardType]);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -78,7 +79,24 @@ export default function LeaderboardScreen() {
         contentContainerStyle={styles.contentContainer}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
-        <Text style={[styles.subheader, { color: themeConfig.textMuted }]}>Top 10 earners this month</Text>
+        <View style={styles.tabContainer}>
+          <TouchableOpacity 
+            style={[styles.tab, leaderboardType === 'points' && { backgroundColor: themeConfig.primary }]}
+            onPress={() => setLeaderboardType('points')}
+          >
+            <Text style={[styles.tabText, leaderboardType === 'points' && styles.activeTabText]}>Current Drips</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.tab, leaderboardType === 'total_earned' && { backgroundColor: themeConfig.primary }]}
+            onPress={() => setLeaderboardType('total_earned')}
+          >
+            <Text style={[styles.tabText, leaderboardType === 'total_earned' && styles.activeTabText]}>Lifetime Earned</Text>
+          </TouchableOpacity>
+        </View>
+
+        <Text style={[styles.subheader, { color: themeConfig.textMuted }]}>
+          {leaderboardType === 'points' ? 'Top 10 by current balance' : 'Top 10 all-time earners'}
+        </Text>
 
         <View style={[styles.yourRankCard, { backgroundColor: themeConfig.primary }]}>
           <View style={styles.yourRankLeft}>
@@ -207,4 +225,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   infoText: { flex: 1, marginLeft: 10, fontSize: 13, color: '#1971c2' },
+  tabContainer: {
+    flexDirection: 'row',
+    backgroundColor: 'rgba(0,0,0,0.05)',
+    borderRadius: 12,
+    padding: 4,
+    marginBottom: 20,
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: 10,
+    alignItems: 'center',
+    borderRadius: 10,
+  },
+  tabText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#666',
+  },
+  activeTabText: {
+    color: '#fff',
+  },
 });
