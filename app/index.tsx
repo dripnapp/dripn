@@ -200,7 +200,7 @@ export default function Home() {
     if (!showSplash && hasCompletedOnboarding && hasAcceptedTerms) {
       initPrivacy();
     }
-  }, [showSplash, hasCompletedOnboarding, hasAcceptedTerms, privacyConsent.hasCompletedPrivacySetup]);
+  }, [showSplash, hasCompletedOnboarding, hasAcceptedTerms, privacyConsent.hasCompletedPrivacySetup, username]);
 
   const handleEUConsent = () => {
     setEUConsent(true);

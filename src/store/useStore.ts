@@ -614,12 +614,13 @@ export const useStore = create<AppState>()(
         }));
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user) {
-          await supabase.from('privacy_consent').upsert({
+          const { error } = await supabase.from('privacy_consent').upsert({
             user_id: session.user.id,
             eu_consent: consent,
             consent_timestamp: new Date(timestamp).toISOString(),
             updated_at: new Date().toISOString()
           }, { onConflict: 'user_id' });
+          if (error) console.error('Error saving EU consent:', error);
         }
       },
 
@@ -634,12 +635,13 @@ export const useStore = create<AppState>()(
         }));
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user) {
-          await supabase.from('privacy_consent').upsert({
+          const { error } = await supabase.from('privacy_consent').upsert({
             user_id: session.user.id,
             eu_data_preferences: prefs,
             consent_timestamp: new Date(timestamp).toISOString(),
             updated_at: new Date().toISOString()
           }, { onConflict: 'user_id' });
+          if (error) console.error('Error saving EU prefs:', error);
         }
       },
 
@@ -654,12 +656,13 @@ export const useStore = create<AppState>()(
         }));
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user) {
-          await supabase.from('privacy_consent').upsert({
+          const { error } = await supabase.from('privacy_consent').upsert({
             user_id: session.user.id,
             eu_vendor_consents: consents,
             consent_timestamp: new Date(timestamp).toISOString(),
             updated_at: new Date().toISOString()
           }, { onConflict: 'user_id' });
+          if (error) console.error('Error saving EU vendor consents:', error);
         }
       },
 
@@ -674,12 +677,13 @@ export const useStore = create<AppState>()(
         }));
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user) {
-          await supabase.from('privacy_consent').upsert({
+          const { error } = await supabase.from('privacy_consent').upsert({
             user_id: session.user.id,
             us_allow_data_sharing: allow,
             consent_timestamp: new Date(timestamp).toISOString(),
             updated_at: new Date().toISOString()
           }, { onConflict: 'user_id' });
+          if (error) console.error('Error saving US sharing prefs:', error);
         }
       },
 
@@ -687,8 +691,14 @@ export const useStore = create<AppState>()(
         set((state) => ({
           privacyConsent: { ...state.privacyConsent, hasCompletedPrivacySetup: true }
         }));
-        // Optional: you could mark a flag in users table if needed, 
-        // but privacy_consent table existence usually suffices.
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          await supabase.from('privacy_consent').upsert({
+            user_id: session.user.id,
+            has_completed_setup: true,
+            updated_at: new Date().toISOString()
+          }, { onConflict: 'user_id' });
+        }
       },
 
       revokePrivacyConsent: async () => {
