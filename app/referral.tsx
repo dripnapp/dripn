@@ -1,35 +1,46 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, TextInput } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, TextInput, Share } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useStore, THEME_CONFIGS } from '../src/store/useStore';
 import AppHeader from '../src/components/AppHeader';
 
 export default function ReferralScreen() {
-  const { referralCode, referralCount, enteredReferralCode, referralBonusEarned, enterReferralCode, theme } = useStore();
+  const { referralCode, referralEarnings, fetchReferralStats, theme, setReferralCode, referrerId } = useStore();
   const themeConfig = THEME_CONFIGS[theme];
   const isDark = themeConfig.isDark;
   const [inputCode, setInputCode] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const copyCode = () => {
-    Alert.alert('Copied!', 'Your referral code has been copied to clipboard');
+  useEffect(() => {
+    fetchReferralStats();
+  }, []);
+
+  const handleShareReferral = async () => {
+    if (!referralCode) return;
+    try {
+      await Share.share({
+        message: `Join me on Drip'n and start earning crypto rewards! Use my code ${referralCode} to get started. https://dripn.io`,
+      });
+    } catch (error) {
+      console.error(error);
+    }
   };
 
-  const handleEnterCode = () => {
+  const handleEnterCode = async () => {
     if (!inputCode.trim()) {
       Alert.alert('Error', 'Please enter a referral code');
       return;
     }
-    const success = enterReferralCode(inputCode.trim().toUpperCase());
+    setLoading(true);
+    const success = await setReferralCode(inputCode.trim().toUpperCase());
+    
     if (success) {
-      Alert.alert('Success!', 'Referral code applied! You and your referrer will both earn bonus rewards.');
+      Alert.alert('Success!', 'Referral code applied! You are now connected.');
       setInputCode('');
     } else {
-      if (enteredReferralCode) {
-        Alert.alert('Already Applied', 'You have already entered a referral code.');
-      } else {
-        Alert.alert('Invalid Code', 'Please check the code and try again. You cannot use your own code.');
-      }
+      Alert.alert('Invalid Code', 'Please check the code and try again. You cannot use your own code or reuse codes.');
     }
+    setLoading(false);
   };
 
   return (
@@ -39,31 +50,35 @@ export default function ReferralScreen() {
       <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
         <Text style={[styles.subheader, { color: themeConfig.textMuted }]}>Invite friends and earn together!</Text>
 
-        {!enteredReferralCode && (
+        {!referrerId && (
           <View style={[styles.enterCodeCard, { backgroundColor: themeConfig.card, borderColor: themeConfig.primary }]}>
             <Text style={[styles.enterCodeLabel, { color: themeConfig.text }]}>Have a referral code?</Text>
             <View style={styles.inputRow}>
               <TextInput
                 style={[styles.input, { backgroundColor: themeConfig.background, color: themeConfig.text }]}
-                placeholder="Enter code (e.g. DRPN-ABC123)"
+                placeholder="Enter code (e.g. ABC123XY)"
                 placeholderTextColor={themeConfig.textMuted}
                 value={inputCode}
                 onChangeText={setInputCode}
                 autoCapitalize="characters"
               />
-              <TouchableOpacity style={[styles.applyButton, { backgroundColor: themeConfig.primary }]} onPress={handleEnterCode}>
-                <Text style={styles.applyButtonText}>Apply</Text>
+              <TouchableOpacity 
+                style={[styles.applyButton, { backgroundColor: themeConfig.primary, opacity: loading ? 0.7 : 1 }]} 
+                onPress={handleEnterCode}
+                disabled={loading}
+              >
+                <Text style={styles.applyButtonText}>{loading ? '...' : 'Apply'}</Text>
               </TouchableOpacity>
             </View>
           </View>
         )}
 
-        {enteredReferralCode && (
+        {referrerId && (
           <View style={styles.appliedCard}>
             <MaterialCommunityIcons name="check-circle" size={24} color="#40c057" />
             <View style={styles.appliedContent}>
               <Text style={styles.appliedLabel}>Referral Applied</Text>
-              <Text style={styles.appliedCode}>{enteredReferralCode}</Text>
+              <Text style={styles.appliedCode}>Status: Connected</Text>
             </View>
           </View>
         )}
@@ -71,9 +86,9 @@ export default function ReferralScreen() {
         <View style={[styles.codeCard, { backgroundColor: themeConfig.primary }]}>
           <Text style={[styles.codeLabel, { color: 'rgba(255,255,255,0.8)' }]}>Your Referral Code</Text>
           <View style={styles.codeBox}>
-            <Text style={styles.code}>{referralCode || 'DRPN-XXXXXX'}</Text>
-            <TouchableOpacity style={styles.copyButton} onPress={copyCode}>
-              <MaterialCommunityIcons name="content-copy" size={20} color="#fff" />
+            <Text style={styles.code}>{referralCode || 'GENERATING...'}</Text>
+            <TouchableOpacity style={styles.copyButton} onPress={handleShareReferral}>
+              <MaterialCommunityIcons name="share-variant" size={20} color="#fff" />
             </TouchableOpacity>
           </View>
           <Text style={styles.codeHint}>Share this code with friends</Text>
@@ -81,12 +96,12 @@ export default function ReferralScreen() {
 
         <View style={[styles.statsCard, { backgroundColor: themeConfig.card }]}>
           <View style={styles.statItem}>
-            <Text style={[styles.statNumber, { color: themeConfig.text }]}>{referralCount}</Text>
-            <Text style={[styles.statLabel, { color: themeConfig.textMuted }]}>Friends Referred</Text>
+            <Text style={[styles.statNumber, { color: themeConfig.text }]}>30 Days</Text>
+            <Text style={[styles.statLabel, { color: themeConfig.textMuted }]}>Bonus Window</Text>
           </View>
           <View style={[styles.statDivider, { backgroundColor: themeConfig.background }]} />
           <View style={styles.statItem}>
-            <Text style={[styles.statNumber, { color: themeConfig.text }]}>{referralBonusEarned}</Text>
+            <Text style={[styles.statNumber, { color: themeConfig.text }]}>{referralEarnings.toLocaleString()}</Text>
             <Text style={[styles.statLabel, { color: themeConfig.textMuted }]}>Bonus drips</Text>
           </View>
         </View>

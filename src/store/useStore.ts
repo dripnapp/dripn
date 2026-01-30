@@ -141,13 +141,17 @@ interface AppState {
   userLevel: 'None' | 'Bronze' | 'Silver' | 'Gold';
   privacyConsent: PrivacyConsent;
   
+  referralCode: string | null;
+  referrerId: string | null;
+  referralEarnings: number;
+  
   addPoints: (amount: number, source?: string) => Promise<void>;
   completeOnboarding: () => void;
   acceptTerms: () => void;
   setUsername: (name: string) => Promise<void>;
   setTheme: (theme: ThemeMode) => void;
   unlockTheme: (theme: ThemeMode) => boolean;
-  checkDailyReset: () => void;
+  checkDailyReset: () => Promise<void>;
   setWalletAddress: (address: string) => void;
   createRedemption: (drips: number, usd: number, xrp: number, price: number, wallet: string) => Promise<Redemption>;
   updateRedemptionStatus: (id: string, status: Redemption['status'], txId?: string) => Promise<void>;
@@ -156,6 +160,9 @@ interface AppState {
   lastShareTimestamp: Record<string, number>;
   recordShare: (platform: string) => Promise<{ success: boolean; message: string }>;
   getDailyShareCount: (platform: string) => number;
+  
+  setReferralCode: (code: string) => Promise<boolean>;
+  fetchReferralStats: () => Promise<void>;
   
   setPrivacyRegion: (region: 'EU' | 'US' | 'OTHER') => Promise<void>;
   setEUConsent: (consent: boolean) => Promise<void>;
@@ -184,6 +191,9 @@ export const useStore = create<AppState>()(
       totalEarned: 0,
       userLevel: 'None',
       lastShareTimestamp: {},
+      referralCode: null,
+      referrerId: null,
+      referralEarnings: 0,
       privacyConsent: {
         region: null,
         hasCompletedPrivacySetup: false,
@@ -257,28 +267,66 @@ export const useStore = create<AppState>()(
         // Sync to Supabase if session exists
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user) {
-          await supabase.from('users').update({ 
+          const { data: user } = await supabase.from('users').update({ 
             username: name,
             unique_id: newId
-          }).eq('id', session.user.id);
+          }).eq('id', session.user.id).select('referral_code').single();
+          
+          if (user?.referral_code) {
+            set({ referralCode: user.referral_code });
+          }
         }
-      },
-      
-      setTheme: (theme) => set({ theme }),
-      
-      unlockTheme: (targetTheme) => {
-        const state = get();
-        if (state.unlockedThemes.includes(targetTheme)) return true;
-        if (state.points >= 1000) {
-          set((state) => ({
-            points: state.points - 1000,
-            unlockedThemes: [...state.unlockedThemes, targetTheme],
-          }));
-          return true;
-        }
-        return false;
       },
 
+      setReferralCode: async (code) => {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.user) return false;
+
+        try {
+          // Check if code exists
+          const { data: referrer, error: findError } = await supabase
+            .from('users')
+            .select('id')
+            .eq('referral_code', code.toUpperCase())
+            .single();
+
+          if (findError || !referrer) return false;
+          if (referrer.id === session.user.id) return false;
+
+          // Create referral record
+          const { error: insertError } = await supabase
+            .from('referrals')
+            .insert({
+              referrer_id: referrer.id,
+              referee_id: session.user.id,
+              referral_code: code.toUpperCase()
+            });
+
+          if (insertError) return false;
+
+          set({ referrerId: referrer.id });
+          return true;
+        } catch (err) {
+          console.error('Referral error:', err);
+          return false;
+        }
+      },
+
+      fetchReferralStats: async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.user) return;
+
+        const { data: stats } = await supabase
+          .from('referrals')
+          .select('referrer_bonus_earned')
+          .eq('referrer_id', session.user.id);
+
+        if (stats) {
+          const total = stats.reduce((sum, item) => sum + (item.referrer_bonus_earned || 0), 0);
+          set({ referralEarnings: total });
+        }
+      },
+      
       checkDailyReset: async () => {
         const now = new Date();
         const lastReset = new Date(get().lastEarningsReset);
@@ -299,6 +347,20 @@ export const useStore = create<AppState>()(
               date: dateStr,
               earnings: 0
             }, { onConflict: 'user_id,date' });
+          }
+        }
+        
+        // Load referral data on init/reset
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user && !get().referralCode) {
+          const { data: user } = await supabase.from('users').select('referral_code').eq('id', session.user.id).single();
+          if (user?.referral_code) {
+            set({ referralCode: user.referral_code });
+          }
+          
+          const { data: referral } = await supabase.from('referrals').select('referrer_id').eq('referee_id', session.user.id).single();
+          if (referral?.referrer_id) {
+            set({ referrerId: referral.referrer_id });
           }
         }
       },
