@@ -336,13 +336,13 @@ export default function Home() {
   };
 
   const handleShare = async (platform: string) => {
-    const result = recordShare(platform);
+    const result = await recordShare(platform);
     if (!result.success) {
       Alert.alert("Limit Reached", result.message);
       return;
     }
 
-    // Securely add points via Supabase Edge Function
+    // Update local state by calling addPointsServer which we'll also update to be async
     await addPointsServer(100, `Social Share (${platform})`);
 
     const shareMessage =

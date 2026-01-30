@@ -141,7 +141,7 @@ interface AppState {
   userLevel: 'None' | 'Bronze' | 'Silver' | 'Gold';
   privacyConsent: PrivacyConsent;
   
-  addPoints: (amount: number) => void;
+  addPoints: (amount: number, source?: string) => Promise<void>;
   completeOnboarding: () => void;
   acceptTerms: () => void;
   setUsername: (name: string) => Promise<void>;
@@ -153,7 +153,7 @@ interface AppState {
   updateRedemptionStatus: (id: string, status: Redemption['status'], txId?: string) => Promise<void>;
   addBadge: (badgeId: string) => Promise<void>;
   claimBadgeReward: (badgeId: string) => number;
-  recordShare: (platform: string) => { success: boolean; message: string };
+  recordShare: (platform: string) => Promise<{ success: boolean; message: string }>;
   getDailyShareCount: (platform: string) => number;
   
   setPrivacyRegion: (region: 'EU' | 'US' | 'OTHER') => Promise<void>;
@@ -192,7 +192,7 @@ export const useStore = create<AppState>()(
         consentTimestamp: null,
       },
 
-      addPoints: async (amount) => {
+      addPoints: async (amount, source = 'reward') => {
         const state = get();
         state.checkDailyReset();
         const currentDaily = get().dailyEarnings;
@@ -215,17 +215,14 @@ export const useStore = create<AppState>()(
           userLevel: newLevel,
         });
 
-        // Sync level and points to Supabase
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user) {
-          // Sync users table
           await supabase.from('users').update({
             points: get().points,
             total_earned: newTotal,
             user_level: newLevel
           }).eq('id', session.user.id);
 
-          // Sync daily_earnings table
           const dateStr = new Date().toISOString().split('T')[0];
           await supabase.from('daily_earnings').upsert({
             user_id: session.user.id,
@@ -233,12 +230,11 @@ export const useStore = create<AppState>()(
             earnings: state.dailyEarnings + possibleAdd
           }, { onConflict: 'user_id,date' });
 
-          // Sync history table
           await supabase.from('history').insert({
             user_id: session.user.id,
             type: 'reward',
             amount: possibleAdd,
-            source: 'reward', // Fallback if source is not defined
+            source: source,
             status: 'completed'
           });
         }
@@ -430,7 +426,38 @@ export const useStore = create<AppState>()(
         return reward;
       },
 
-      recordShare: (platform) => {
+      recordShare: async (platform) => {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          try {
+            const { error } = await supabase.from('shares').insert({
+              user_id: session.user.id,
+              platform: platform,
+              reward: 100
+            });
+
+            if (error) {
+              if (error.code === '23505') { // Unique constraint violation
+                return { success: false, message: `You have already shared on ${platform} today!` };
+              }
+              throw error;
+            }
+            
+            // Sync to history table
+            await supabase.from('history').insert({
+              user_id: session.user.id,
+              type: 'reward',
+              amount: 100,
+              source: `Social Share (${platform})`,
+              status: 'completed'
+            });
+
+            return { success: true, message: "Shared successfully!" };
+          } catch (err) {
+            console.error('Error recording share:', err);
+            return { success: false, message: "Failed to record share." };
+          }
+        }
         return { success: true, message: "Shared successfully!" };
       },
 
