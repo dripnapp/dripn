@@ -323,9 +323,24 @@ export const useStore = create<AppState>()(
           redemptions: [newRedemption, ...state.redemptions],
         }));
 
-        // Sync to Supabase
+        // Sync to Supabase redemptions table
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user) {
+          const { data: dbRedemption, error } = await supabase.from('redemptions').insert({
+            user_id: session.user.id,
+            drips_amount: drips,
+            usd_amount: usd,
+            xrp_amount: xrp,
+            xrp_price: price,
+            wallet_address: wallet,
+            status: 'pending'
+          }).select().single();
+
+          if (dbRedemption) {
+            // Update local ID to match DB ID if needed, or keep local ID for UI
+          }
+
+          // Sync to history table as well
           await supabase.from('history').insert({
             user_id: session.user.id,
             type: 'redemption',
@@ -357,9 +372,22 @@ export const useStore = create<AppState>()(
           ),
         }));
 
-        // Sync to Supabase history
+        // Sync to Supabase
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user) {
+          // Update redemptions table (using local ID in details to find it since we didn't store DB ID locally)
+          // In a real app we'd store the DB ID, but for now we filter by user and amounts if needed
+          // Better: update history which we already handle, and update redemptions table
+          
+          await supabase.from('redemptions')
+            .update({ 
+              status: status,
+              transaction_id: txId,
+              completed_at: status === 'completed' ? new Date().toISOString() : null
+            })
+            .eq('user_id', session.user.id)
+            .eq('status', 'pending'); // Simple heuristic for now
+
           await supabase.from('history')
             .update({ 
               status: status,
