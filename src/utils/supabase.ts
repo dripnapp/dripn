@@ -2,10 +2,19 @@
 import "react-native-url-polyfill/auto";
 import { createClient } from "@supabase/supabase-js";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useStore } from "../store/useStore";
 import { Alert } from "react-native";
 import Constants from "expo-constants";
 import { Platform } from "react-native";
+
+// Define a simple event emitter for store updates to break require cycle
+const storeEvents = {
+  addPoints: (amount: number) => {
+    // This will be listened to by useStore
+    if ((global as any).onAddPoints) {
+      (global as any).onAddPoints(amount);
+    }
+  }
+};
 
 // ────────────────────────────────────────────────
 // Environment detection (critical fix for Expo Go / web crashes)
@@ -75,10 +84,8 @@ export const addPointsServer = async (
   amount: number,
   source: string,
 ): Promise<AddPointsServerResult> => {
-  const { addPoints } = useStore.getState();
-
-  // 1. Optimistic local update (UI updates instantly)
-  addPoints(amount);
+  // 1. Optimistic local update via event emitter
+  storeEvents.addPoints(amount);
 
   try {
     // 2. Get current authenticated session
@@ -138,6 +145,13 @@ export const addPointsServer = async (
     if (response.status === 404) {
       console.error(
         "Reward verification endpoint not found (404). Check Edge Function deployment.",
+      );
+      return { success: true, synced: false };
+    }
+
+    if (response.status === 401) {
+      console.error(
+        "Unauthorized (401). Ensure the user is logged in and the Edge Function is correctly verifying the JWT.",
       );
       return { success: true, synced: false };
     }

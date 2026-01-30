@@ -173,6 +173,14 @@ interface AppState {
   revokePrivacyConsent: () => Promise<void>;
 }
 
+// Set up listener for addPointsServer to break require cycle
+if (typeof global !== 'undefined') {
+  (global as any).onAddPoints = (amount: number) => {
+    const { addPoints } = useStore.getState();
+    addPoints(amount);
+  };
+}
+
 export const useStore = create<AppState>()(
   persist(
     (set, get) => ({
