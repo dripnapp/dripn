@@ -218,11 +218,20 @@ export const useStore = create<AppState>()(
         // Sync level and points to Supabase
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user) {
+          // Sync users table
           await supabase.from('users').update({
             points: get().points,
             total_earned: newTotal,
             user_level: newLevel
           }).eq('id', session.user.id);
+
+          // Sync daily_earnings table
+          const dateStr = new Date().toISOString().split('T')[0];
+          await supabase.from('daily_earnings').upsert({
+            user_id: session.user.id,
+            date: dateStr,
+            earnings: state.dailyEarnings + possibleAdd
+          }, { onConflict: 'user_id,date' });
         }
       },
 
@@ -263,7 +272,7 @@ export const useStore = create<AppState>()(
         return false;
       },
 
-      checkDailyReset: () => {
+      checkDailyReset: async () => {
         const now = new Date();
         const lastReset = new Date(get().lastEarningsReset);
         
@@ -273,6 +282,17 @@ export const useStore = create<AppState>()(
           now.getFullYear() !== lastReset.getFullYear()
         ) {
           set({ dailyEarnings: 0, lastEarningsReset: Date.now() });
+
+          // Sync reset state to Supabase if session exists
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session?.user) {
+            const dateStr = now.toISOString().split('T')[0];
+            await supabase.from('daily_earnings').upsert({
+              user_id: session.user.id,
+              date: dateStr,
+              earnings: 0
+            }, { onConflict: 'user_id,date' });
+          }
         }
       },
 
