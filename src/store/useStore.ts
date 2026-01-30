@@ -346,6 +346,13 @@ export const useStore = create<AppState>()(
         }
       },
       
+      setTheme: (theme) => set({ theme }),
+      unlockTheme: (theme) => {
+        const state = get();
+        if (state.unlockedThemes.includes(theme)) return false;
+        set({ unlockedThemes: [...state.unlockedThemes, theme] });
+        return true;
+      },
       checkDailyReset: async () => {
         const now = new Date();
         const lastReset = new Date(get().lastEarningsReset);
