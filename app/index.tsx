@@ -444,7 +444,24 @@ export default function Home() {
       <UsernameSetup
         visible={showUsernameSetup}
         currentUsername={username}
-        onSave={(name) => setUsername(name)}
+        onSave={async (name) => {
+          await setUsername(name);
+          setShowUsernameSetup(false);
+          
+          // Trigger privacy check after username setup
+          setTimeout(() => {
+            const region = useStore.getState().privacyConsent.region || 'OTHER';
+            if (!useStore.getState().privacyConsent.hasCompletedPrivacySetup) {
+              if (region === 'EU') {
+                setShowEUConsent(true);
+              } else if (region === 'US') {
+                setShowUSPreferences(true);
+              } else {
+                completePrivacySetup();
+              }
+            }
+          }, 800);
+        }}
         onClose={() => {
           if (username) setShowUsernameSetup(false);
         }}

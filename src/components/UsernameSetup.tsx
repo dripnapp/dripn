@@ -86,6 +86,19 @@ export default function UsernameSetup({
     try {
       const { data: { session } } = await supabase.auth.getSession();
 
+      // Check if username is taken in DB
+      const { data: existingUser, error: checkError } = await supabase
+        .from('users')
+        .select('id')
+        .eq('username', trimmedUsername)
+        .single();
+
+      if (!checkError && existingUser && (!session?.user || existingUser.id !== session.user.id)) {
+        setError("This username is already taken");
+        setChecking(false);
+        return;
+      }
+
       if (session?.user) {
         await useStore.getState().setUsername(trimmedUsername, trimmedCode);
         Alert.alert("Success", "Profile updated!");

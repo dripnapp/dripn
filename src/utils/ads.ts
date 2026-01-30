@@ -43,6 +43,19 @@ export const initializeAds = async (): Promise<{ success: boolean; reason?: stri
   try {
     const ads = loadMobileAds();
     if (!ads || !ads.default) return { success: false, reason: 'module_not_available' };
+    
+    // Apply privacy preferences from store
+    const { useStore } = require('../store/useStore');
+    const { privacyConsent } = useStore.getState();
+    
+    if (ads.default().setRequestConfiguration) {
+      ads.default().setRequestConfiguration({
+        tagForChildDirectedTreatment: false,
+        tagForUnderAgeOfConsent: privacyConsent.region === 'EU' && !privacyConsent.euConsent,
+        maxAdContentRating: 'G',
+      });
+    }
+
     await ads.default().initialize();
     return { success: true };
   } catch (e) {
