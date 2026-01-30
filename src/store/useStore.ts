@@ -2,6 +2,8 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+import { supabase } from '../utils/supabase';
+
 export type ThemeMode = 'classic' | 'dark' | 'neon' | 'ocean' | 'sunset' | 'forest';
 
 export interface ThemeConfig {
@@ -109,13 +111,18 @@ export interface PrivacyConsent {
   consentTimestamp: number | null;
 }
 
-type UserLevel = 'Bronze' | 'Silver' | 'Gold';
-
-const getUserLevel = (totalEarned: number): UserLevel => {
-  if (totalEarned >= 20000) return 'Gold';
-  if (totalEarned >= 10000) return 'Silver';
-  return 'Bronze';
+export const BADGE_REWARDS: Record<string, number> = {
+  first_video: 50,
+  bronze_member: 250,
+  silver_member: 500,
+  gold_member: 1000,
+  first_cashout: 500,
+  referrer: 250,
+  week_warrior: 350,
+  monthly_master: 1500,
 };
+
+type UserLevel = 'None' | 'Bronze' | 'Silver' | 'Gold';
 
 interface AppState {
   points: number;
@@ -131,20 +138,20 @@ interface AppState {
   redemptions: Redemption[];
   badges: string[];
   totalEarned: number;
-  userLevel: UserLevel;
+  userLevel: 'None' | 'Bronze' | 'Silver' | 'Gold';
   privacyConsent: PrivacyConsent;
   
   addPoints: (amount: number) => void;
   completeOnboarding: () => void;
   acceptTerms: () => void;
-  setUsername: (name: string) => void;
+  setUsername: (name: string) => Promise<void>;
   setTheme: (theme: ThemeMode) => void;
   unlockTheme: (theme: ThemeMode) => boolean;
   checkDailyReset: () => void;
   setWalletAddress: (address: string) => void;
   createRedemption: (drips: number, usd: number, xrp: number, price: number, wallet: string) => Redemption;
   updateRedemptionStatus: (id: string, status: Redemption['status'], txId?: string) => void;
-  addBadge: (badgeId: string) => void;
+  addBadge: (badgeId: string) => Promise<void>;
   claimBadgeReward: (badgeId: string) => number;
   recordShare: (platform: string) => { success: boolean; message: string };
   getDailyShareCount: (platform: string) => number;
@@ -174,9 +181,7 @@ export const useStore = create<AppState>()(
       redemptions: [],
       badges: [],
       totalEarned: 0,
-      get userLevel() {
-        return getUserLevel(get().totalEarned);
-      },
+      userLevel: 'None',
       privacyConsent: {
         region: null,
         hasCompletedPrivacySetup: false,
@@ -187,7 +192,7 @@ export const useStore = create<AppState>()(
         consentTimestamp: null,
       },
 
-      addPoints: (amount) => {
+      addPoints: async (amount) => {
         const state = get();
         state.checkDailyReset();
         const currentDaily = get().dailyEarnings;
@@ -196,22 +201,50 @@ export const useStore = create<AppState>()(
         const possibleAdd = Math.min(amount, DAILY_CAP - currentDaily);
         if (possibleAdd <= 0) return;
 
-        set((state) => ({
+        const newTotal = state.totalEarned + possibleAdd;
+        let newLevel: UserLevel = 'None';
+        if (newTotal >= 20000) newLevel = 'Gold';
+        else if (newTotal >= 10000) newLevel = 'Silver';
+        else if (newTotal >= 5000) newLevel = 'Bronze';
+        else newLevel = 'None';
+
+        set({
           points: state.points + possibleAdd,
           dailyEarnings: state.dailyEarnings + possibleAdd,
-          totalEarned: state.totalEarned + possibleAdd,
-        }));
+          totalEarned: newTotal,
+          userLevel: newLevel,
+        });
+
+        // Sync level and points to Supabase
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          await supabase.from('users').update({
+            points: get().points,
+            total_earned: newTotal,
+            user_level: newLevel
+          }).eq('id', session.user.id);
+        }
       },
 
       completeOnboarding: () => set({ hasCompletedOnboarding: true }),
       acceptTerms: () => set({ hasAcceptedTerms: true }),
       
-      setUsername: (name) => {
-        if (!get().uniqueId) {
-          const newId = Math.floor(100000 + Math.random() * 900000).toString();
-          set({ username: name, uniqueId: newId });
-        } else {
-          set({ username: name });
+      setUsername: async (name) => {
+        const state = get();
+        let newId = state.uniqueId;
+        if (!newId) {
+          newId = Math.floor(100000 + Math.random() * 900000).toString();
+        }
+
+        set({ username: name, uniqueId: newId });
+
+        // Sync to Supabase if session exists
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          await supabase.from('users').update({ 
+            username: name,
+            unique_id: newId
+          }).eq('id', session.user.id);
         }
       },
       
@@ -271,9 +304,19 @@ export const useStore = create<AppState>()(
         }));
       },
 
-      addBadge: (badgeId) => {
+      addBadge: async (badgeId) => {
         if (!get().badges.includes(badgeId)) {
           set((state) => ({ badges: [...state.badges, badgeId] }));
+          
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session?.user) {
+            await supabase.from('badges').upsert({
+              user_id: session.user.id,
+              badge_id: badgeId,
+              reward: BADGE_REWARDS[badgeId] || 0,
+              claimed: false
+            }, { onConflict: 'user_id,badge_id' });
+          }
         }
       },
 

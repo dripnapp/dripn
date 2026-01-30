@@ -4,6 +4,8 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useStore, BADGE_REWARDS, THEME_CONFIGS } from '../src/store/useStore';
 import AppHeader from '../src/components/AppHeader';
 
+import { supabase } from '../src/utils/supabase';
+
 const allBadges = [
   { id: 'first_video', name: 'First Steps', description: 'Watch your first video', icon: 'play', unlockPoints: 0 },
   { id: 'bronze', name: 'Bronze Member', description: 'Earn 5,000 drips', icon: 'medal', unlockPoints: 5000 },
@@ -16,17 +18,35 @@ const allBadges = [
 ];
 
 export default function BadgesScreen() {
-  const { badges, badgeRewards, points, userLevel, claimBadgeReward, addBadge, theme } = useStore();
+  const { badges, points, userLevel, claimBadgeReward, addBadge, theme } = useStore();
   const themeConfig = THEME_CONFIGS[theme];
   const isDark = themeConfig.isDark;
   const [showUnlockModal, setShowUnlockModal] = useState(false);
   const [unlockedBadge, setUnlockedBadge] = useState<typeof allBadges[0] | null>(null);
   const [previousPoints, setPreviousPoints] = useState(points);
+  const [badgeRewards, setBadgeRewards] = useState<any[]>([]);
 
   useEffect(() => {
-    checkForNewBadges();
-    setPreviousPoints(points);
-  }, [points]);
+    fetchBadgeRewards();
+  }, [badges]);
+
+  const fetchBadgeRewards = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        const { data, error } = await supabase
+          .from('badges')
+          .select('*')
+          .eq('user_id', session.user.id);
+        
+        if (!error && data) {
+          setBadgeRewards(data);
+        }
+      }
+    } catch (err) {
+      console.error("fetchBadgeRewards failed:", err);
+    }
+  };
 
   const checkForNewBadges = () => {
     allBadges.forEach(badge => {
@@ -41,6 +61,11 @@ export default function BadgesScreen() {
   };
 
   const isUnlocked = (badge: typeof allBadges[0]) => {
+    if (badge.id === 'bronze') return userLevel === 'Bronze' || userLevel === 'Silver' || userLevel === 'Gold';
+    if (badge.id === 'silver') return userLevel === 'Silver' || userLevel === 'Gold';
+    if (badge.id === 'gold') return userLevel === 'Gold';
+    if (badge.id === 'first_video') return badges.includes('first_video');
+    
     if (badge.unlockPoints > 0) {
       return points >= badge.unlockPoints;
     }
@@ -48,15 +73,34 @@ export default function BadgesScreen() {
   };
 
   const getBadgeReward = (badgeId: string) => {
-    return badgeRewards.find(br => br.id === badgeId);
+    return (badgeRewards || []).find((br: any) => br.badge_id === badgeId);
   };
 
   const canClaim = (badgeId: string) => {
     const reward = getBadgeReward(badgeId);
-    return reward && !reward.claimed;
+    return reward ? !reward.claimed : badges.includes(badgeId);
   };
 
-  const handleClaimReward = (badge: typeof allBadges[0]) => {
+  const handleClaimReward = async (badge: typeof allBadges[0]) => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.user) {
+      const rewardAmount = BADGE_REWARDS[badge.id] || 0;
+      const { error } = await supabase
+        .from('badges')
+        .upsert({
+          user_id: session.user.id,
+          badge_id: badge.id,
+          reward: rewardAmount,
+          claimed: true,
+          claimed_at: new Date().toISOString()
+        }, { onConflict: 'user_id,badge_id' });
+
+      if (error) {
+        console.error("Error syncing badge to DB:", error);
+      }
+      fetchBadgeRewards();
+    }
+
     const reward = claimBadgeReward(badge.id);
     if (reward > 0) {
       Alert.alert(
@@ -126,11 +170,11 @@ export default function BadgesScreen() {
 
       <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
         <View style={[styles.levelCard, { backgroundColor: themeConfig.card }]}>
-          <MaterialCommunityIcons 
-            name={userLevel === 'Gold' ? 'trophy' : userLevel === 'Silver' ? 'medal-outline' : 'medal'} 
-            size={50} 
-            color={userLevel === 'Gold' ? '#f59f00' : userLevel === 'Silver' ? '#868e96' : '#cd7f32'} 
-          />
+            <MaterialCommunityIcons 
+              name={userLevel === 'Gold' ? 'trophy' : userLevel === 'Silver' ? 'medal-outline' : userLevel === 'Bronze' ? 'medal' : 'account-question'} 
+              size={50} 
+              color={userLevel === 'Gold' ? '#f59f00' : userLevel === 'Silver' ? '#868e96' : userLevel === 'Bronze' ? '#cd7f32' : '#adb5bd'} 
+            />
           <View style={styles.levelInfo}>
             <Text style={[styles.levelLabel, { color: themeConfig.textMuted }]}>Current Level</Text>
             <Text style={[styles.levelName, { color: themeConfig.text }]}>{userLevel}</Text>
