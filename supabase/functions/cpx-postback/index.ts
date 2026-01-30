@@ -5,20 +5,40 @@ import { crypto } from "https://deno.land/std@0.168.0/crypto/mod.ts"
 const CPX_WHITELIST_IPS = ["188.40.3.73", "2a01:4f8:d0a:30ff::2", "157.90.97.92"]
 
 serve(async (req) => {
+  // Handle CORS
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { 
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Headers": "content-type",
+      } 
+    })
+  }
+
+  // CPX Testing sometimes sends a simple GET to check if the URL exists
+  const url = new URL(req.url)
+  if (url.searchParams.sort().toString() === "" && req.method === "GET") {
+    return new Response("CPX Postback Endpoint Active", { status: 200 })
+  }
+
   // 1. IP Whitelist Check
   const clientIp = req.headers.get("x-real-ip") || req.headers.get("x-forwarded-for")?.split(',')[0].trim()
   if (clientIp && !CPX_WHITELIST_IPS.includes(clientIp)) {
     console.warn(`Incoming request from non-whitelisted IP: ${clientIp}`)
-    // We allow it to continue for debugging if needed, but in production you'd return 403
+    // In production, you might want to return 403 here
   }
 
-  const url = new URL(req.url)
   const status = url.searchParams.get("status") // 1 = completed, 2 = canceled
   const transId = url.searchParams.get("trans_id")
   const userId = url.searchParams.get("user_id") 
   const amountLocal = parseFloat(url.searchParams.get("amount_local") || "0")
   const type = url.searchParams.get("type") // out, complete, bonus
   const receivedHash = url.searchParams.get("secure_hash")
+
+  // Check for required params
+  if (!transId || !receivedHash) {
+    return new Response("Missing parameters", { status: 400 })
+  }
 
   const SECURE_HASH = Deno.env.get("CPX_SECURE_HASH") || Deno.env.get("EXPO_PUBLIC_CPX_SECURE_HASH")
   
@@ -37,7 +57,7 @@ serve(async (req) => {
   const calculatedHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
 
   if (calculatedHash !== receivedHash) {
-    console.error(`Hash mismatch. Received: ${receivedHash}, Calculated: ${calculatedHash}`)
+    console.error(`Hash mismatch for transId ${transId}. Received: ${receivedHash}, Calculated: ${calculatedHash}`)
     return new Response("Invalid Hash", { status: 403 })
   }
 
@@ -53,21 +73,26 @@ serve(async (req) => {
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
   )
 
-  // Find user by unique_id (the 6-digit code we generate)
-  const { data: user, error: userError } = await supabase
-    .from("users")
-    .select("id, points, total_earned")
-    .eq("unique_id", userId)
-    .single()
+  // Try to find user by unique_id (6-digit code) OR by UUID (f3da46bc...)
+  // The screenshot shows a UUID being sent as user_id
+  let query = supabase.from("users").select("id, points, total_earned")
+  
+  if (userId && userId.includes("-")) {
+    query = query.eq("id", userId)
+  } else {
+    query = query.eq("unique_id", userId)
+  }
+
+  const { data: user, error: userError } = await query.single()
 
   if (userError || !user) {
-    console.error(`User with unique_id ${userId} not found`)
+    console.error(`User ${userId} not found`)
     return new Response("User not found", { status: 404 })
   }
 
   const rewardAmount = Math.floor(amountLocal)
   
-  // Use RPC or atomic update to prevent race conditions
+  // Atomic update
   const { error: updateError } = await supabase
     .from("users")
     .update({ 
