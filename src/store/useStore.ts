@@ -153,6 +153,7 @@ interface AppState {
   updateRedemptionStatus: (id: string, status: Redemption['status'], txId?: string) => Promise<void>;
   addBadge: (badgeId: string) => Promise<void>;
   claimBadgeReward: (badgeId: string) => number;
+  lastShareTimestamp: Record<string, number>;
   recordShare: (platform: string) => Promise<{ success: boolean; message: string }>;
   getDailyShareCount: (platform: string) => number;
   
@@ -182,6 +183,7 @@ export const useStore = create<AppState>()(
       badges: [],
       totalEarned: 0,
       userLevel: 'None',
+      lastShareTimestamp: {},
       privacyConsent: {
         region: null,
         hasCompletedPrivacySetup: false,
@@ -427,6 +429,16 @@ export const useStore = create<AppState>()(
       },
 
       recordShare: async (platform) => {
+        const state = get();
+        const now = Date.now();
+        const lastShare = state.lastShareTimestamp[platform] || 0;
+        const COOLDOWN = 60000; // 1 minute
+
+        if (now - lastShare < COOLDOWN) {
+          const secondsLeft = Math.ceil((COOLDOWN - (now - lastShare)) / 1000);
+          return { success: false, message: `Please wait ${secondsLeft} seconds before sharing on ${platform} again.` };
+        }
+
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user) {
           try {
@@ -437,12 +449,19 @@ export const useStore = create<AppState>()(
             });
 
             if (error) {
-              if (error.code === '23505') { // Unique constraint violation
+              if (error.code === '23505') {
                 return { success: false, message: `You have already shared on ${platform} today!` };
               }
               throw error;
             }
             
+            set((state) => ({
+              lastShareTimestamp: {
+                ...state.lastShareTimestamp,
+                [platform]: now
+              }
+            }));
+
             // Sync to history table
             await supabase.from('history').insert({
               user_id: session.user.id,
