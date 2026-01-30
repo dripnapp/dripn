@@ -151,8 +151,24 @@ export const addPointsServer = async (
 
     if (response.status === 401) {
       console.error(
-        "Unauthorized (401). Ensure the user is logged in and the Edge Function is correctly verifying the JWT.",
+        "Unauthorized (401). Retrying with fresh session...",
       );
+      // Try to refresh session once
+      const { data: refreshData } = await supabase.auth.refreshSession();
+      if (refreshData?.session?.access_token) {
+        const retryResponse = await fetch(VERIFY_REWARD_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${refreshData.session.access_token}`,
+          },
+          body: JSON.stringify({ amount, source }),
+        });
+        if (retryResponse.ok) {
+          const retryResult = await retryResponse.json();
+          return { success: true, synced: true };
+        }
+      }
       return { success: true, synced: false };
     }
 

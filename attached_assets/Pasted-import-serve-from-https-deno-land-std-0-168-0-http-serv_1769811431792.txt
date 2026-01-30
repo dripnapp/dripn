@@ -51,31 +51,21 @@ serve(async (req) => {
       });
     }
 
-    // Fetch current points to calculate new total (since we can't easily use RPC result in return)
-    const { data: userData, error: fetchError } = await supabase
-      .from("users")
-      .select("points, total_earned")
-      .eq("id", user.id)
-      .single();
-
-    if (fetchError) throw fetchError;
-
-    const newPoints = (userData.points || 0) + amount;
-    const newTotal = (userData.total_earned || 0) + amount;
-
-    // Add points to user
-    const { error: updateError } = await supabase
+    // Add points to user (transactional)
+    const { data, error } = await supabase
       .from("users")
       .update({
-        points: newPoints,
-        total_earned: newTotal,
+        points: supabase.rpc("increment_points", { user_id: user.id, add_amount: amount }),
+        total_earned: supabase.rpc("increment_total_earned", { user_id: user.id, add_amount: amount }),
         updated_at: new Date().toISOString(),
       })
-      .eq("id", user.id);
+      .eq("id", user.id)
+      .select()
+      .single();
 
-    if (updateError) throw updateError;
+    if (error) throw error;
 
-    // Log to history
+    // Log to history (optional but recommended)
     await supabase
       .from("history")
       .insert({
@@ -83,11 +73,11 @@ serve(async (req) => {
         type: "reward",
         amount,
         source: source || "Server-verified reward",
-        status: "completed"
+        date: new Date().toISOString().split("T")[0],
       });
 
     return new Response(
-      JSON.stringify({ success: true, new_points: newPoints }),
+      JSON.stringify({ success: true, new_points: data.points }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,

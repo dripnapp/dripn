@@ -302,6 +302,17 @@ export const useStore = create<AppState>()(
         }
 
         set({ username: name, uniqueId: newId });
+        
+        // Trigger privacy setup check
+        if (!state.privacyConsent.hasCompletedPrivacySetup) {
+          // Setting a small delay to allow modal transitions
+          setTimeout(() => {
+            set((s) => ({
+              privacyConsent: { ...s.privacyConsent, region: s.privacyConsent.region }
+            }));
+          }, 500);
+        }
+
         return { success: true };
       },
 
