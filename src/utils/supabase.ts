@@ -17,18 +17,11 @@ const storeEvents = {
 };
 
 // ────────────────────────────────────────────────
-// Environment detection (critical fix for Expo Go / web crashes)
+// Environment detection (critical fix for web crashes)
 // ────────────────────────────────────────────────
-const isProblematicEnv = () => {
-  // Expo Go detection
-  if (Constants.appOwnership === "expo") return true;
-
-  // Web / bundler / preview detection
+const isWebEnv = () => {
+  // Web / bundler / preview detection - AsyncStorage doesn't work on web
   if (Platform.OS === "web") return true;
-
-  // Extra safety: if window is defined (browser-like env)
-  if (typeof window !== "undefined") return true;
-
   return false;
 };
 
@@ -57,10 +50,10 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
 // ────────────────────────────────────────────────
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
-    // Disable storage in Expo Go / web to prevent "window is not defined" crash
-    storage: isProblematicEnv() ? undefined : AsyncStorage,
-    autoRefreshToken: !isProblematicEnv(),
-    persistSession: !isProblematicEnv(),
+    // Use AsyncStorage for native (including Expo Go), disable for web only
+    storage: isWebEnv() ? undefined : AsyncStorage,
+    autoRefreshToken: !isWebEnv(),
+    persistSession: !isWebEnv(),
     detectSessionInUrl: false,
   },
 });

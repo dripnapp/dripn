@@ -102,7 +102,30 @@ export default function Home() {
   const AD_REVENUE_CENTS = 5;
 
   useEffect(() => {
-    // Auth init removed to avoid error when anonymous sign-ins are disabled in Supabase
+    const initAuth = async () => {
+      try {
+        // Check for existing session first
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          console.log('Existing session found:', session.user.id);
+          return;
+        }
+
+        // Try anonymous sign-in for new users
+        const { data, error } = await supabase.auth.signInAnonymously();
+        if (error) {
+          console.warn('Anonymous sign-in failed:', error.message);
+          // If anonymous sign-in is disabled, try to create a pseudo-session with email
+          // For now, we'll continue without a session - local storage will work
+        } else if (data.session) {
+          console.log('Anonymous session created:', data.session.user.id);
+        }
+      } catch (err) {
+        console.warn('Auth initialization error:', err);
+      }
+    };
+    
+    initAuth();
   }, []);
 
   useEffect(() => {
