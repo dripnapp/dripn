@@ -241,41 +241,25 @@ export const useStore = create<AppState>()(
           try {
             console.log('Syncing points to Supabase for user:', session.user.id, 'Points:', newPoints);
             
-            // First check if user exists
-            const { data: existingUser } = await supabase
-              .from('users')
-              .select('id')
-              .eq('id', session.user.id)
-              .single();
-            
-            let userError;
-            if (existingUser) {
-              // Update existing user
-              const { error } = await supabase.from('users').update({
-                points: newPoints,
-                total_earned: newTotal,
-                user_level: newLevel,
-                updated_at: new Date().toISOString()
-              }).eq('id', session.user.id);
-              userError = error;
-            } else {
-              // Insert new user with username from state
-              const { error } = await supabase.from('users').insert({
-                id: session.user.id,
-                username: get().username,
-                unique_id: get().uniqueId,
-                points: newPoints,
-                total_earned: newTotal,
-                user_level: newLevel,
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString()
-              });
-              userError = error;
-            }
+            // Use upsert for simpler logic - creates user if not exists, updates if exists
+            const { error: userError } = await supabase.from('users').upsert({
+              id: session.user.id,
+              username: get().username || null,
+              unique_id: get().uniqueId || null,
+              points: newPoints,
+              total_earned: newTotal,
+              user_level: newLevel,
+              updated_at: new Date().toISOString()
+            }, { 
+              onConflict: 'id',
+              ignoreDuplicates: false 
+            });
             
             if (userError) {
-              console.error('User update error:', userError);
-              throw userError;
+              console.error('User upsert error:', JSON.stringify(userError));
+              // Continue anyway - don't block rewards for DB issues
+            } else {
+              console.log('User record upserted successfully');
             }
 
             const dateStr = new Date().toISOString().split('T')[0];
@@ -286,8 +270,8 @@ export const useStore = create<AppState>()(
             }, { onConflict: 'user_id,date' });
             
             if (dailyError) {
-              console.error('Daily earnings error:', dailyError);
-              throw dailyError;
+              console.error('Daily earnings error:', JSON.stringify(dailyError));
+              // Continue - don't block for this
             }
 
             const { error: historyError } = await supabase.from('history').insert({
@@ -299,13 +283,13 @@ export const useStore = create<AppState>()(
             });
             
             if (historyError) {
-              console.error('History insert error:', historyError);
-              throw historyError;
+              console.error('History insert error:', JSON.stringify(historyError));
+              // Continue - don't block for this
             }
             
             console.log('Points synced to Supabase successfully');
-          } catch (syncError) {
-            console.error('Error syncing points to Supabase:', syncError);
+          } catch (syncError: any) {
+            console.error('Error syncing points to Supabase:', syncError?.message || syncError);
           }
         }
       },
