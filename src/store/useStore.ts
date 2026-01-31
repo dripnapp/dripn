@@ -319,6 +319,12 @@ export const useStore = create<AppState>()(
         if (!newId) {
           newId = Math.floor(100000 + Math.random() * 900000).toString();
         }
+        
+        // Generate referral code for this user
+        let userReferralCode = state.referralCode;
+        if (!userReferralCode) {
+          userReferralCode = `DRIP${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+        }
 
         // Sync to Supabase if session exists
         const { data: { session } } = await supabase.auth.getSession();
@@ -341,17 +347,27 @@ export const useStore = create<AppState>()(
             }
           }
 
-          const { data: user } = await supabase.from('users').update({ 
+          // Use upsert to create or update user with consistent IDs
+          const { data: user, error: upsertError } = await supabase.from('users').upsert({
+            id: session.user.id,  // Supabase auth UUID - primary identifier
             username: name,
-            unique_id: newId
-          }).eq('id', session.user.id).select('referral_code').single();
+            unique_id: newId,     // App's 6-digit ID for CPX surveys
+            referral_code: userReferralCode,
+            points: state.points,
+            total_earned: state.totalEarned,
+            user_level: state.userLevel,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          }, { onConflict: 'id' }).select('referral_code').single();
           
-          if (user?.referral_code) {
-            set({ referralCode: user.referral_code });
+          if (upsertError) {
+            console.error('Error creating/updating user:', upsertError);
+          } else if (user?.referral_code) {
+            userReferralCode = user.referral_code;
           }
         }
 
-        set({ username: name, uniqueId: newId });
+        set({ username: name, uniqueId: newId, referralCode: userReferralCode });
         
         // Trigger privacy setup check
         if (!state.privacyConsent.hasCompletedPrivacySetup) {
