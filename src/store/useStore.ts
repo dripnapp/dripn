@@ -239,12 +239,20 @@ export const useStore = create<AppState>()(
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user) {
           try {
-            const { error: userError } = await supabase.from('users').update({
+            console.log('Syncing points to Supabase for user:', session.user.id, 'Points:', newPoints);
+            
+            const { error: userError } = await supabase.from('users').upsert({
+              id: session.user.id,
               points: newPoints,
               total_earned: newTotal,
-              user_level: newLevel
-            }).eq('id', session.user.id);
-            if (userError) throw userError;
+              user_level: newLevel,
+              updated_at: new Date().toISOString()
+            }, { onConflict: 'id' });
+            
+            if (userError) {
+              console.error('User update error:', userError);
+              throw userError;
+            }
 
             const dateStr = new Date().toISOString().split('T')[0];
             const { error: dailyError } = await supabase.from('daily_earnings').upsert({
@@ -252,7 +260,11 @@ export const useStore = create<AppState>()(
               date: dateStr,
               earnings: state.dailyEarnings + possibleAdd
             }, { onConflict: 'user_id,date' });
-            if (dailyError) throw dailyError;
+            
+            if (dailyError) {
+              console.error('Daily earnings error:', dailyError);
+              throw dailyError;
+            }
 
             const { error: historyError } = await supabase.from('history').insert({
               user_id: session.user.id,
@@ -261,7 +273,11 @@ export const useStore = create<AppState>()(
               source: source,
               status: 'completed'
             });
-            if (historyError) throw historyError;
+            
+            if (historyError) {
+              console.error('History insert error:', historyError);
+              throw historyError;
+            }
             
             console.log('Points synced to Supabase successfully');
           } catch (syncError) {

@@ -66,12 +66,12 @@ serve(async (req) => {
     // Add points to user
     const { error: updateError } = await supabase
       .from("users")
-      .update({
+      .upsert({
+        id: user.id,
         points: newPoints,
         total_earned: newTotal,
         updated_at: new Date().toISOString(),
-      })
-      .eq("id", user.id);
+      }, { onConflict: 'id' });
 
     if (updateError) throw updateError;
 
