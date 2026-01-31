@@ -62,7 +62,7 @@ export default function HistoryScreen() {
         <View style={styles.statsRow}>
           <View style={[styles.statCard, { backgroundColor: themeConfig.card }]}>
             <MaterialCommunityIcons name="wallet" size={28} color={themeConfig.primary} />
-            <Text style={[styles.statValue, { color: themeConfig.primary }]}>{points.toLocaleString()}</Text>
+            <Text style={[styles.statValue, { color: themeConfig.primary }]}>{(points || 0).toLocaleString()}</Text>
             <Text style={[styles.statLabel, { color: themeConfig.textMuted }]}>Available Drips</Text>
           </View>
           <View style={[styles.statCard, { backgroundColor: themeConfig.card }]}>
@@ -86,7 +86,7 @@ export default function HistoryScreen() {
 
         <Text style={[styles.sectionTitle, { color: themeConfig.text }]}>Recent Activity</Text>
 
-        {history.length === 0 ? (
+        {(!history || history.length === 0) ? (
           <View style={[styles.emptyCard, { backgroundColor: themeConfig.card }]}>
             <MaterialCommunityIcons name="history" size={48} color={themeConfig.textMuted} />
             <Text style={[styles.emptyText, { color: themeConfig.textMuted }]}>No activity yet</Text>
@@ -98,7 +98,7 @@ export default function HistoryScreen() {
           <View style={[styles.historyCard, { backgroundColor: themeConfig.card }]}>
             {history.slice(0, 50).map((item, index) => (
               <View 
-                key={item.id} 
+                key={item.id || index} 
                 style={[
                   styles.historyRow,
                   index !== history.slice(0, 50).length - 1 && styles.historyRowBorder,
@@ -116,7 +116,7 @@ export default function HistoryScreen() {
                   <Text style={[styles.historySource, { color: themeConfig.text }]}>
                     {item.source}{getStatusText(item.status)}
                   </Text>
-                  <Text style={[styles.historyDate, { color: themeConfig.textMuted }]}>{item.date}</Text>
+                  <Text style={[styles.historyDate, { color: themeConfig.textMuted }]}>{item.date || new Date(item.timestamp).toLocaleDateString()}</Text>
                   {item.xrpAmount && (
                     <Text style={[styles.xrpAmount, { color: themeConfig.primary }]}>~{item.xrpAmount.toFixed(6)} XRP</Text>
                   )}

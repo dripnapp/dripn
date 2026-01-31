@@ -175,32 +175,41 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    const initPrivacy = async () => {
-      if (!privacyConsent.region) {
-        const region = await detectUserRegion();
-        setPrivacyRegion(region);
-      }
-      
-      if (hasCompletedOnboarding && hasAcceptedTerms && !privacyConsent.hasCompletedPrivacySetup) {
+    const checkPrivacyPopup = async () => {
+      if (!showSplash && hasCompletedOnboarding && hasAcceptedTerms && username && !privacyConsent.hasCompletedPrivacySetup) {
         const region = privacyConsent.region || await detectUserRegion();
         if (!privacyConsent.region) {
           setPrivacyRegion(region);
         }
         
-        if (region === 'EU') {
-          setShowEUConsent(true);
-        } else if (region === 'US') {
-          setShowUSPreferences(true);
-        } else {
-          completePrivacySetup();
-        }
+        // Small delay to ensure any previous modals are fully closed
+        setTimeout(() => {
+          if (region === 'EU') {
+            setShowEUConsent(true);
+          } else if (region === 'US') {
+            setShowUSPreferences(true);
+          } else {
+            completePrivacySetup();
+          }
+        }, 500);
+      }
+    };
+    
+    checkPrivacyPopup();
+  }, [showSplash, hasCompletedOnboarding, hasAcceptedTerms, username, privacyConsent.hasCompletedPrivacySetup]);
+
+  useEffect(() => {
+    const initPrivacy = async () => {
+      if (!privacyConsent.region) {
+        const region = await detectUserRegion();
+        setPrivacyRegion(region);
       }
     };
     
     if (!showSplash && hasCompletedOnboarding && hasAcceptedTerms) {
       initPrivacy();
     }
-  }, [showSplash, hasCompletedOnboarding, hasAcceptedTerms, privacyConsent.hasCompletedPrivacySetup, username]);
+  }, [showSplash, hasCompletedOnboarding, hasAcceptedTerms]);
 
   const handleEUConsent = () => {
     setEUConsent(true);

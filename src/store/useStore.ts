@@ -221,6 +221,7 @@ export const useStore = create<AppState>()(
         const possibleAdd = Math.min(amount, DAILY_CAP - currentDaily);
         if (possibleAdd <= 0) return;
 
+        const newPoints = state.points + possibleAdd;
         const newTotal = state.totalEarned + possibleAdd;
         let newLevel: UserLevel = 'None';
         if (newTotal >= 20000) newLevel = 'Gold';
@@ -229,7 +230,7 @@ export const useStore = create<AppState>()(
         else newLevel = 'None';
 
         set({
-          points: state.points + possibleAdd,
+          points: newPoints,
           dailyEarnings: state.dailyEarnings + possibleAdd,
           totalEarned: newTotal,
           userLevel: newLevel,
@@ -237,26 +238,35 @@ export const useStore = create<AppState>()(
 
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user) {
-          await supabase.from('users').update({
-            points: get().points,
-            total_earned: newTotal,
-            user_level: newLevel
-          }).eq('id', session.user.id);
+          try {
+            const { error: userError } = await supabase.from('users').update({
+              points: newPoints,
+              total_earned: newTotal,
+              user_level: newLevel
+            }).eq('id', session.user.id);
+            if (userError) throw userError;
 
-          const dateStr = new Date().toISOString().split('T')[0];
-          await supabase.from('daily_earnings').upsert({
-            user_id: session.user.id,
-            date: dateStr,
-            earnings: state.dailyEarnings + possibleAdd
-          }, { onConflict: 'user_id,date' });
+            const dateStr = new Date().toISOString().split('T')[0];
+            const { error: dailyError } = await supabase.from('daily_earnings').upsert({
+              user_id: session.user.id,
+              date: dateStr,
+              earnings: state.dailyEarnings + possibleAdd
+            }, { onConflict: 'user_id,date' });
+            if (dailyError) throw dailyError;
 
-          await supabase.from('history').insert({
-            user_id: session.user.id,
-            type: 'reward',
-            amount: possibleAdd,
-            source: source,
-            status: 'completed'
-          });
+            const { error: historyError } = await supabase.from('history').insert({
+              user_id: session.user.id,
+              type: 'reward',
+              amount: possibleAdd,
+              source: source,
+              status: 'completed'
+            });
+            if (historyError) throw historyError;
+            
+            console.log('Points synced to Supabase successfully');
+          } catch (syncError) {
+            console.error('Error syncing points to Supabase:', syncError);
+          }
         }
       },
 
