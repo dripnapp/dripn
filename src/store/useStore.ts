@@ -241,13 +241,37 @@ export const useStore = create<AppState>()(
           try {
             console.log('Syncing points to Supabase for user:', session.user.id, 'Points:', newPoints);
             
-            const { error: userError } = await supabase.from('users').upsert({
-              id: session.user.id,
-              points: newPoints,
-              total_earned: newTotal,
-              user_level: newLevel,
-              updated_at: new Date().toISOString()
-            }, { onConflict: 'id' });
+            // First check if user exists
+            const { data: existingUser } = await supabase
+              .from('users')
+              .select('id')
+              .eq('id', session.user.id)
+              .single();
+            
+            let userError;
+            if (existingUser) {
+              // Update existing user
+              const { error } = await supabase.from('users').update({
+                points: newPoints,
+                total_earned: newTotal,
+                user_level: newLevel,
+                updated_at: new Date().toISOString()
+              }).eq('id', session.user.id);
+              userError = error;
+            } else {
+              // Insert new user with username from state
+              const { error } = await supabase.from('users').insert({
+                id: session.user.id,
+                username: get().username,
+                unique_id: get().uniqueId,
+                points: newPoints,
+                total_earned: newTotal,
+                user_level: newLevel,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+              });
+              userError = error;
+            }
             
             if (userError) {
               console.error('User update error:', userError);
